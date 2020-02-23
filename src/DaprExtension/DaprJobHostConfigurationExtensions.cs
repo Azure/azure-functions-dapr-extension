@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
@@ -22,7 +23,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            builder.AddExtension<DaprExtensionConfigProvider>();
+            builder.AddExtension<DaprExtensionConfigProvider>()
+                .Services
+                .AddSingleton<DaprService>()
+                .AddHttpClient();
             return builder;
         }
     }

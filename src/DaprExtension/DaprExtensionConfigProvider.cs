@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -28,10 +29,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         private ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly DaprService _daprService;
 
-        public DaprExtensionConfigProvider(ILoggerFactory loggerFactory)
+        public DaprExtensionConfigProvider(ILoggerFactory loggerFactory, DaprService daprService)
         {
             _loggerFactory = loggerFactory;
+            _daprService = daprService;
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -47,7 +50,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             context.AddConverter<JObject, SaveStateOptions>(SaveStateOptions);
             context.AddConverter<JObject, InvokeMethodOptions>(InvokeMethodOptions);
             
+            var daprStateConverter = new DaprStateConverter(_daprService);
+            
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
+            stateRule.BindToInput<byte[]>(daprStateConverter);
+            stateRule.BindToInput<string>(daprStateConverter);
+            stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToCollector<SaveStateOptions>((attr) => {
                 return new DaprSaveStateAsyncCollector(attr);
             });
