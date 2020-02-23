@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,6 +31,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
             };
             await _client.SendAsync(req);
+        }
+
+        internal async Task<Stream> GetStateAsync(string daprAddress, string stateStore, string key)
+        {
+            var res = await _client.GetAsync($"{daprAddress}/v1.0/state/{stateStore}/{key}");
+            var resStream = await res.Content.ReadAsStreamAsync();
+            return resStream;
         }
     }
 }

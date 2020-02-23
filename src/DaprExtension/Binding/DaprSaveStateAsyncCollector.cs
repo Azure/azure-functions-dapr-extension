@@ -44,7 +44,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     Key = item.Key,
                     Value = item.Value
                 };
-                // this create will initiate the send operation
+                
                 await _daprService.SaveStateAsync(_attr.DaprAddress, item.StateStore, stateContent);
             }
         }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,19 +19,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             _daprService = daprService;
         }
 
-        public Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        public async Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var stateStream = await _daprService.GetStateAsync(input.DaprAddress, input.StateStore, input.Key);
+            StreamReader sr = new StreamReader(stateStream);
+            return Encoding.UTF8.GetBytes(await sr.ReadToEndAsync());
         }
 
-        Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var stateStream = await _daprService.GetStateAsync(input.DaprAddress, input.StateStore, input.Key);
+            StreamReader sr = new StreamReader(stateStream);
+            return await sr.ReadToEndAsync();
         }
 
-        Task<Stream> IAsyncConverter<DaprStateAttribute, Stream>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<Stream> IAsyncConverter<DaprStateAttribute, Stream>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var stateStream = await _daprService.GetStateAsync(input.DaprAddress, input.StateStore, input.Key);
+            return stateStream;
         }
     }
 }
