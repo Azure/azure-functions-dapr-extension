@@ -11,22 +11,17 @@ using Microsoft.Azure.WebJobs.Extensions.Dapr;
 
 namespace dotnet_azurefunction
 {
-    public static class StateOutputBinding
+    public static class StateInputBinding
     {
-        [FunctionName("StateOutputBinding")]
+        [FunctionName("StateInputBinding")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "save/{key}")] HttpRequest req,
-            [DaprState(StateStore = "stateStore", Key = "{key}")] IAsyncCollector<SaveStateOptions> state,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "get/{key}")] HttpRequest req,
+            [DaprState(StateStore = "stateStore", Key = "{key}")] string state,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            await state.AddAsync(new SaveStateOptions() {
-                Value = requestBody
-            });
-
-            return new OkResult();
+            return new OkObjectResult(state);
         }
     }
 }

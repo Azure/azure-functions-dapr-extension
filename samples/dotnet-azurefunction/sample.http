@@ -1,4 +1,8 @@
-POST http://localhost:7071/api/SaveStateOutputBinding
+### Save state
+POST http://localhost:7071/api/save/hello
 Content-Type: application/json
 
 "Hello World"
+
+### Get State
+GET http://localhost:7071/api/get/hello
