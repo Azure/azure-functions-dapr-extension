@@ -9,6 +9,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     public abstract class DaprBaseAttribute : Attribute
     {
         [AutoResolve]
-        public string UserId { get; set; }
+        public string DaprAddress { get; set; } = "http://localhost:3500";
     }
 }

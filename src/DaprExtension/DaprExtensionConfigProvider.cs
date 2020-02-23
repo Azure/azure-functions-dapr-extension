@@ -68,20 +68,50 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         internal static SaveStateOptions SaveStateOptions(JObject saveStateOptions)
         {
-            throw new System.NotImplementedException();
+            var options = new SaveStateOptions()
+            {
+                StateStore = GetValueOrDefault<string>(saveStateOptions, "stateStore"),
+                Key = GetValueOrDefault<string>(saveStateOptions, "key"),
+                Value = GetValueOrDefault<JToken>(saveStateOptions, "value")
+            };
+
+            return options;
         }
 
         internal static InvokeMethodOptions InvokeMethodOptions(JObject invokeMethodOptions)
         {
-            throw new System.NotImplementedException();
+            var options = new InvokeMethodOptions()
+            {
+                AppId = GetValueOrDefault<string>(invokeMethodOptions, "appId"),
+                Method = GetValueOrDefault<string>(invokeMethodOptions, "method"),
+                Body = GetValueOrDefault<JToken>(invokeMethodOptions, "body")
+            };
+
+            return options;
+        }
+
+        private static TValue GetValueOrDefault<TValue>(JObject messageObject, string propertyName)
+        {
+            if (messageObject.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken result))
+            {
+                return result.Value<TValue>();
+            }
+
+            return default;
         }
     }
 
     public class InvokeMethodOptions
     {
+        public string AppId { get; set; }
+        public string Method { get; set; }
+        public JToken Body { get; set; }
     }
 
     public class SaveStateOptions
     {
+        public string StateStore { get; set; }
+        public string Key { get; set; }
+        public JToken Value { get; set; }
     }
 }
