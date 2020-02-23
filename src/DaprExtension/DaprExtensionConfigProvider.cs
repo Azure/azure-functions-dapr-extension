@@ -62,7 +62,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
             invokeRule.BindToCollector<InvokeMethodOptions>((attr) => {
-                return new DaprInvokeMethodAsyncCollector(attr);
+                return new DaprInvokeMethodAsyncCollector(attr, _daprService);
             });
         }
 
@@ -83,7 +83,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             var options = new InvokeMethodOptions()
             {
                 AppId = GetValueOrDefault<string>(invokeMethodOptions, "appId"),
-                Method = GetValueOrDefault<string>(invokeMethodOptions, "method"),
+                MethodName = GetValueOrDefault<string>(invokeMethodOptions, "method"),
                 Body = GetValueOrDefault<JToken>(invokeMethodOptions, "body")
             };
 
@@ -104,7 +104,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     public class InvokeMethodOptions
     {
         public string AppId { get; set; }
-        public string Method { get; set; }
+        public string MethodName { get; set; }
+        public HttpMethod HttpVerb { get; set; }
         public JToken Body { get; set; }
     }
 

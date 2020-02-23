@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Net.Http;
 using Microsoft.Azure.WebJobs.Description;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
@@ -17,8 +18,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         [AutoResolve]
         public string AppId { get; set; }
 
-        /// <summary>The method of the app to invoke. </summary>
+        /// <summary>The method name of the app to invoke. </summary>
         [AutoResolve]
         public string MethodName { get; set; }
+
+        /// <summary>The http verb of the app to invoke. </summary>
+        [AutoResolve]
+        public HttpMethod HttpVerb { get; set; }
     }
 }

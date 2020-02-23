@@ -12,11 +12,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         private readonly ConcurrentQueue<SaveStateOptions> _requests = new ConcurrentQueue<SaveStateOptions>();
         private readonly DaprService _daprService;
-        private DaprStateAttribute attr;
+        private DaprStateAttribute _attr;
 
         public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprService daprService)
         {
-            this.attr = attr;
+            _attr = attr;
             _daprService = daprService;
         }
 
@@ -24,12 +24,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             if(item.StateStore == null)
             {
-                item.StateStore = attr.StateStore;
+                item.StateStore = _attr.StateStore;
             }
 
             if(item.Key == null)
             {
-                item.Key = attr.Key;
+                item.Key = _attr.Key;
             }
 
             _requests.Enqueue(item);
@@ -45,7 +45,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     Value = item.Value
                 };
                 // this create will initiate the send operation
-                await _daprService.SaveStateAsync(attr.DaprAddress, item.StateStore, stateContent);
+                await _daprService.SaveStateAsync(_attr.DaprAddress, item.StateStore, stateContent);
             }
         }
     }

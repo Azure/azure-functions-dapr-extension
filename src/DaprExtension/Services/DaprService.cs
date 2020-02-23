@@ -3,7 +3,9 @@
 
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
@@ -19,6 +21,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         internal async Task SaveStateAsync(string daprAddress, string stateStore, StateContent stateContent)
         {
             await _client.PostAsJsonAsync($"{daprAddress}/v1.0/state/{stateStore}", stateContent);
+        }
+
+        internal async Task InvokeMethodAsync(string daprAddress, string appId, string methodName, HttpMethod httpVerb, JToken body)
+        {
+            var req = new HttpRequestMessage(httpVerb, $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}")
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
+            };
+            await _client.SendAsync(req);
         }
     }
 }
