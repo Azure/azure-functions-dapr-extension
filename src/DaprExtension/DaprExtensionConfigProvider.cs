@@ -57,7 +57,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             stateRule.BindToInput<string>(daprStateConverter);
             stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToCollector<SaveStateOptions>((attr) => {
-                return new DaprSaveStateAsyncCollector(attr);
+                return new DaprSaveStateAsyncCollector(attr, _daprService);
             });
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
