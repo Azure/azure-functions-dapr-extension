@@ -1,0 +1,4 @@
+POST http://localhost:7071/api/SaveStateOutputBinding
+Content-Type: application/json
+
+"Hello World"
