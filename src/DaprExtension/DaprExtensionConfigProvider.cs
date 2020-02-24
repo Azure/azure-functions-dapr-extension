@@ -108,7 +108,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             {
                 AppId = GetValueOrDefault<string>(invokeMethodOptions, "appId"),
                 MethodName = GetValueOrDefault<string>(invokeMethodOptions, "method"),
-                Body = GetValueOrDefault<JToken>(invokeMethodOptions, "body")
+                Body = GetValueOrDefault<JToken>(invokeMethodOptions, "body"),
+                HttpVerb = GetValueOrDefault<string>(invokeMethodOptions, "httpVerb")
             };
 
             return options;
@@ -129,7 +130,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         public string AppId { get; set; }
         public string MethodName { get; set; }
-        public HttpMethod HttpVerb { get; set; }
+        public string HttpVerb { get; set; }
         public JToken Body { get; set; }
     }
 

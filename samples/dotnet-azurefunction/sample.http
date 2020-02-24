@@ -6,6 +6,9 @@ Hello World
 ### Get State
 GET http://localhost:7071/api/state/hello
 
+### Invoke function2
+GET http://localhost:7071/api/invoke/hello
+
 ### Test dapr GET
 GET http://localhost:3500/v1.0/state/statestore/hello
 

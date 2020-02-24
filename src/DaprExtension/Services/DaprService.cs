@@ -25,9 +25,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             await _client.PostAsJsonAsync($"{daprAddress}/v1.0/state/{stateStore}", stateContent);
         }
 
-        internal async Task InvokeMethodAsync(string daprAddress, string appId, string methodName, HttpMethod httpVerb, JToken body)
+        internal async Task InvokeMethodAsync(string daprAddress, string appId, string methodName, string httpVerb, JToken body)
         {
-            var req = new HttpRequestMessage(httpVerb, $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}")
+            var req = new HttpRequestMessage(new HttpMethod(httpVerb), $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}")
             {
                 Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
             };
