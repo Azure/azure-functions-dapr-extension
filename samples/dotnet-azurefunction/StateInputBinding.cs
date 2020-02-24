@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Azure.WebJobs.Extensions.Dapr;
+using Newtonsoft.Json.Linq;
 
 namespace dotnet_azurefunction
 {
@@ -16,7 +17,7 @@ namespace dotnet_azurefunction
         [FunctionName("StateInputBinding")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "state/{key}")] HttpRequest req,
-            [DaprState(StateStore = "statestore", Key = "{key}")] string state,
+            [DaprState(StateStore = "statestore", Key = "{key}")] JObject state,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");

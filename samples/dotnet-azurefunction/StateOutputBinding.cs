@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Azure.WebJobs.Extensions.Dapr;
+using Newtonsoft.Json.Linq;
 
 namespace dotnet_azurefunction
 {
@@ -23,7 +24,10 @@ namespace dotnet_azurefunction
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             await state.AddAsync(new SaveStateOptions() {
-                Value = requestBody
+                Value = JToken.FromObject(new {
+                    id = "id",
+                    name = "jeff"
+                })
             });
 
             return new OkResult();
