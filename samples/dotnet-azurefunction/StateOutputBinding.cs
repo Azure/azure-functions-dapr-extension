@@ -15,8 +15,8 @@ namespace dotnet_azurefunction
     {
         [FunctionName("StateOutputBinding")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "save/{key}")] HttpRequest req,
-            [DaprState(StateStore = "stateStore", Key = "{key}")] IAsyncCollector<SaveStateOptions> state,
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "state/{key}")] HttpRequest req,
+            [DaprState(StateStore = "statestore", Key = "{key}")] IAsyncCollector<SaveStateOptions> state,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");

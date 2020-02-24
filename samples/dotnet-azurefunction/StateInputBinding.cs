@@ -15,8 +15,8 @@ namespace dotnet_azurefunction
     {
         [FunctionName("StateInputBinding")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "get/{key}")] HttpRequest req,
-            [DaprState(StateStore = "stateStore", Key = "{key}")] string state,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "state/{key}")] HttpRequest req,
+            [DaprState(StateStore = "statestore", Key = "{key}")] string state,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");

@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -19,7 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             _client = clientFactory.CreateClient("DaprServiceClient");
         }
 
-        internal async Task SaveStateAsync(string daprAddress, string stateStore, StateContent stateContent)
+        internal async Task SaveStateAsync(string daprAddress, string stateStore, IList<StateContent> stateContent)
         {
             await _client.PostAsJsonAsync($"{daprAddress}/v1.0/state/{stateStore}", stateContent);
         }

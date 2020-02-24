@@ -23,7 +23,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             var stateStream = await _daprService.GetStateAsync(input.DaprAddress, input.StateStore, input.Key);
             StreamReader sr = new StreamReader(stateStream);
-            return Encoding.UTF8.GetBytes(await sr.ReadToEndAsync());
+            string content =  await sr.ReadToEndAsync();
+            return Encoding.UTF8.GetBytes(content);
         }
 
         async Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)

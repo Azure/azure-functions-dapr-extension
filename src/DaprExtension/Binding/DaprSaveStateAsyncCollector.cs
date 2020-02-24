@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -26,7 +27,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             {
                 item.StateStore = _attr.StateStore;
             }
-
             if(item.Key == null)
             {
                 item.Key = _attr.Key;
@@ -40,12 +40,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             while (_requests.TryDequeue(out SaveStateOptions item))
             {
-                var stateContent = new StateContent() {
-                    Key = item.Key,
-                    Value = item.Value
+                var stateList = new List<StateContent>
+                {
+                    new StateContent() 
+                    {
+                        Key = item.Key,
+                        Value = item.Value
+                    }
                 };
                 
-                await _daprService.SaveStateAsync(_attr.DaprAddress, item.StateStore, stateContent);
+                await _daprService.SaveStateAsync(_attr.DaprAddress, item.StateStore, stateList);
             }
         }
     }
