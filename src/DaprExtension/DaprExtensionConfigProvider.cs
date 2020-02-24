@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -24,7 +25,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     /// <summary>
     /// Defines the configuration options for the Dapr binding.
     /// </summary>
-    [Extension("Dapr", "Dapr")]
+    [Extension("Dapr")]
     internal class DaprExtensionConfigProvider : IExtensionConfigProvider
     {
         private ILogger _logger;
@@ -94,10 +95,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         internal static SaveStateOptions SaveStateOptions(byte[] saveStateOptions)
         {
-            var options = new SaveStateOptions()
+            var options = new SaveStateOptions();
+            try
             {
-                Value = saveStateOptions
-            };
+                string content = Encoding.UTF8.GetString(saveStateOptions);
+                var jObject = JObject.Parse(content);
+                options = SaveStateOptions(jObject);
+                if(options.Value == null)
+                {
+                    throw new FormatException("Invalid save state options JSON");
+                }
+            }
+            catch(Exception)
+            {
+                options.Value = saveStateOptions;
+            }
 
             return options;
         }

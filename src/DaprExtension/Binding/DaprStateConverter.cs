@@ -32,9 +32,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             {
                 bytes = json.ToObject<byte[]>();
             }
-            catch (FormatException)
+            catch (Exception)
             {
-                bytes = Encoding.UTF8.GetBytes(json.ToObject<string>());
+                bytes = Encoding.UTF8.GetBytes(json.ToString());
             }
             return bytes;
         }
