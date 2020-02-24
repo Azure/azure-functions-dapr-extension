@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "samples/dotnet-azurefunction"
+		},
+		{
+			"path": "src/DaprExtension"
+		},
+		{
+			"path": "samples/javascript-azurefunction"
+		}
+	]
+}
