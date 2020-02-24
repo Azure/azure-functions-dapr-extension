@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -25,7 +26,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         public async Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
             var content = await GetStringContentAsync(input, cancellationToken);
-            return Encoding.UTF8.GetBytes(content);
+            var json = JToken.Parse(content);
+            byte[] bytes;
+            try 
+            {
+                bytes = json.ToObject<byte[]>();
+            }
+            catch (FormatException)
+            {
+                bytes = Encoding.UTF8.GetBytes(json.ToObject<string>());
+            }
+            return bytes;
         }
 
         async Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)

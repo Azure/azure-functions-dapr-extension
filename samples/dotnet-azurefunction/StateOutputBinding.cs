@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Azure.WebJobs.Extensions.Dapr;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace dotnet_azurefunction
 {
@@ -17,18 +18,13 @@ namespace dotnet_azurefunction
         [FunctionName("StateOutputBinding")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "state/{key}")] HttpRequest req,
-            [DaprState(StateStore = "statestore", Key = "{key}")] IAsyncCollector<SaveStateOptions> state,
+            [DaprState(StateStore = "statestore", Key = "{key}")] IAsyncCollector<string> state,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            await state.AddAsync(new SaveStateOptions() {
-                Value = JToken.FromObject(new {
-                    id = "id",
-                    name = "jeff"
-                })
-            });
+            await state.AddAsync(requestBody);
 
             return new OkResult();
         }

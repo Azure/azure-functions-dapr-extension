@@ -48,6 +48,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             _logger.LogInformation($"Registered dapr extension");
 
             context.AddConverter<JObject, SaveStateOptions>(SaveStateOptions);
+            context.AddConverter<string, SaveStateOptions>(SaveStateOptions);
+            context.AddConverter<byte[], SaveStateOptions>(SaveStateOptions);
             context.AddConverter<JObject, InvokeMethodOptions>(InvokeMethodOptions);
             
             var daprStateConverter = new DaprStateConverter(_daprService);
@@ -75,6 +77,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 StateStore = GetValueOrDefault<string>(saveStateOptions, "stateStore"),
                 Key = GetValueOrDefault<string>(saveStateOptions, "key"),
                 Value = GetValueOrDefault<JToken>(saveStateOptions, "value")
+            };
+
+            return options;
+        }
+
+        internal static SaveStateOptions SaveStateOptions(string saveStateOptions)
+        {
+            var options = new SaveStateOptions()
+            {
+                Value = saveStateOptions
+            };
+
+            return options;
+        }
+
+        internal static SaveStateOptions SaveStateOptions(byte[] saveStateOptions)
+        {
+            var options = new SaveStateOptions()
+            {
+                Value = saveStateOptions
             };
 
             return options;
