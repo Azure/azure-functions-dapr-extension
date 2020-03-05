@@ -1,0 +1,11 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "FUNCTIONS_WORKER_RUNTIME": "node",
+      "AzureWebJobsStorage": "",
+      "daprAddress": "http://localhost:3501"
+    },
+    "Host": {
+      "LocalHttpPort": 7071
+    }
+  }
