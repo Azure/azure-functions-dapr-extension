@@ -119,7 +119,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             var options = new InvokeMethodOptions()
             {
                 AppId = GetValueOrDefault<string>(invokeMethodOptions, "appId"),
-                MethodName = GetValueOrDefault<string>(invokeMethodOptions, "method"),
+                MethodName = GetValueOrDefault<string>(invokeMethodOptions, "methodName"),
                 Body = GetValueOrDefault<JToken>(invokeMethodOptions, "body"),
                 HttpVerb = GetValueOrDefault<string>(invokeMethodOptions, "httpVerb")
             };

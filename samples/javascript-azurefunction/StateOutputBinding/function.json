@@ -14,7 +14,8 @@
       "direction": "out",
       "name": "dapr",
       "stateStore": "statestore",
-      "key": "{key}"
+      "key": "{key}",
+      "daprAddress": "%daprAddress%"
     },
     {
       "type": "http",

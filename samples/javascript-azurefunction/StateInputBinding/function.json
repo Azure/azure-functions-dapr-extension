@@ -4,7 +4,8 @@
       "type": "httpTrigger",
       "route": "state/{key}",
       "methods": [
-        "get"
+        "get",
+        "options"
       ],
       "authLevel": "function",
       "name": "req"
@@ -13,9 +14,17 @@
       "type": "daprState",
       "direction": "in",
       "dataType": "string",
-      "name": "dapr",
+      "name": "daprState",
       "stateStore": "statestore",
-      "key": "{key}"
+      "key": "{key}",
+      "daprAddress": "%daprAddress%"
+    },
+    {
+      "type": "daprInvoke",
+      "direction": "out",
+      "dataType": "string",
+      "name": "daprInvoke",
+      "daprAddress": "%daprAddress%"
     },
     {
       "type": "http",

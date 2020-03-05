@@ -5,6 +5,6 @@
       "AzureWebJobsStorage": ""
     },
     "Host": {
-      "LocalHttpPort": 7071
+      "LocalHttpPort": 7072
     }
   }
