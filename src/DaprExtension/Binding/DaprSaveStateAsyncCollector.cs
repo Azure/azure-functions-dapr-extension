@@ -1,62 +1,57 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
-    internal class DaprSaveStateAsyncCollector : IAsyncCollector<SaveStateOptions>
+    class DaprSaveStateAsyncCollector : IAsyncCollector<SaveStateParameters>
     {
-        private readonly ConcurrentQueue<SaveStateOptions> _requests = new ConcurrentQueue<SaveStateOptions>();
-        private readonly DaprService _daprService;
-        private DaprStateAttribute _attr;
+        readonly ConcurrentQueue<SaveStateParameters> requests = new ConcurrentQueue<SaveStateParameters>();
+        readonly DaprService daprService;
+        readonly DaprStateAttribute attr;
 
         public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprService daprService)
         {
-            _attr = attr;
-            _daprService = daprService;
+            this.attr = attr;
+            this.daprService = daprService;
         }
 
-        public Task AddAsync(SaveStateOptions item, CancellationToken cancellationToken = default)
+        public Task AddAsync(SaveStateParameters item, CancellationToken cancellationToken = default)
         {
-            if(item.StateStore == null)
+            if (item.StateStore == null)
             {
-                item.StateStore = _attr.StateStore;
-            }
-            if(item.Key == null)
-            {
-                item.Key = _attr.Key;
+                item.StateStore = this.attr.StateStore;
             }
 
-            _requests.Enqueue(item);
+            if (item.Key == null)
+            {
+                item.Key = this.attr.Key;
+            }
+
+            this.requests.Enqueue(item);
             return Task.CompletedTask;
         }
 
+        // TODO: Optimize this method to minimize the number of SaveStateAsync calls
         public async Task FlushAsync(CancellationToken cancellationToken = default)
         {
-            while (_requests.TryDequeue(out SaveStateOptions item))
+            while (this.requests.TryDequeue(out SaveStateParameters item))
             {
                 var stateList = new List<StateContent>
                 {
-                    new StateContent() 
+                    new StateContent()
                     {
                         Key = item.Key,
-                        Value = item.Value
-                    }
+                        Value = item.Value,
+                    },
                 };
-                
-                await _daprService.SaveStateAsync(_attr.DaprAddress, item.StateStore, stateList);
+
+                await this.daprService.SaveStateAsync(this.attr.DaprAddress, item.StateStore, stateList);
             }
         }
-    }
-
-    internal class StateContent 
-    {
-        public string Key { get; set; }
-        public JToken Value { get; set; }
     }
 }

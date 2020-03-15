@@ -17,14 +17,15 @@ namespace dotnet_azurefunction
         [FunctionName("InvokeOutputBinding")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{methodName}")] HttpRequest req,
-            [DaprInvoke(AppId = "function2", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodOptions> output,
+            [DaprInvoke(AppId = "function2", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodParameters> output,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
-            var outputContent = new InvokeMethodOptions(){
+            var outputContent = new InvokeMethodParameters
+            {
                 Body = JObject.FromObject(new 
                 {
                     message = requestBody

@@ -1,20 +1,11 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Azure.WebJobs.Description;
-using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Azure.WebJobs.Host.Config;
-using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -26,16 +17,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     /// Defines the configuration options for the Dapr binding.
     /// </summary>
     [Extension("Dapr")]
-    internal class DaprExtensionConfigProvider : IExtensionConfigProvider
+    class DaprExtensionConfigProvider : IExtensionConfigProvider
     {
-        private ILogger _logger;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly DaprService _daprService;
+        readonly ILoggerFactory loggerFactory;
+        readonly DaprService daprService;
+        ILogger logger;
 
         public DaprExtensionConfigProvider(ILoggerFactory loggerFactory, DaprService daprService)
         {
-            _loggerFactory = loggerFactory;
-            _daprService = daprService;
+            this.loggerFactory = loggerFactory;
+            this.daprService = daprService;
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -45,89 +36,90 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentNullException("context");
             }
 
-            _logger = _loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
-            _logger.LogInformation($"Registered dapr extension");
+            this.logger = this.loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.logger.LogInformation($"Registered dapr extension");
 
-            context.AddConverter<JObject, SaveStateOptions>(SaveStateOptions);
-            context.AddConverter<string, SaveStateOptions>(SaveStateOptions);
-            context.AddConverter<byte[], SaveStateOptions>(SaveStateOptions);
-            context.AddConverter<JObject, InvokeMethodOptions>(InvokeMethodOptions);
-            
-            var daprStateConverter = new DaprStateConverter(_daprService);
-            
+            context.AddConverter<JObject, SaveStateParameters>(CreateSaveStateParameters);
+            context.AddConverter<string, SaveStateParameters>(CreateSaveStateParameters);
+            context.AddConverter<byte[], SaveStateParameters>(CreateSaveStateParameters);
+            context.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
+
+            var daprStateConverter = new DaprStateConverter(this.daprService);
+
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
             stateRule.BindToInput<byte[]>(daprStateConverter);
             stateRule.BindToInput<string>(daprStateConverter);
             stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToInput<JToken>(daprStateConverter);
             stateRule.BindToInput<JObject>(daprStateConverter);
-            stateRule.BindToCollector<SaveStateOptions>((attr) => {
-                return new DaprSaveStateAsyncCollector(attr, _daprService);
-            });
+            stateRule.BindToCollector<SaveStateParameters>(
+                attr => new DaprSaveStateAsyncCollector(attr, this.daprService));
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
-            invokeRule.BindToCollector<InvokeMethodOptions>((attr) => {
-                return new DaprInvokeMethodAsyncCollector(attr, _daprService);
-            });
+            invokeRule.BindToCollector<InvokeMethodParameters>(
+                attr => new DaprInvokeMethodAsyncCollector(attr, this.daprService));
         }
 
-        internal static SaveStateOptions SaveStateOptions(JObject saveStateOptions)
+        internal static SaveStateParameters CreateSaveStateParameters(JObject parametersJson)
         {
-            var options = new SaveStateOptions()
+            var options = new SaveStateParameters()
             {
-                StateStore = GetValueOrDefault<string>(saveStateOptions, "stateStore"),
-                Key = GetValueOrDefault<string>(saveStateOptions, "key"),
-                Value = GetValueOrDefault<JToken>(saveStateOptions, "value")
+                StateStore = GetValueOrDefault<string>(parametersJson, "stateStore"),
+                Key = GetValueOrDefault<string>(parametersJson, "key"),
+                Value = GetValueOrDefault<JToken>(parametersJson, "value"),
             };
 
             return options;
         }
 
-        internal static SaveStateOptions SaveStateOptions(string saveStateOptions)
+        internal static SaveStateParameters CreateSaveStateParameters(string parametersValue)
         {
-            var options = new SaveStateOptions()
+            var options = new SaveStateParameters()
             {
-                Value = saveStateOptions
+                Value = parametersValue,
             };
 
             return options;
         }
 
-        internal static SaveStateOptions SaveStateOptions(byte[] saveStateOptions)
+        // TODO: Review this - it doesn't seem right to assume these are JSON bytes.
+        //       Instead we should probably save the raw bytes as-is.
+        //       More discussion: https://github.com/dapr/dapr/issues/235
+        internal static SaveStateParameters CreateSaveStateParameters(byte[] parametersJsonBytes)
         {
-            var options = new SaveStateOptions();
+            var options = new SaveStateParameters();
             try
             {
-                string content = Encoding.UTF8.GetString(saveStateOptions);
-                var jObject = JObject.Parse(content);
-                options = SaveStateOptions(jObject);
-                if(options.Value == null)
+                string content = Encoding.UTF8.GetString(parametersJsonBytes);
+                JObject jObject = JObject.Parse(content);
+                options = CreateSaveStateParameters(jObject);
+                if (options.Value == null)
                 {
-                    throw new FormatException("Invalid save state options JSON");
+                    throw new FormatException("Invalid save state parameters JSON");
                 }
             }
-            catch(Exception)
+            catch (JsonException)
             {
-                options.Value = saveStateOptions;
+                options.Value = parametersJsonBytes;
             }
 
             return options;
         }
 
-        internal static InvokeMethodOptions InvokeMethodOptions(JObject invokeMethodOptions)
+        internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject parametersJson)
         {
-            var options = new InvokeMethodOptions()
+            var options = new InvokeMethodParameters()
             {
-                AppId = GetValueOrDefault<string>(invokeMethodOptions, "appId"),
-                MethodName = GetValueOrDefault<string>(invokeMethodOptions, "methodName"),
-                Body = GetValueOrDefault<JToken>(invokeMethodOptions, "body"),
-                HttpVerb = GetValueOrDefault<string>(invokeMethodOptions, "httpVerb")
+                AppId = GetValueOrDefault<string>(parametersJson, "appId"),
+                MethodName = GetValueOrDefault<string>(parametersJson, "methodName"),
+                Body = GetValueOrDefault<JToken>(parametersJson, "body"),
+                HttpVerb = GetValueOrDefault<string>(parametersJson, "httpVerb"),
             };
 
             return options;
         }
 
-        private static TValue GetValueOrDefault<TValue>(JObject messageObject, string propertyName)
+        static TValue GetValueOrDefault<TValue>(JObject messageObject, string propertyName)
         {
             if (messageObject.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken result))
             {
@@ -136,20 +128,5 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             return default;
         }
-    }
-
-    public class InvokeMethodOptions
-    {
-        public string AppId { get; set; }
-        public string MethodName { get; set; }
-        public string HttpVerb { get; set; }
-        public JToken Body { get; set; }
-    }
-
-    public class SaveStateOptions
-    {
-        public string StateStore { get; set; }
-        public string Key { get; set; }
-        public JToken Value { get; set; }
     }
 }

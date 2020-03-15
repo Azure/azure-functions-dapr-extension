@@ -6,10 +6,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Microsoft.Azure.WebJobs.Extensions.Dapr;
-using Newtonsoft.Json.Linq;
-using System.Text;
 
 namespace dotnet_azurefunction
 {

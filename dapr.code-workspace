@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "samples/javascript-azurefunction"
+		},
+		{
+			"path": ".stylecop"
 		}
-	]
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen"
+	}
 }

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
 using System.Threading;
@@ -7,44 +7,49 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
-    internal class DaprInvokeMethodAsyncCollector : IAsyncCollector<InvokeMethodOptions>
+    class DaprInvokeMethodAsyncCollector : IAsyncCollector<InvokeMethodParameters>
     {
-        private readonly ConcurrentQueue<InvokeMethodOptions> _requests = new ConcurrentQueue<InvokeMethodOptions>();
-        private readonly DaprInvokeAttribute _attr;
-        private readonly DaprService _daprService;
+        readonly ConcurrentQueue<InvokeMethodParameters> requests = new ConcurrentQueue<InvokeMethodParameters>();
+        readonly DaprInvokeAttribute attr;
+        readonly DaprService daprService;
 
         public DaprInvokeMethodAsyncCollector(DaprInvokeAttribute attr, DaprService daprService)
         {
-            _attr = attr;
-            _daprService = daprService;
+            this.attr = attr;
+            this.daprService = daprService;
         }
 
-        public Task AddAsync(InvokeMethodOptions item, CancellationToken cancellationToken = default)
+        public Task AddAsync(InvokeMethodParameters item, CancellationToken cancellationToken = default)
         {
-            if(item.AppId == null)
+            if (item.AppId == null)
             {
-                item.AppId = _attr.AppId;
+                item.AppId = this.attr.AppId;
             }
 
-            if(item.MethodName == null)
+            if (item.MethodName == null)
             {
-                item.MethodName = _attr.MethodName;
+                item.MethodName = this.attr.MethodName;
             }
 
-            if(item.HttpVerb == null)
+            if (item.HttpVerb == null)
             {
-                item.HttpVerb = _attr.HttpVerb;
+                item.HttpVerb = this.attr.HttpVerb;
             }
 
-            _requests.Enqueue(item);
+            this.requests.Enqueue(item);
             return Task.CompletedTask;
         }
 
         public async Task FlushAsync(CancellationToken cancellationToken = default)
         {
-            while (_requests.TryDequeue(out InvokeMethodOptions item))
+            while (this.requests.TryDequeue(out InvokeMethodParameters item))
             {
-                await _daprService.InvokeMethodAsync(_attr.DaprAddress, item.AppId, item.MethodName, item.HttpVerb, item.Body);
+                await this.daprService.InvokeMethodAsync(
+                    this.attr.DaprAddress,
+                    item.AppId,
+                    item.MethodName,
+                    item.HttpVerb,
+                    item.Body);
             }
         }
     }

@@ -6,16 +6,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Microsoft.Azure.WebJobs.Extensions.Dapr;
-using Newtonsoft.Json.Linq;
 
 namespace dotnet_azurefunction
 {
     public static class StateInputBinding
     {
         [FunctionName("StateInputBinding")]
-        public static async Task<IActionResult> Run(
+        public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "state/{key}")] HttpRequest req,
             [DaprState(StateStore = "statestore", Key = "{key}")] string state,
             ILogger log)
