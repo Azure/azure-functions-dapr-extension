@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -12,18 +11,18 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
-    class DaprService
+    class DaprServiceClient
     {
-        readonly HttpClient client;
+        readonly HttpClient httpClient;
 
-        public DaprService(IHttpClientFactory clientFactory)
+        public DaprServiceClient(IHttpClientFactory clientFactory)
         {
-            this.client = clientFactory.CreateClient("DaprServiceClient");
+            this.httpClient = clientFactory.CreateClient("DaprServiceClient");
         }
 
         internal async Task SaveStateAsync(string daprAddress, string stateStore, IList<StateContent> stateContent)
         {
-            await this.client.PostAsJsonAsync($"{daprAddress}/v1.0/state/{stateStore}", stateContent);
+            await this.httpClient.PostAsJsonAsync($"{daprAddress}/v1.0/state/{stateStore}", stateContent);
         }
 
         internal async Task InvokeMethodAsync(string daprAddress, string appId, string methodName, string httpVerb, JToken body)
@@ -33,12 +32,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
             };
 
-            await this.client.SendAsync(req);
+            await this.httpClient.SendAsync(req);
         }
 
         internal async Task<Stream> GetStateAsync(string daprAddress, string stateStore, string key)
         {
-            var res = await this.client.GetAsync($"{daprAddress}/v1.0/state/{stateStore}/{key}");
+            var res = await this.httpClient.GetAsync($"{daprAddress}/v1.0/state/{stateStore}/{key}");
             var resStream = await res.Content.ReadAsStreamAsync();
             return resStream;
         }

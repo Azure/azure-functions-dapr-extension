@@ -11,10 +11,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     class DaprSaveStateAsyncCollector : IAsyncCollector<SaveStateParameters>
     {
         readonly ConcurrentQueue<SaveStateParameters> requests = new ConcurrentQueue<SaveStateParameters>();
-        readonly DaprService daprService;
+        readonly DaprServiceClient daprService;
         readonly DaprStateAttribute attr;
 
-        public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprService daprService)
+        public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprServiceClient daprService)
         {
             this.attr = attr;
             this.daprService = daprService;

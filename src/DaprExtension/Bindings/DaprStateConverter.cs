@@ -17,9 +17,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         IAsyncConverter<DaprStateAttribute, JToken>,
         IAsyncConverter<DaprStateAttribute, JObject>
     {
-        readonly DaprService daprService;
+        readonly DaprServiceClient daprService;
 
-        public DaprStateConverter(DaprService daprService)
+        public DaprStateConverter(DaprServiceClient daprService)
         {
             this.daprService = daprService;
         }

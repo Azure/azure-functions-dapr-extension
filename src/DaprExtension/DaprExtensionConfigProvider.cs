@@ -20,13 +20,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     class DaprExtensionConfigProvider : IExtensionConfigProvider
     {
         readonly ILoggerFactory loggerFactory;
-        readonly DaprService daprService;
+        readonly DaprServiceClient daprClient;     // TODO: Use an interface for mocking
+        readonly DaprServiceListener daprListener; // TODO: Use an interface for mocking
         ILogger logger;
 
-        public DaprExtensionConfigProvider(ILoggerFactory loggerFactory, DaprService daprService)
+        public DaprExtensionConfigProvider(
+            ILoggerFactory loggerFactory,
+            DaprServiceClient daprClient,
+            DaprServiceListener daprListener)
         {
-            this.loggerFactory = loggerFactory;
-            this.daprService = daprService;
+            this.loggerFactory = loggerFactory ?? throw new NotImplementedException(nameof(loggerFactory));
+            this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+            this.daprListener = daprListener ?? throw new ArgumentNullException(nameof(daprListener));
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -44,7 +49,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             context.AddConverter<byte[], SaveStateParameters>(CreateSaveStateParameters);
             context.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
 
-            var daprStateConverter = new DaprStateConverter(this.daprService);
+            var daprStateConverter = new DaprStateConverter(this.daprClient);
 
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
             stateRule.BindToInput<byte[]>(daprStateConverter);
@@ -52,12 +57,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToInput<JToken>(daprStateConverter);
             stateRule.BindToInput<JObject>(daprStateConverter);
-            stateRule.BindToCollector<SaveStateParameters>(
-                attr => new DaprSaveStateAsyncCollector(attr, this.daprService));
+            stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
-            invokeRule.BindToCollector<InvokeMethodParameters>(
-                attr => new DaprInvokeMethodAsyncCollector(attr, this.daprService));
+            invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
+
+            context.AddBindingRule<DaprMethodTriggerAttribute>()
+                .BindToTrigger(new DaprMethodTriggerBindingProvider(this.daprListener));
         }
 
         internal static SaveStateParameters CreateSaveStateParameters(JObject parametersJson)
