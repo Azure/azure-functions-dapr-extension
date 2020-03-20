@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
-    - name: Build and run tests
-      run: |
-        dotnet build --configuration Release
-        dotnet test --no-build --verbosity normal
+    - name: Build
+      run: dotnet build
+    - name: Run unit tests
+      run: dotnet test --no-build --verbosity normal
