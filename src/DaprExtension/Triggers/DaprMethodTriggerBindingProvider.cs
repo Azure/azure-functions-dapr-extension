@@ -118,6 +118,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     {
                         convertedValue = jsonValue;
                     }
+                    else if (destinationType == typeof(string) && jsonValue.Type != JTokenType.String)
+                    {
+                        // Special case for out-of-proc workers (like nodejs). The binding type
+                        // appears to always be "string" so we need to do a special conversion.
+                        convertedValue = jsonValue.ToString(Formatting.None);
+                    }
                     else
                     {
                         // At this point, we're probably dealing with a POCO

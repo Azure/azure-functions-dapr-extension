@@ -1,0 +1,8 @@
+{
+    "bindings": [
+      {
+        "type": "daprMethodTrigger",
+        "name": "daprInput"
+      }
+    ]
+  }

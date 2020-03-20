@@ -15,9 +15,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// Gets or sets the address of the Dapr runtime endpoint.
         /// </summary>
         /// <remarks>
-        /// If not specified, the default value of <c>http://localhost:3500</c> is used.
+        /// If not specified, the default value of <c>http://localhost:{daprPort}</c> is used.
+        /// If the <c>DAPR_HTTP_PORT</c> environment variable is present, that value is used
+        /// for <c>{daprPort}</c>. Otherwise port 3500 is assumed.
         /// </remarks>
         [AutoResolve]
-        public string DaprAddress { get; set; } = "http://localhost:3500";
+        public string DaprAddress { get; set; } = GetDaprAddress();
+
+        static string GetDaprAddress()
+        {
+            if (!int.TryParse(Environment.GetEnvironmentVariable("DAPR_HTTP_PORT"), out int daprPort))
+            {
+                daprPort = 3500;
+            }
+
+            return $"http://localhost:{daprPort}";
+        }
     }
 }

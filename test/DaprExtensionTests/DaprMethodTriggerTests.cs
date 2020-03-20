@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DaprExtensionTests.Functions;
-using Microsoft.Azure.WebJobs.Extensions.Dapr;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
@@ -74,7 +73,6 @@ namespace DaprExtensionTests
             string result = await response.Content.ReadAsStringAsync();
             Assert.Equal(inputJson, result);
         }
-
 
         [Fact]
         public async Task BindToPOCO()
