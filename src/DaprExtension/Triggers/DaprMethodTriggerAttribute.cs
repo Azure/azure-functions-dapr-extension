@@ -21,6 +21,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <remarks>
         /// If not specified, the name of the function is used as the method name.
         /// </remarks>
-        public string MethodName { get; set; }
+        public string? MethodName { get; set; }
     }
 }

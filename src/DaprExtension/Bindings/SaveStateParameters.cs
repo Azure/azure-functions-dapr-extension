@@ -7,10 +7,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     class SaveStateParameters
     {
-        public string StateStore { get; set; }
+        public SaveStateParameters(JToken value)
+        {
+            this.Value = value;
+        }
 
-        public string Key { get; set; }
+        // If not specified, defaults to binding values
+        public string? StateStore { get; set;  }
 
-        public JToken Value { get; set; }
+        // If not specified, defaults to binding values
+        public string? Key { get; set;  }
+
+        public JToken? Value { get; }
     }
 }

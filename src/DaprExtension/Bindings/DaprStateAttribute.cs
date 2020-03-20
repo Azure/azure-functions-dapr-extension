@@ -19,12 +19,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// Is found in the `metadata.name` of the component.
         /// </summary>
         [AutoResolve]
-        public string StateStore { get; set; }
+        public string? StateStore { get; set; }
 
         /// <summary>
         /// Gets or sets the key name to get or set state.
         /// </summary>
         [AutoResolve]
-        public string Key { get; set; }
+        public string? Key { get; set; }
     }
 }

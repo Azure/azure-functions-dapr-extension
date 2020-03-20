@@ -17,18 +17,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// Gets or sets the dapr app name to invoke.
         /// </summary>
         [AutoResolve]
-        public string AppId { get; set; }
+        public string? AppId { get; set; }
 
         /// <summary>
         /// Gets or sets the method name of the app to invoke.
         /// </summary>
         [AutoResolve]
-        public string MethodName { get; set; }
+        public string? MethodName { get; set; }
 
         /// <summary>
         /// Gets or sets the http verb of the app to invoke.
         /// </summary>
         [AutoResolve]
-        public string HttpVerb { get; set; }
+        public string HttpVerb { get; set; } = "GET";
     }
 }

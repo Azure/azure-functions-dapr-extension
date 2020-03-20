@@ -3,12 +3,10 @@
 
 using System;
 using System.IO;
-using System.Text;
 using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Azure.WebJobs.Logging;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
@@ -19,19 +17,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     [Extension("Dapr")]
     class DaprExtensionConfigProvider : IExtensionConfigProvider
     {
-        readonly ILoggerFactory loggerFactory;
         readonly DaprServiceClient daprClient;     // TODO: Use an interface for mocking
         readonly DaprServiceListener daprListener; // TODO: Use an interface for mocking
-        ILogger logger;
+        readonly ILogger logger;
 
         public DaprExtensionConfigProvider(
-            ILoggerFactory loggerFactory,
             DaprServiceClient daprClient,
-            DaprServiceListener daprListener)
+            DaprServiceListener daprListener,
+            ILoggerFactory loggerFactory)
         {
-            this.loggerFactory = loggerFactory ?? throw new NotImplementedException(nameof(loggerFactory));
             this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
             this.daprListener = daprListener ?? throw new ArgumentNullException(nameof(daprListener));
+
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -41,7 +44,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentNullException("context");
             }
 
-            this.logger = this.loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
             this.logger.LogInformation($"Registered dapr extension");
 
             context.AddConverter<JObject, SaveStateParameters>(CreateSaveStateParameters);
@@ -68,71 +70,69 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         internal static SaveStateParameters CreateSaveStateParameters(JObject parametersJson)
         {
-            var options = new SaveStateParameters()
+            if (!TryGetValue(parametersJson, "value", out string? value))
             {
-                StateStore = GetValueOrDefault<string>(parametersJson, "stateStore"),
-                Key = GetValueOrDefault<string>(parametersJson, "key"),
-                Value = GetValueOrDefault<JToken>(parametersJson, "value"),
-            };
-
-            return options;
-        }
-
-        internal static SaveStateParameters CreateSaveStateParameters(string parametersValue)
-        {
-            var options = new SaveStateParameters()
-            {
-                Value = parametersValue,
-            };
-
-            return options;
-        }
-
-        // TODO: Review this - it doesn't seem right to assume these are JSON bytes.
-        //       Instead we should probably save the raw bytes as-is.
-        //       More discussion: https://github.com/dapr/dapr/issues/235
-        internal static SaveStateParameters CreateSaveStateParameters(byte[] parametersJsonBytes)
-        {
-            var options = new SaveStateParameters();
-            try
-            {
-                string content = Encoding.UTF8.GetString(parametersJsonBytes);
-                JObject jObject = JObject.Parse(content);
-                options = CreateSaveStateParameters(jObject);
-                if (options.Value == null)
-                {
-                    throw new FormatException("Invalid save state parameters JSON");
-                }
-            }
-            catch (JsonException)
-            {
-                options.Value = parametersJsonBytes;
+                throw new ArgumentException("A 'value' parameter is required for save-state operations.", nameof(parametersJson));
             }
 
-            return options;
+            var parameters = new SaveStateParameters(value);
+
+            if (TryGetValue(parametersJson, "stateStore", out string? stateStore))
+            {
+                parameters.StateStore = stateStore;
+            }
+
+            if (!TryGetValue(parametersJson, "key", out string? key))
+            {
+                parameters.Key = key;
+            }
+
+            return parameters;
+        }
+
+        internal static SaveStateParameters CreateSaveStateParameters(object parametersValue)
+        {
+            return new SaveStateParameters(JToken.FromObject(parametersValue));
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject parametersJson)
         {
-            var options = new InvokeMethodParameters()
+            var options = new InvokeMethodParameters();
+
+            if (TryGetValue(parametersJson, "appId", out string? appId))
             {
-                AppId = GetValueOrDefault<string>(parametersJson, "appId"),
-                MethodName = GetValueOrDefault<string>(parametersJson, "methodName"),
-                Body = GetValueOrDefault<JToken>(parametersJson, "body"),
-                HttpVerb = GetValueOrDefault<string>(parametersJson, "httpVerb"),
-            };
+                options.AppId = appId;
+            }
+
+            if (TryGetValue(parametersJson, "methodName", out string? methodName))
+            {
+                options.MethodName = methodName;
+            }
+
+            if (TryGetValue(parametersJson, "body", out JToken? body))
+            {
+                options.Body = body;
+            }
+
+            if (TryGetValue(parametersJson, "httpVerb", out string? httpVerb) && httpVerb != null)
+            {
+                options.HttpVerb = httpVerb;
+            }
 
             return options;
         }
 
-        static TValue GetValueOrDefault<TValue>(JObject messageObject, string propertyName)
+        static bool TryGetValue<TValue>(JObject messageObject, string propertyName, out TValue? value)
+            where TValue : class
         {
             if (messageObject.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken result))
             {
-                return result.Value<TValue>();
+                value = result.Value<TValue>();
+                return true;
             }
 
-            return default;
+            value = default;
+            return false;
         }
     }
 }

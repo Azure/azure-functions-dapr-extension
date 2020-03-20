@@ -20,7 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     class DaprMethodTriggerBindingProvider : ITriggerBindingProvider
     {
-        static readonly Task<ITriggerBinding> NotApplicableResult = Task.FromResult<ITriggerBinding>(null);
+        static readonly Task<ITriggerBinding?> NotApplicableResult = Task.FromResult<ITriggerBinding?>(null);
 
         readonly DaprServiceListener serviceListener;
 
@@ -29,7 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
         }
 
-        public Task<ITriggerBinding> TryCreateAsync(TriggerBindingProviderContext context)
+        public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
         {
             ParameterInfo parameter = context.Parameter;
             DaprMethodTriggerAttribute attribute =
@@ -39,25 +39,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 return NotApplicableResult;
             }
 
-            string methodName = attribute.MethodName;
-            if (string.IsNullOrEmpty(methodName))
+            string? methodName = attribute.MethodName;
+            if (methodName == null)
             {
                 MemberInfo method = parameter.Member;
                 methodName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
             }
 
-            return Task.FromResult<ITriggerBinding>(
+            return Task.FromResult<ITriggerBinding?>(
                 new DaprMethodTriggerBinding(this.serviceListener, methodName, parameter));
         }
 
         class DaprMethodTriggerBinding : ITriggerBinding
         {
-            static readonly IReadOnlyDictionary<string, Type> StaticBindingContract = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
-            {
-                // This binding supports return values of any type
-                { "$return", typeof(object).MakeByRefType() },
-            };
-
             readonly DaprServiceListener serviceListener;
             readonly string methodName;
             readonly ParameterInfo parameter;
@@ -70,11 +64,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
                 this.methodName = methodName ?? throw new ArgumentNullException(nameof(methodName));
                 this.parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
+
+                this.BindingDataContract = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
+                {
+                    // Allow return values of any type
+                    { "$return", typeof(object).MakeByRefType() },
+
+                    // Allow binding to the name of the parameter in binding expressions
+                    { parameter.Name, parameter.ParameterType },
+                };
             }
 
             public Type TriggerValueType => typeof(HttpContext);
 
-            public IReadOnlyDictionary<string, Type> BindingDataContract => StaticBindingContract;
+            public IReadOnlyDictionary<string, Type> BindingDataContract { get; }
 
             public async Task<ITriggerData> BindAsync(object value, ValueBindingContext context)
             {
@@ -248,69 +251,48 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     }
                 }
             }
-        }
-    }
 
-    // TODO: Find a better home for this
-    // TODO: Derive from some abstract base class
-    class DaprMethodListener : IListener
-    {
-        readonly DaprServiceListener serviceListener;
-        readonly ITriggeredFunctionExecutor executor;
-
-        public DaprMethodListener(
-            DaprServiceListener serviceListener,
-            ITriggeredFunctionExecutor executor,
-            string methodName)
-        {
-            this.serviceListener = serviceListener;
-            this.executor = executor;
-
-            this.ListenPath = "/" + methodName;
-        }
-
-        public PathString ListenPath { get; }
-
-        Task IListener.StartAsync(CancellationToken cancellationToken)
-        {
-            return this.serviceListener.RegisterListenerAsync(this, cancellationToken);
-        }
-
-        Task IListener.StopAsync(CancellationToken cancellationToken)
-        {
-            return this.serviceListener.DeregisterListenerAsync(this, cancellationToken);
-        }
-
-        void IListener.Cancel()
-        {
-            // no-op
-        }
-
-        void IDisposable.Dispose()
-        {
-            // no-op
-        }
-
-        public async Task DispatchAsync(HttpContext context)
-        {
-            var input = new TriggeredFunctionData
+            sealed class DaprMethodListener : DaprListenerBase
             {
-                TriggerValue = context,
-            };
+                readonly ITriggeredFunctionExecutor executor;
 
-            try
-            {
-                FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
-            }
-            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
-            {
-                // The request was aborted by the client. No-op.
-            }
-            catch (Exception)
-            {
-                // This means an unhandled exception occurred in the Functions runtime.
-                // This is often caused by the host shutting down while a function is still executing.
-                // TODO: Handle failure
+                public DaprMethodListener(
+                    DaprServiceListener serviceListener,
+                    ITriggeredFunctionExecutor executor,
+                    string methodName)
+                    : base(serviceListener, "/" + methodName)
+                {
+                    this.executor = executor;
+                }
+
+                public override void Dispose()
+                {
+                    // no-op
+                }
+
+                public override async Task DispatchAsync(HttpContext context)
+                {
+                    var input = new TriggeredFunctionData
+                    {
+                        TriggerValue = context,
+                    };
+
+                    try
+                    {
+                        FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
+                    }
+                    catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+                    {
+                        // The request was aborted by the client. No-op.
+                        // TODO: Consider moving exception handling into base class
+                    }
+                    catch (Exception)
+                    {
+                        // This means an unhandled exception occurred in the Functions runtime.
+                        // This is often caused by the host shutting down while a function is still executing.
+                        // TODO: Handle failure
+                    }
+                }
             }
         }
     }

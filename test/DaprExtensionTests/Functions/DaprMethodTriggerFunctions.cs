@@ -52,7 +52,7 @@ namespace DaprExtensionTests.Functions
             [DaprMethodTrigger] JObject input,
             [DaprState(Key = "{input.stateKey}")] string existingState)
         {
-            // TODO: Not sure if this will work. "content" might be required instead of "input".
+            // TODO: Not sure yet if this binding expression will work - needs testing.
             return existingState;
         }
 

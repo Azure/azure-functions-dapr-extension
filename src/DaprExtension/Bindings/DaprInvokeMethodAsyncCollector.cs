@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,17 +24,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             if (item.AppId == null)
             {
-                item.AppId = this.attr.AppId;
+                item.AppId = this.attr.AppId ?? throw new ArgumentException("A non-null app ID must be specified.");
             }
 
             if (item.MethodName == null)
             {
-                item.MethodName = this.attr.MethodName;
+                item.MethodName = this.attr.MethodName ?? throw new ArgumentException("A non-null method name must be specified.");
             }
 
             if (item.HttpVerb == null)
             {
-                item.HttpVerb = this.attr.HttpVerb;
+                item.HttpVerb = this.attr.HttpVerb ?? throw new ArgumentException("A non-null method verb must be specified.");
             }
 
             this.requests.Enqueue(item);
@@ -46,8 +47,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             {
                 await this.daprService.InvokeMethodAsync(
                     this.attr.DaprAddress,
-                    item.AppId,
-                    item.MethodName,
+                    item.AppId!,
+                    item.MethodName!,
                     item.HttpVerb,
                     item.Body);
             }

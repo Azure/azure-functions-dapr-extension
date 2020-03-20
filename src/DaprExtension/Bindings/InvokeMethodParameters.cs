@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
@@ -13,21 +14,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <summary>
         /// Gets or sets the ID of the app containing the method to invoke.
         /// </summary>
-        public string AppId { get; set; }
+        public string? AppId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the method to invoke.
         /// </summary>
-        public string MethodName { get; set; }
+        public string? MethodName { get; set; }
 
         /// <summary>
         /// Gets or sets the HTTP verb associated with the method to invoke.
         /// </summary>
-        public string HttpVerb { get; set; }
+        public string HttpVerb { get; set; } = "GET";
 
         /// <summary>
         /// Gets or sets the body of the invoke-method operation.
         /// </summary>
-        public JToken Body { get; set; }
+        public JToken? Body { get; set; }
     }
 }

@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprExtension", "src\DaprExtension\DaprExtension.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprExtensionTests", "test\DaprExtensionTests\DaprExtensionTests.csproj", "{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprExtensionTests", "test\DaprExtensionTests\DaprExtensionTests.csproj", "{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A41513E0-93E2-4122-9FFD-7B9EFEB23D5E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -15,7 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     sealed class DaprServiceListener : IDisposable
     {
-        readonly ConcurrentDictionary<PathString, DaprMethodListener> listeners;
+        readonly ConcurrentDictionary<PathString, DaprListenerBase> listeners;
         readonly ILogger log;
         readonly IWebHost host;
 
@@ -23,7 +23,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         public DaprServiceListener(ILoggerFactory loggerFactory)
         {
-            this.listeners = new ConcurrentDictionary<PathString, DaprMethodListener>();
+            this.listeners = new ConcurrentDictionary<PathString, DaprListenerBase>();
             this.log = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
             this.host = new WebHostBuilder()
                 .UseKestrel()
@@ -34,7 +34,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         public void Dispose() => this.host.Dispose();
 
-        internal async Task RegisterListenerAsync(DaprMethodListener listener, CancellationToken cancellationToken)
+        internal async Task RegisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
         {
             if (this.listeners.TryAdd(listener.ListenPath, listener))
             {
@@ -48,7 +48,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
         }
 
-        internal async Task DeregisterListenerAsync(DaprMethodListener listener, CancellationToken cancellationToken)
+        internal async Task DeregisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
         {
             // TODO: Lock
             if (this.listeners.TryRemove(listener.ListenPath, out _))
@@ -93,7 +93,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         async Task DispatchToListener(HttpContext context)
         {
-            if (this.listeners.TryGetValue(context.Request.Path, out DaprMethodListener listener))
+            if (this.listeners.TryGetValue(context.Request.Path, out DaprListenerBase listener))
             {
                 await listener.DispatchAsync(context);
             }
