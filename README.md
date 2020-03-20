@@ -1,5 +1,7 @@
 # Azure Functions dapr extensions
 
+![Build and Test](https://github.com/cgillum/azure-functions-dapr-extension/workflows/Build%20and%20Test/badge.svg)
+
 ⚠️ This is a proof of concept extensions.  It is not intended for production ⚠️
 
 The Azure Functions dapr extension allows you to easily interact with the dapr APIs from an Azure Function.  This would work in local and Kubernetes scenarios.
