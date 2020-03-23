@@ -2,7 +2,8 @@
     "bindings": [
       {
         "type": "daprMethodTrigger",
-        "name": "daprInput"
+        "name": "daprInput",
+        "direction": "inout"
       }
     ]
   }

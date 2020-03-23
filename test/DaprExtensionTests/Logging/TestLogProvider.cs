@@ -23,7 +23,7 @@ namespace DaprExtensionTests.Logging
 
         public bool TryGetLogs(string category, out IEnumerable<LogEntry> logs)
         {
-            if (this.loggers.TryGetValue(category, out TestLogger logger))
+            if (this.loggers.TryGetValue(category, out TestLogger? logger))
             {
                 logs = logger.GetLogs();
                 return true;
@@ -35,9 +35,7 @@ namespace DaprExtensionTests.Logging
 
         ILogger ILoggerProvider.CreateLogger(string categoryName)
         {
-            return this.loggers.GetOrAdd(
-                categoryName,
-                name => new TestLogger(this.output, name));
+            return this.loggers.GetOrAdd(categoryName, _ => new TestLogger(this.output));
         }
 
         void IDisposable.Dispose()
@@ -50,7 +48,7 @@ namespace DaprExtensionTests.Logging
             readonly ITestOutputHelper output;
             readonly List<LogEntry> entries;
 
-            public TestLogger(ITestOutputHelper output, string categoryName)
+            public TestLogger(ITestOutputHelper output)
             {
                 this.output = output;
                 this.entries = new List<LogEntry>();
@@ -58,7 +56,7 @@ namespace DaprExtensionTests.Logging
 
             public IReadOnlyCollection<LogEntry> GetLogs() => this.entries.AsReadOnly();
 
-            IDisposable ILogger.BeginScope<TState>(TState state) => null;
+            IDisposable? ILogger.BeginScope<TState>(TState state) => null;
 
             bool ILogger.IsEnabled(LogLevel logLevel) => true;
 

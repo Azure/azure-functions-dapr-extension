@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,9 +20,14 @@ using Xunit.Abstractions;
 
 namespace DaprExtensionTests
 {
+    // TODO: Instead of making all tests run sequentially, configure a different port number for each collection
+    [Collection("Sequential")]
     public abstract class DaprExtensionTest : IDisposable, IAsyncLifetime
     {
-        static readonly HttpClient HttpClient = new HttpClient();
+        static readonly HttpClient HttpClient = new HttpClient()
+        {
+            Timeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(10),
+        };
 
         readonly TestLogProvider logProvider;
         readonly TestFunctionTypeLocator typeLocator;
@@ -50,19 +57,28 @@ namespace DaprExtensionTests
 
         internal void AddFunctions(Type functionType) => this.typeLocator.AddFunctionType(functionType);
 
-        internal IEnumerable<LogEntry> GetExtensionLogs()
+        internal IEnumerable<string> GetExtensionLogs()
         {
-            string category = "Host.Triggers.Dapr";
-            bool loggerExists = this.logProvider.TryGetLogs(category, out IEnumerable<LogEntry> logs);
-            Assert.True(loggerExists, $"No logger was found for {category}. Did the extension get loaded?");
+            return this.GetLogs("Host.Triggers.Dapr");
+        }
 
-            return logs!;
+        internal IEnumerable<string> GetFunctionLogs(string functionName)
+        {
+            return this.GetLogs($"Function.{functionName}.User");
+        }
+
+        internal IEnumerable<string> GetLogs(string category)
+        {
+            bool loggerExists = this.logProvider.TryGetLogs(category, out IEnumerable<LogEntry> logs);
+            Assert.True(loggerExists, $"No logger was found for '{category}'.");
+
+            return logs.Select(entry => entry.Message).ToArray();
         }
 
         internal async Task<HttpResponseMessage> SendRequestAsync(
             HttpMethod method,
             string url,
-            object jsonContent = null)
+            object? jsonContent = null)
         {
             using var request = new HttpRequestMessage(method, url);
 
@@ -73,6 +89,12 @@ namespace DaprExtensionTests
             }
 
             return await HttpClient.SendAsync(request);
+        }
+
+        internal Task CallFunctionAsync(string name, IDictionary<string, object>? args = null)
+        {
+            IJobHost jobHost = this.Host.Services.GetService<IJobHost>();
+            return jobHost.CallAsync(name, args);
         }
 
         Task IAsyncLifetime.InitializeAsync() => this.Host.StartAsync();

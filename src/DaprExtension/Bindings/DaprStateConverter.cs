@@ -29,8 +29,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         //       More discussion: https://github.com/dapr/dapr/issues/235
         public async Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            var content = await this.GetStringContentAsync(input, cancellationToken);
-            var json = JToken.Parse(content);
+            string content = await this.GetStringContentAsync(input, cancellationToken);
+            JToken json = JToken.Parse(content);
             byte[] bytes;
 
             try
@@ -45,32 +45,48 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return bytes;
         }
 
-        async Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
         {
             return await this.GetStringContentAsync(input, cancellationToken);
         }
 
-        async Task<Stream> IAsyncConverter<DaprStateAttribute, Stream>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<Stream> IAsyncConverter<DaprStateAttribute, Stream>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
         {
-            var stateStream = await this.daprService.GetStateAsync(input.DaprAddress, input.StateStore, input.Key);
+            Stream stateStream = await this.daprService.GetStateAsync(
+                input.DaprAddress,
+                input.StateStore,
+                input.Key,
+                cancellationToken);
             return stateStream;
         }
 
-        async Task<JToken> IAsyncConverter<DaprStateAttribute, JToken>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<JToken> IAsyncConverter<DaprStateAttribute, JToken>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
         {
-            var content = await this.GetStringContentAsync(input, cancellationToken);
+            string content = await this.GetStringContentAsync(input, cancellationToken);
             return JToken.Parse(content);
         }
 
-        async Task<JObject> IAsyncConverter<DaprStateAttribute, JObject>.ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<JObject> IAsyncConverter<DaprStateAttribute, JObject>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
         {
-            var content = await this.GetStringContentAsync(input, cancellationToken);
+            string content = await this.GetStringContentAsync(input, cancellationToken);
             return JObject.Parse(content);
         }
 
         async Task<string> GetStringContentAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            var stateStream = await this.daprService.GetStateAsync(input.DaprAddress, input.StateStore, input.Key);
+            Stream stateStream = await this.daprService.GetStateAsync(
+                input.DaprAddress,
+                input.StateStore,
+                input.Key,
+                cancellationToken);
             StreamReader sr = new StreamReader(stateStream);
             return await sr.ReadToEndAsync();
         }

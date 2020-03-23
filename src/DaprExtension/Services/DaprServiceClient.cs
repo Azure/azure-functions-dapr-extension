@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -42,10 +43,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             await this.httpClient.SendAsync(req);
         }
 
-        internal async Task<Stream> GetStateAsync(string? daprAddress, string? stateStore, string? key)
+        internal async Task<Stream> GetStateAsync(
+            string? daprAddress,
+            string? stateStore,
+            string? key,
+            CancellationToken cancellationToken)
         {
-            var res = await this.httpClient.GetAsync($"{daprAddress}/v1.0/state/{stateStore}/{key}");
-            var resStream = await res.Content.ReadAsStreamAsync();
+            HttpResponseMessage res = await this.httpClient.GetAsync(
+                $"{daprAddress}/v1.0/state/{stateStore}/{key}",
+                cancellationToken);
+            Stream resStream = await res.Content.ReadAsStreamAsync();
             return resStream;
         }
     }

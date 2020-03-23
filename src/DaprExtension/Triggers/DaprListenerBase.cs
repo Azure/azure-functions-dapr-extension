@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Azure.WebJobs.Host.Listeners;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
@@ -12,13 +13,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly DaprServiceListener serviceListener;
 
-        public DaprListenerBase(DaprServiceListener serviceListener, PathString listenPath)
+        public DaprListenerBase(DaprServiceListener serviceListener)
         {
             this.serviceListener = serviceListener;
-            this.ListenPath = listenPath;
         }
 
-        public PathString ListenPath { get; }
+        public abstract void AddRoute(IRouteBuilder routeBuilder);
 
         public virtual void Cancel()
         {
@@ -27,7 +27,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         Task IListener.StartAsync(CancellationToken cancellationToken)
         {
-            return this.serviceListener.RegisterListenerAsync(this, cancellationToken);
+            return this.serviceListener.EnsureStartedAsync(cancellationToken);
         }
 
         Task IListener.StopAsync(CancellationToken cancellationToken)

@@ -41,7 +41,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             while (this.requests.TryDequeue(out SaveStateParameters item))
             {
-                var stateList = new[] { new StateContent(item.Key, item.Value) };
+                StateContent[] stateList = new[] { new StateContent(item.Key, item.Value) };
 
                 await this.daprService.SaveStateAsync(this.attr.DaprAddress, item.StateStore, stateList);
             }

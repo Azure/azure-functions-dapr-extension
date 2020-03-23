@@ -26,18 +26,27 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <!-- Microsoft 1st party dependencies -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.14" />
   </ItemGroup>
 
+  <!-- 3rd party dependencies -->
+  <ItemGroup>
+    <PackageReference Include="CloudNative.CloudEvents" Version="1.3.80" />
+  </ItemGroup>
+
+  <!-- Meta packages and development tools -->
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.*" PrivateAssets="All" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.*" PrivateAssets="All" />
   </ItemGroup>
 
+  <!-- StyleCop configuration -->
   <ItemGroup>
     <AdditionalFiles Include="..\..\.stylecop\stylecop.json" />
     <Compile Include="..\..\.stylecop\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />

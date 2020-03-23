@@ -2,109 +2,108 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Azure.WebJobs.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     sealed class DaprServiceListener : IDisposable
     {
-        readonly ConcurrentDictionary<PathString, DaprListenerBase> listeners;
-        readonly ILogger log;
-        readonly IWebHost host;
+        readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
+        readonly HashSet<string> topics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        int serverStarted = 0;
+        readonly ILogger log;
+
+        IWebHost? host;
+        int serverStarted;
 
         public DaprServiceListener(ILoggerFactory loggerFactory)
         {
-            this.listeners = new ConcurrentDictionary<PathString, DaprListenerBase>();
             this.log = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
-            this.host = new WebHostBuilder()
-                .UseKestrel()
-                .UseUrls("http://localhost:3001") // TODO: Configurable
-                .Configure(a => a.Run(this.HandleRequestAsync))
-                .Build();
         }
 
-        public void Dispose() => this.host.Dispose();
+        public void Dispose() => this.host?.Dispose();
 
-        internal async Task RegisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
+        internal async Task EnsureStartedAsync(CancellationToken cancellationToken)
         {
-            if (this.listeners.TryAdd(listener.ListenPath, listener))
-            {
-                // TODO: Probably need the method info here as well
-                this.log.LogInformation("Registered function listener for path {Path}.", listener.ListenPath);
-            }
-
             if (Interlocked.CompareExchange(ref this.serverStarted, 1, 0) == 0)
             {
+                string listenUrl = "http://localhost:3001"; // TODO: Configurable
+
+                this.host = new WebHostBuilder()
+                    .UseKestrel()
+                    .ConfigureServices(s => s.AddRouting())
+                    .UseUrls(listenUrl)
+                    .Configure(app =>
+                    {
+                        var routes = new RouteBuilder(app);
+                        foreach (DaprListenerBase listener in this.listeners)
+                        {
+                            // CONSIDER: Each listener should return a route object (or a collection)
+                            //           instead of having direct access to the builder. This will
+                            //           improve encapsulation and enable better logging.
+                            listener.AddRoute(routes);
+                        }
+
+                        // See https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-a-route-for-dapr-to-discover-topic-subscriptions
+                        routes.MapGet("dapr/subscribe", this.GetTopicsAsync);
+
+                        app.UseRouter(routes.Build());
+                    })
+                    .Build();
+
+                this.log.LogInformation($"Starting Dapr HTTP listener on {listenUrl} with {this.listeners.Count} function listener(s) registered.");
                 await this.host.StartAsync(cancellationToken);
+                this.log.LogInformation("Dapr HTTP host started successfully.");
             }
         }
 
         internal async Task DeregisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
         {
-            // TODO: Lock
-            if (this.listeners.TryRemove(listener.ListenPath, out _))
-            {
-                // TODO: Probably need the method info here as well
-                this.log.LogInformation("Deregistered function listener for path {Path}.", listener.ListenPath);
-            }
+            this.listeners.Remove(listener);
 
-            if (this.listeners.Count == 0 && Interlocked.CompareExchange(ref this.serverStarted, 0, 1) == 1)
+            if (this.host != null &&
+                this.listeners.Count == 0 &&
+                Interlocked.CompareExchange(ref this.serverStarted, 0, 1) == 1)
             {
+                this.log.LogInformation($"Stopping Dapr HTTP listener.");
                 await this.host.StopAsync(cancellationToken);
+                this.log.LogInformation($"Dapr HTTP host stopped successfully.");
             }
         }
 
-        async Task HandleRequestAsync(HttpContext context)
+        internal void AddFunctionListener(DaprListenerBase daprListener)
         {
-            HttpRequest request = context.Request;
-            this.log.LogTrace("Received request: {Method} {Path}", request.Method, request.Path);
-            try
+            if (this.serverStarted > 0)
             {
-                await this.DispatchToListener(context);
-            }
-            catch (Exception unexpectedException)
-            {
-                // TODO: Proper tracing
-                this.log.LogError(
-                    unexpectedException,
-                    "Unhandled exception in HTTP API handler for {Method} {Path}",
-                    request.Method,
-                    request.Path);
-
-                context.Response.StatusCode = 500;
+                throw new InvalidOperationException("Cannot add listeners after the host has been started.");
             }
 
-            this.log.LogTrace(
-                "Sending response: {Method} {Path} -> {StatusCode}. Content length: {ContentLength}",
-                request.Method,
-                request.Path,
-                context.Response.StatusCode,
-                context.Response.ContentLength ?? -1);
+            this.listeners.Add(daprListener);
         }
 
-        async Task DispatchToListener(HttpContext context)
+        internal void RegisterTopic(string topicName)
         {
-            if (this.listeners.TryGetValue(context.Request.Path, out DaprListenerBase listener))
+            if (this.topics.Add(topicName))
             {
-                await listener.DispatchAsync(context);
+                this.log.LogInformation("Registered topic: {TopicName}", topicName);
             }
-            else
-            {
-                this.log.LogWarning(
-                    "No listener was registered that could handle {Method} {Path}",
-                    context.Request.Method,
-                    context.Request.Path);
-                context.Response.StatusCode = 404;
-            }
+        }
+
+        Task GetTopicsAsync(HttpContext context)
+        {
+            string topicListJson = JsonConvert.SerializeObject(this.topics);
+            context.Response.ContentType = "application/json";
+            return context.Response.WriteAsync(topicListJson);
         }
     }
 }

@@ -4,18 +4,20 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using CloudNative.CloudEvents;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Azure.WebJobs.Host.Triggers;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
-    class DaprMethodTriggerBindingProvider : ITriggerBindingProvider
+    class DaprTopicTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;
 
-        public DaprMethodTriggerBindingProvider(DaprServiceListener serviceListener)
+        public DaprTopicTriggerBindingProvider(DaprServiceListener serviceListener)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
         }
@@ -23,56 +25,80 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
         {
             ParameterInfo parameter = context.Parameter;
-            var attribute = parameter.GetCustomAttribute<DaprMethodTriggerAttribute>(inherit: false);
+            var attribute = parameter.GetCustomAttribute<DaprTopicTriggerAttribute>(inherit: false);
             if (attribute == null)
             {
                 return Utils.NullTriggerBindingTask;
             }
 
-            string? methodName = attribute.MethodName;
-            if (methodName == null)
+            string? topicName = attribute.TopicName;
+            if (topicName == null)
             {
                 MemberInfo method = parameter.Member;
-                methodName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
+                topicName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
             }
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprMethodTriggerBinding(this.serviceListener, methodName, parameter));
+                new DaprTopicTriggerBinding(this.serviceListener, topicName, parameter));
         }
 
-        class DaprMethodTriggerBinding : DaprTriggerBindingBase
+        class DaprTopicTriggerBinding : DaprTriggerBindingBase
         {
-            readonly DaprServiceListener serviceListener;
-            readonly string methodName;
+            static readonly JsonEventFormatter CloudEventFormatter = new JsonEventFormatter();
 
-            public DaprMethodTriggerBinding(
+            readonly DaprServiceListener serviceListener;
+            readonly string topicName;
+
+            public DaprTopicTriggerBinding(
                 DaprServiceListener serviceListener,
-                string methodName,
+                string topicName,
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
             {
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
-                this.methodName = methodName ?? throw new ArgumentNullException(nameof(methodName));
+                this.topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
             }
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprMethodListener(this.serviceListener, executor, this.methodName);
+                return new DaprTopicListener(this.serviceListener, executor, this.topicName);
             }
 
-            sealed class DaprMethodListener : DaprListenerBase
+            protected override object ConvertFromJson(JToken jsonValue, Type destinationType)
+            {
+                // The input is always expected to be an object in the Cloud Events schema
+                // https://github.com/cloudevents/spec/blob/v1.0/spec.md#example
+                if (jsonValue is JObject jsonObject)
+                {
+                    if (destinationType == typeof(CloudEvent))
+                    {
+                        return CloudEventFormatter.DecodeJObject(jsonObject);
+                    }
+                    else if (jsonObject.TryGetValue("data", StringComparison.Ordinal, out JToken eventData))
+                    {
+                        // Do the generic conversion from the "data" payload
+                        return base.ConvertFromJson(eventData, destinationType);
+                    }
+                }
+
+                return base.ConvertFromJson(jsonValue, destinationType);
+            }
+
+            sealed class DaprTopicListener : DaprListenerBase
             {
                 readonly ITriggeredFunctionExecutor executor;
-                readonly string methodName;
+                readonly string topicName;
 
-                public DaprMethodListener(
+                public DaprTopicListener(
                     DaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
-                    string methodName)
+                    string topicName)
                     : base(serviceListener)
                 {
                     this.executor = executor;
-                    this.methodName = methodName;
+                    this.topicName = topicName;
+
+                    serviceListener.RegisterTopic(topicName);
                 }
 
                 public override void Dispose()
@@ -82,7 +108,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
                 public override void AddRoute(IRouteBuilder routeBuilder)
                 {
-                    routeBuilder.MapPost(this.methodName, this.DispatchAsync);
+                    // Example: POST /Topic1
+                    // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-routes-for-dapr-to-deliver-topic-events
+                    routeBuilder.MapPost(this.topicName, this.DispatchAsync);
                 }
 
                 public override async Task DispatchAsync(HttpContext context)

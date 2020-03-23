@@ -29,6 +29,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// Gets or sets the http verb of the app to invoke.
         /// </summary>
         [AutoResolve]
-        public string HttpVerb { get; set; } = "GET";
+        public string HttpVerb { get; set; } = "POST";
     }
 }

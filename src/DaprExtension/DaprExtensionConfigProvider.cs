@@ -66,6 +66,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             context.AddBindingRule<DaprMethodTriggerAttribute>()
                 .BindToTrigger(new DaprMethodTriggerBindingProvider(this.daprListener));
+
+            context.AddBindingRule<DaprTopicTriggerAttribute>()
+                .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
         }
 
         internal static SaveStateParameters CreateSaveStateParameters(JObject parametersJson)
