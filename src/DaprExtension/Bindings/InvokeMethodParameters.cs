@@ -1,11 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
-
-using System;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using Newtonsoft.Json.Linq;
+
     /// <summary>
     /// Parameters for Dapr invoke-method operations.
     /// </summary>

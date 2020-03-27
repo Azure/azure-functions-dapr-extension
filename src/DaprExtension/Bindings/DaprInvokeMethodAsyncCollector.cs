@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     class DaprInvokeMethodAsyncCollector : IAsyncCollector<InvokeMethodParameters>
     {
         readonly ConcurrentQueue<InvokeMethodParameters> requests = new ConcurrentQueue<InvokeMethodParameters>();
@@ -50,7 +50,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     item.AppId!,
                     item.MethodName!,
                     item.HttpVerb,
-                    item.Body);
+                    item.Body,
+                    cancellationToken);
             }
         }
     }

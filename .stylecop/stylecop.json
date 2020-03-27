@@ -2,8 +2,7 @@
     "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
     "settings": {
         "orderingRules": {
-            "systemUsingDirectivesFirst": true,
-            "usingDirectivesPlacement": "outsideNamespace"
+            "systemUsingDirectivesFirst": true
         },
         "documentationRules": {
             "companyName": "Microsoft",

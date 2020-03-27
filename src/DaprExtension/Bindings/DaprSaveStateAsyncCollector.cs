@@ -1,16 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
-
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
-    class DaprSaveStateAsyncCollector : IAsyncCollector<SaveStateParameters>
+    using System;
+    using System.Collections.Concurrent;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    class DaprSaveStateAsyncCollector : IAsyncCollector<DaprStateRecord>
     {
-        readonly ConcurrentQueue<SaveStateParameters> requests = new ConcurrentQueue<SaveStateParameters>();
+        readonly ConcurrentBag<DaprStateRecord> requests = new ConcurrentBag<DaprStateRecord>();
+
         readonly DaprServiceClient daprService;
         readonly DaprStateAttribute attr;
 
@@ -20,31 +22,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             this.daprService = daprService;
         }
 
-        public Task AddAsync(SaveStateParameters item, CancellationToken cancellationToken = default)
+        public Task AddAsync(DaprStateRecord item, CancellationToken cancellationToken = default)
         {
-            if (item.StateStore == null)
-            {
-                item.StateStore = this.attr.StateStore;
-            }
-
             if (item.Key == null)
             {
-                item.Key = this.attr.Key;
+                item.Key = this.attr.Key ?? throw new ArgumentException("No key information was found. Make sure it is configured either in the binding properties or in the data payload.", nameof(item));
             }
 
-            this.requests.Enqueue(item);
+            this.requests.Add(item);
+
             return Task.CompletedTask;
         }
 
-        // TODO: Optimize this method to minimize the number of SaveStateAsync calls
-        public async Task FlushAsync(CancellationToken cancellationToken = default)
+        public Task FlushAsync(CancellationToken cancellationToken = default)
         {
-            while (this.requests.TryDequeue(out SaveStateParameters item))
-            {
-                StateContent[] stateList = new[] { new StateContent(item.Key, item.Value) };
-
-                await this.daprService.SaveStateAsync(this.attr.DaprAddress, item.StateStore, stateList);
-            }
+            return this.daprService.SaveStateAsync(
+                this.attr.DaprAddress,
+                this.attr.StateStore,
+                this.requests.Take(this.requests.Count),
+                cancellationToken);
         }
     }
 }

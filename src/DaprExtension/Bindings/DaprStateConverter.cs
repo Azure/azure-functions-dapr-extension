@@ -1,21 +1,25 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
-
-using System;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using System;
+    using System.IO;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.Azure.WebJobs;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+
     class DaprStateConverter :
+        IAsyncConverter<DaprStateAttribute, DaprStateRecord>,
         IAsyncConverter<DaprStateAttribute, byte[]>,
         IAsyncConverter<DaprStateAttribute, string>,
         IAsyncConverter<DaprStateAttribute, Stream>,
         IAsyncConverter<DaprStateAttribute, JToken>,
-        IAsyncConverter<DaprStateAttribute, JObject>
+        IAsyncConverter<DaprStateAttribute, JObject>,
+        IAsyncConverter<DaprStateAttribute, object?>
     {
         readonly DaprServiceClient daprService;
 
@@ -24,12 +28,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             this.daprService = daprService;
         }
 
-        // TODO: Review this - it doesn't seem right to assume JSON-formatted string content when converting
-        //       to a byte array. We probably need to return the stream bytes directly.
-        //       More discussion: https://github.com/dapr/dapr/issues/235
         public async Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
             string content = await this.GetStringContentAsync(input, cancellationToken);
+            if (string.IsNullOrEmpty(content))
+            {
+                return Array.Empty<byte>();
+            }
+
+            // Per Yaron, Dapr only supports JSON payloads over HTTP.
+            // By default we assume that the payload is a JSON-serialized base64 string of bytes
             JToken json = JToken.Parse(content);
             byte[] bytes;
 
@@ -37,31 +45,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             {
                 bytes = json.ToObject<byte[]>();
             }
-            catch (Exception)
+            catch (JsonException)
             {
+                // Looks like it's not actually JSON - just return the raw bytes
                 bytes = Encoding.UTF8.GetBytes(json.ToString());
             }
 
             return bytes;
         }
 
-        async Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(
+        Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(
             DaprStateAttribute input,
             CancellationToken cancellationToken)
         {
-            return await this.GetStringContentAsync(input, cancellationToken);
+            return this.GetStringContentAsync(input, cancellationToken);
         }
 
         async Task<Stream> IAsyncConverter<DaprStateAttribute, Stream>.ConvertAsync(
             DaprStateAttribute input,
             CancellationToken cancellationToken)
         {
-            Stream stateStream = await this.daprService.GetStateAsync(
-                input.DaprAddress,
-                input.StateStore,
-                input.Key,
-                cancellationToken);
-            return stateStream;
+            DaprStateRecord record = await this.GetStateRecordAsync(input, cancellationToken);
+            return record.ContentStream;
         }
 
         async Task<JToken> IAsyncConverter<DaprStateAttribute, JToken>.ConvertAsync(
@@ -80,15 +85,51 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return JObject.Parse(content);
         }
 
+        async Task<object?> IAsyncConverter<DaprStateAttribute, object?>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
+        {
+            string content = await this.GetStringContentAsync(input, cancellationToken);
+            if (string.IsNullOrEmpty(content))
+            {
+                return null; // TODO: This will cause a null-ref for value types!
+            }
+            else
+            {
+                return JToken.Parse(content);
+            }
+        }
+
+        async Task<DaprStateRecord> IAsyncConverter<DaprStateAttribute, DaprStateRecord>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
+        {
+            DaprStateRecord record = await this.GetStateRecordAsync(input, cancellationToken);
+            using StreamReader reader = new StreamReader(record.ContentStream);
+            string content = await reader.ReadToEndAsync();
+            if (!string.IsNullOrEmpty(content))
+            {
+                record.Value = JToken.Parse(content);
+            }
+
+            return record;
+        }
+
         async Task<string> GetStringContentAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            Stream stateStream = await this.daprService.GetStateAsync(
+            DaprStateRecord stateRecord = await this.GetStateRecordAsync(input, cancellationToken);
+            using StreamReader reader = new StreamReader(stateRecord.ContentStream);
+            return await reader.ReadToEndAsync();
+        }
+
+        async Task<DaprStateRecord> GetStateRecordAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        {
+            DaprStateRecord stateRecord = await this.daprService.GetStateAsync(
                 input.DaprAddress,
-                input.StateStore,
-                input.Key,
+                input.StateStore ?? throw new ArgumentException("No state store name was specified.", nameof(input.StateStore)),
+                input.Key ?? throw new ArgumentException("No state store key was specified.", nameof(input.Key)),
                 cancellationToken);
-            StreamReader sr = new StreamReader(stateStream);
-            return await sr.ReadToEndAsync();
+            return stateRecord;
         }
     }
 }

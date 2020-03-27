@@ -1,22 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Dapr;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace DaprExtensionTests
 {
-    public class DaprMethodTriggerTests : DaprExtensionTest
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+    using Xunit;
+    using Xunit.Abstractions;
+
+    public class DaprMethodTriggerTests : DaprTestBase
     {
         public DaprMethodTriggerTests(ITestOutputHelper output)
             : base(output)
@@ -122,7 +122,7 @@ namespace DaprExtensionTests
             [FunctionName(nameof(GetState1))]
             public static string GetState1(
                 [DaprMethodTrigger] string stateKey,
-                [DaprState(Key = "{stateKey}")] string existingState)
+                [DaprState("store1", Key = "{stateKey}")] string existingState)
             {
                 return existingState;
             }
@@ -130,7 +130,7 @@ namespace DaprExtensionTests
             [FunctionName(nameof(GetState2))]
             public static string GetState2(
                 [DaprMethodTrigger] JObject input,
-                [DaprState(Key = "{input.stateKey}")] string existingState)
+                [DaprState("store1", Key = "{input.stateKey}")] string existingState)
             {
                 // TODO: Not sure yet if this binding expression will work - needs testing.
                 return existingState;

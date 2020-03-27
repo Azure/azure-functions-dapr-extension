@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
-
 namespace DaprExtensionTests.Logging
 {
+    using System;
+    using Microsoft.Extensions.Logging;
+
     class LogEntry
     {
         public LogEntry(LogLevel level, string message)

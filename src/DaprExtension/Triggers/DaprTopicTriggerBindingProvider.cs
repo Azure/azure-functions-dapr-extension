@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using CloudNative.CloudEvents;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Azure.WebJobs.Host.Executors;
-using Microsoft.Azure.WebJobs.Host.Triggers;
-using Newtonsoft.Json.Linq;
-
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using System;
+    using System.Reflection;
+    using System.Threading.Tasks;
+    using CloudNative.CloudEvents;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs.Host.Executors;
+    using Microsoft.Azure.WebJobs.Host.Triggers;
+    using Newtonsoft.Json.Linq;
+
     class DaprTopicTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;

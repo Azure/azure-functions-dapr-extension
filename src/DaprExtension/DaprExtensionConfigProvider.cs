@@ -1,16 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
-using System.IO;
-using Microsoft.Azure.WebJobs.Description;
-using Microsoft.Azure.WebJobs.Host.Config;
-using Microsoft.Azure.WebJobs.Logging;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
+    using Microsoft.Azure.WebJobs.Description;
+    using Microsoft.Azure.WebJobs.Host.Config;
+    using Microsoft.Azure.WebJobs.Logging;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json.Linq;
+
     /// <summary>
     /// Defines the configuration options for the Dapr binding.
     /// </summary>
@@ -46,22 +48,23 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             this.logger.LogInformation($"Registered dapr extension");
 
-            context.AddConverter<JObject, SaveStateParameters>(CreateSaveStateParameters);
-            context.AddConverter<string, SaveStateParameters>(CreateSaveStateParameters);
-            context.AddConverter<byte[], SaveStateParameters>(CreateSaveStateParameters);
-            context.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
-
             var daprStateConverter = new DaprStateConverter(this.daprClient);
 
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
-            stateRule.BindToInput<byte[]>(daprStateConverter);
+            stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
             stateRule.BindToInput<string>(daprStateConverter);
-            stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToInput<JToken>(daprStateConverter);
             stateRule.BindToInput<JObject>(daprStateConverter);
-            stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
+            stateRule.BindToInput<Stream>(daprStateConverter);
+            stateRule.BindToInput<byte[]>(daprStateConverter);
+
+            // TODO: This does not work for nulls and value types. Need a better way of doing this conversion.
+            stateRule.BindToInput<object?>(daprStateConverter);
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
+            invokeRule.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
 
             context.AddBindingRule<DaprMethodTriggerAttribute>()
@@ -71,21 +74,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
         }
 
-        internal static SaveStateParameters CreateSaveStateParameters(JObject parametersJson)
+        internal static DaprStateRecord CreateSaveStateParameters(JObject parametersJson)
         {
             if (!TryGetValue(parametersJson, "value", out string? value))
             {
                 throw new ArgumentException("A 'value' parameter is required for save-state operations.", nameof(parametersJson));
             }
 
-            var parameters = new SaveStateParameters(value);
+            var parameters = new DaprStateRecord(value);
 
-            if (TryGetValue(parametersJson, "stateStore", out string? stateStore))
-            {
-                parameters.StateStore = stateStore;
-            }
-
-            if (!TryGetValue(parametersJson, "key", out string? key))
+            if (TryGetValue(parametersJson, "key", out string? key))
             {
                 parameters.Key = key;
             }
@@ -93,9 +91,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return parameters;
         }
 
-        internal static SaveStateParameters CreateSaveStateParameters(object parametersValue)
+        internal static DaprStateRecord CreateSaveStateParameters(object parametersValue)
         {
-            return new SaveStateParameters(JToken.FromObject(parametersValue));
+            return new DaprStateRecord(JToken.FromObject(parametersValue));
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject parametersJson)

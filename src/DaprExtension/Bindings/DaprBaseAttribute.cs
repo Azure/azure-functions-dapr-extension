@@ -1,11 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
-
-using System;
-using Microsoft.Azure.WebJobs.Description;
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using System;
+    using Microsoft.Azure.WebJobs.Description;
+
     /// <summary>
     /// Abstract base class for Dapr binding attributes.
     /// </summary>
@@ -20,16 +20,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// for <c>{daprPort}</c>. Otherwise port 3500 is assumed.
         /// </remarks>
         [AutoResolve]
-        public string DaprAddress { get; set; } = GetDaprAddress();
-
-        static string GetDaprAddress()
-        {
-            if (!int.TryParse(Environment.GetEnvironmentVariable("DAPR_HTTP_PORT"), out int daprPort))
-            {
-                daprPort = 3500;
-            }
-
-            return $"http://localhost:{daprPort}";
-        }
+        public string? DaprAddress { get; set; }
     }
 }
