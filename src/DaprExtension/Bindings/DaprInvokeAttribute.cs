@@ -7,7 +7,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using Microsoft.Azure.WebJobs.Description;
 
     /// <summary>
-    /// Attribute to specify parameters for the dapr-invoke output binding.
+    /// Attribute to specify parameters for the Dapr-invoke output binding.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
     [Binding]

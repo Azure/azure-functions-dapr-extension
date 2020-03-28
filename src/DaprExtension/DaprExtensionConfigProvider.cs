@@ -67,11 +67,32 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             invokeRule.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
 
+            var publishRule = context.AddBindingRule<DaprPublishAttribute>();
+            publishRule.AddConverter<JObject, DaprPubSubEvent>(CreatePubSubEvent);
+            publishRule.AddConverter<object, DaprPubSubEvent>(CreatePubSubEvent);
+            publishRule.BindToCollector(attr => new DaprPublishAsyncCollector(attr, this.daprClient));
+
             context.AddBindingRule<DaprMethodTriggerAttribute>()
                 .BindToTrigger(new DaprMethodTriggerBindingProvider(this.daprListener));
 
             context.AddBindingRule<DaprTopicTriggerAttribute>()
                 .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
+        }
+
+        static DaprPubSubEvent CreatePubSubEvent(object arg)
+        {
+            return new DaprPubSubEvent(JToken.FromObject(arg));
+        }
+
+        static DaprPubSubEvent CreatePubSubEvent(JObject json)
+        {
+            DaprPubSubEvent e = json.ToObject<DaprPubSubEvent>();
+            if (e.Payload == null)
+            {
+                throw new ArgumentException($"A '{nameof(e.Payload).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
+            }
+
+            return e;
         }
 
         internal static DaprStateRecord CreateSaveStateParameters(JObject parametersJson)

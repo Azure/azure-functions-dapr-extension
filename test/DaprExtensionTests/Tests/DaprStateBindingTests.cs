@@ -130,7 +130,7 @@ namespace DaprExtensionTests
             new object[] { Guid.NewGuid() }, 
             new object[] { Guid.NewGuid().ToByteArray() },
             new object[] { new { arg1 = 2, arg2 = 3 } },
-            new object[] { new CustomType { P1 = "Hello, world!", P2 = 3, P3 = DateTime.UtcNow } },
+            new object[] { new UserDefinedType { P1 = "Hello, world!", P2 = 3, P3 = DateTime.UtcNow } },
         };
 
         SavedHttpRequest GetSingleSaveStateRequest()
@@ -208,7 +208,7 @@ namespace DaprExtensionTests
             }
         }
 
-        class CustomType
+        class UserDefinedType
         {
             public string? P1 { get; set; }
             public int P2 { get; set; }

@@ -95,28 +95,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             await this.httpClient.SendAsync(req, cancellationToken);
         }
 
+        internal Task PublishEventAsync(
+            string? daprAddress,
+            string? topicName,
+            JToken? payload,
+            CancellationToken cancellationToken)
+        {
+            this.EnsureDaprAddress(ref daprAddress);
+
+            var req = new HttpRequestMessage(HttpMethod.Post, $"{daprAddress}/v1.0/publish/{topicName}");
+            if (payload != null)
+            {
+                req.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");
+            }
+
+            return this.httpClient.SendAsync(req, cancellationToken);
+        }
+
         void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
-        }
-
-        struct StateContent
-        {
-            public StateContent(string? key, JToken? value, string? eTag = null)
-            {
-                this.Key = key ?? throw new ArgumentNullException(nameof(key));
-                this.Value = value;
-                this.ETag = eTag;
-            }
-
-            [JsonProperty("key")]
-            public string Key { get; }
-
-            [JsonProperty("value")]
-            public JToken? Value { get; }
-
-            [JsonProperty("etag", NullValueHandling = NullValueHandling.Ignore)]
-            public string? ETag { get; }
         }
     }
 }

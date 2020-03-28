@@ -18,7 +18,7 @@ namespace DaprExtensionTests
 
     sealed class DaprRuntimeEmulator : IDisposable
     {
-        readonly List<SavedHttpRequest> requestBin = new List<SavedHttpRequest>();
+        readonly ConcurrentBag<SavedHttpRequest> requestBin = new ConcurrentBag<SavedHttpRequest>();
         readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> stateStore = 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>>();
 

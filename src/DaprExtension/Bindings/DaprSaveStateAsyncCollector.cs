@@ -13,13 +13,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly ConcurrentBag<DaprStateRecord> requests = new ConcurrentBag<DaprStateRecord>();
 
-        readonly DaprServiceClient daprService;
+        readonly DaprServiceClient daprClient;
         readonly DaprStateAttribute attr;
 
-        public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprServiceClient daprService)
+        public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprServiceClient daprClient)
         {
             this.attr = attr;
-            this.daprService = daprService;
+            this.daprClient = daprClient;
         }
 
         public Task AddAsync(DaprStateRecord item, CancellationToken cancellationToken = default)
@@ -36,7 +36,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         public Task FlushAsync(CancellationToken cancellationToken = default)
         {
-            return this.daprService.SaveStateAsync(
+            return this.daprClient.SaveStateAsync(
                 this.attr.DaprAddress,
                 this.attr.StateStore,
                 this.requests.Take(this.requests.Count),
