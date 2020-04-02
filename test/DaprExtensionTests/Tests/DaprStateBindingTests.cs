@@ -16,8 +16,6 @@ namespace DaprExtensionTests
     using Xunit.Abstractions;
 
     // TODO: Need to test variations of JObject where stateStore and key are defined in the binding attribute
-    // TODO: Need to verify that multiple state values can be saved in a single Dapr HTTP request
-    // TODO: Need to test fetching state
     public class DaprStateBindingTests : DaprTestBase
     {
         public DaprStateBindingTests(ITestOutputHelper output)
@@ -113,8 +111,11 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.SaveState_BindToKeyName), "key", keyName);
             await this.CallFunctionAsync(nameof(Functions.GetState_BindToKeyName), "key", keyName);
 
-            SavedHttpRequest req = this.GetLastGetStateRequest();
-            Assert.EndsWith(keyName, req.Path);
+            SavedHttpRequest[] requests = this.GetDaprRequests();
+            Assert.Equal(2, requests.Length);
+            Assert.Single(requests, r => r.Method == "GET");
+            Assert.Single(requests, r => r.Method == "POST");
+            Assert.All(requests, r => r.Path.Value.EndsWith(keyName));
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.GetState_BindToKeyName));
             Assert.Contains("42", functionLogs);
@@ -139,16 +140,6 @@ namespace DaprExtensionTests
             SavedHttpRequest req = Assert.Single(requests);
             Assert.StartsWith("application/json", req.ContentType);
             Assert.Equal("POST", req.Method);
-            return req;
-        }
-
-        SavedHttpRequest GetLastGetStateRequest()
-        {
-            SavedHttpRequest[] requests = this.GetDaprRequests();
-            Assert.NotEmpty(requests);
-
-            SavedHttpRequest req = requests.Last();
-            Assert.Equal("GET", req.Method);
             return req;
         }
 

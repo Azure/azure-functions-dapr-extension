@@ -11,6 +11,7 @@ namespace DaprExtensionTests
         {
             this.Method = request.Method;
             this.Path = request.Path;
+            this.Query = request.QueryString;
             this.ContentType = request.ContentType;
             this.ContentAsString = content;
         }
@@ -18,6 +19,8 @@ namespace DaprExtensionTests
         public string Method { get; }
 
         public PathString Path { get; }
+
+        public QueryString Query { get; }
 
         public string ContentType { get; }
 

@@ -21,11 +21,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         IAsyncConverter<DaprStateAttribute, JObject>,
         IAsyncConverter<DaprStateAttribute, object?>
     {
-        readonly DaprServiceClient daprService;
+        readonly DaprServiceClient daprClient;
 
-        public DaprStateConverter(DaprServiceClient daprService)
+        public DaprStateConverter(DaprServiceClient daprClient)
         {
-            this.daprService = daprService;
+            this.daprClient = daprClient;
         }
 
         public async Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
@@ -124,7 +124,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         async Task<DaprStateRecord> GetStateRecordAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
-            DaprStateRecord stateRecord = await this.daprService.GetStateAsync(
+            DaprStateRecord stateRecord = await this.daprClient.GetStateAsync(
                 input.DaprAddress,
                 input.StateStore ?? throw new ArgumentException("No state store name was specified.", nameof(input.StateStore)),
                 input.Key ?? throw new ArgumentException("No state store key was specified.", nameof(input.Key)),

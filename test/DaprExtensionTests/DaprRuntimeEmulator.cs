@@ -18,7 +18,7 @@ namespace DaprExtensionTests
 
     sealed class DaprRuntimeEmulator : IDisposable
     {
-        readonly ConcurrentBag<SavedHttpRequest> requestBin = new ConcurrentBag<SavedHttpRequest>();
+        readonly ConcurrentQueue<SavedHttpRequest> requestBin = new ConcurrentQueue<SavedHttpRequest>();
         readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> stateStore = 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>>();
 
@@ -53,6 +53,10 @@ namespace DaprExtensionTests
                     // PubSub APIs
                     // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md
                     routes.MapPost("v1.0/publish/{topic}", this.OnPublish);
+
+                    // Secrets API
+                    // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md
+                    routes.MapGet("v1.0/secrets/{storeName}/{name}", this.OnGetSecret);
 
                     app.UseRouter(routes.Build());
                 })
@@ -129,6 +133,14 @@ namespace DaprExtensionTests
             await Task.CompletedTask; // TODO
         }
 
+        async Task OnGetSecret(HttpContext context)
+        {
+            // This is just one example. The actual set of key/value pairs may differ
+            // depending on the secret store provider.
+            string secretName = (string)context.GetRouteValue("name");
+            await context.Response.WriteAsync(@$"{{""{secretName}"":""secret!""}}");
+        }
+
         async Task SaveRequestAsync(HttpRequest request)
         {
             request.EnableBuffering();
@@ -137,7 +149,8 @@ namespace DaprExtensionTests
 
             // Add a copy of the request because the original object will be
             // uninitialized by the time someone tries to get it.
-            this.requestBin.Add(new SavedHttpRequest(request, content));
+            this.requestBin.Enqueue(new SavedHttpRequest(request, content));
+
             request.Body.Position = 0;
         }
 

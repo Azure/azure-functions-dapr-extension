@@ -26,7 +26,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// Gets the name of the topic.
         /// </summary>
         /// <remarks>
-        /// If the topic name is not specified, it is inferred from the 
+        /// If the topic name is not specified, it is inferred from the
         /// <see cref="DaprPublishAttribute"/> binding attribute.
         /// </remarks>
         [JsonProperty("topic")]

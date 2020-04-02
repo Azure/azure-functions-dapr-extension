@@ -50,6 +50,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             var daprStateConverter = new DaprStateConverter(this.daprClient);
 
+            // NOTE: The order of conversions for each binding rules is important!
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
             stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
@@ -71,6 +72,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             publishRule.AddConverter<JObject, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<object, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.BindToCollector(attr => new DaprPublishAsyncCollector(attr, this.daprClient));
+
+            var daprSecretConverter = new DaprSecretConverter(this.daprClient);
+            var secretsRule = context.AddBindingRule<DaprSecretAttribute>();
+            secretsRule.BindToInput<JObject>(daprSecretConverter);
+            secretsRule.BindToInput<string?>(daprSecretConverter);
+            secretsRule.BindToInput<byte[]>(daprSecretConverter);
 
             context.AddBindingRule<DaprMethodTriggerAttribute>()
                 .BindToTrigger(new DaprMethodTriggerBindingProvider(this.daprListener));

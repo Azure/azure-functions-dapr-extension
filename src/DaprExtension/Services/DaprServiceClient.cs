@@ -112,6 +112,42 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return this.httpClient.SendAsync(req, cancellationToken);
         }
 
+        internal async Task<JObject> GetSecretAsync(
+            string? daprAddress,
+            string secretStoreName,
+            string? key,
+            string? metadata,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(secretStoreName))
+            {
+                throw new ArgumentNullException(nameof(secretStoreName));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            this.EnsureDaprAddress(ref daprAddress);
+
+            string metadataQuery = string.Empty;
+            if (!string.IsNullOrEmpty(metadata))
+            {
+                metadataQuery = "?" + metadata;
+            }
+
+            HttpResponseMessage response = await this.httpClient.GetAsync(
+                $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
+                cancellationToken);
+
+            // TODO: Error handling (404 Not Found, etc.)
+            string secretPayload = await response.Content.ReadAsStringAsync();
+
+            // The response is always expected to be a JSON object
+            return JObject.Parse(secretPayload);
+        }
+
         void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
