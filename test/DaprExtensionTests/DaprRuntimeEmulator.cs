@@ -58,6 +58,10 @@ namespace DaprExtensionTests
                     // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md
                     routes.MapGet("v1.0/secrets/{storeName}/{name}", this.OnGetSecret);
 
+                    // Actor State API
+                    // https://github.com/dapr/docs/blob/master/reference/api/actors_api.md
+                    routes.MapGet("v1.0/actors/{actorType}/{actorId}/state/{key}", this.OnGetActorState);
+
                     app.UseRouter(routes.Build());
                 })
                 .Build();
@@ -139,6 +143,14 @@ namespace DaprExtensionTests
             // depending on the secret store provider.
             string secretName = (string)context.GetRouteValue("name");
             await context.Response.WriteAsync(@$"{{""{secretName}"":""secret!""}}");
+        }
+
+        async Task OnGetActorState(HttpContext context)
+        {
+            // This is just one example. The actual set of key/value pairs may differ
+            // depending on the secret store provider.
+            string state = (string)context.GetRouteValue("name");
+            await context.Response.WriteAsync(@$"{{ ""PropertyA"": ""ValueA"", ""PropertyB"": ""ValueB"" }}");
         }
 
         async Task SaveRequestAsync(HttpRequest request)

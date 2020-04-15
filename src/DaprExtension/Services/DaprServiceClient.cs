@@ -148,6 +148,41 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return JObject.Parse(secretPayload);
         }
 
+        internal async Task<JObject> GetActorStateAsync(
+            string? daprAddress,
+            string actorType,
+            string actorId,
+            string? key,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(actorType))
+            {
+                throw new ArgumentNullException(nameof(actorType));
+            }
+
+            if (string.IsNullOrEmpty(actorId))
+            {
+                throw new ArgumentNullException(nameof(actorId));
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            this.EnsureDaprAddress(ref daprAddress);
+
+            HttpResponseMessage response = await this.httpClient.GetAsync(
+                $"{daprAddress}/v1.0/actors/{actorType}/{actorId}/state/{key}",
+                cancellationToken);
+
+            // TODO: Error handling (404 Not Found, etc.)
+            string actorStatePayload = await response.Content.ReadAsStringAsync();
+
+            // The response is always expected to be a JSON object
+            return JObject.Parse(actorStatePayload);
+        }
+
         void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
