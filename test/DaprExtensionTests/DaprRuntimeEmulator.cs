@@ -22,6 +22,10 @@ namespace DaprExtensionTests
         readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> stateStore = 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>>();
 
+        // {actorType}-{actorId} => (key, value)
+        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> actorStateStore =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>>();
+
         readonly IWebHost host;
 
         public DaprRuntimeEmulator(int daprPort)
@@ -61,6 +65,9 @@ namespace DaprExtensionTests
                     // Actor State API
                     // https://github.com/dapr/docs/blob/master/reference/api/actors_api.md
                     routes.MapGet("v1.0/actors/{actorType}/{actorId}/state/{key}", this.OnGetActorState);
+
+                    // https://github.com/dapr/docs/blob/master/reference/api/actors_api.md
+                    routes.MapPost("v1.0/actors/{actorType}/{actorId}/state/{key}", this.OnSaveActorState);
 
                     app.UseRouter(routes.Build());
                 })
@@ -147,10 +154,42 @@ namespace DaprExtensionTests
 
         async Task OnGetActorState(HttpContext context)
         {
-            // This is just one example. The actual set of key/value pairs may differ
-            // depending on the secret store provider.
-            string state = (string)context.GetRouteValue("name");
-            await context.Response.WriteAsync(@$"{{ ""PropertyA"": ""ValueA"", ""PropertyB"": ""ValueB"" }}");
+            using var writer = new StreamWriter(context.Response.Body);
+            await writer.WriteAsync(DaprActorStateBindingTests.testStoredState.ToString(Formatting.None));
+        }
+
+        async Task OnSaveActorState(HttpContext context)
+        {
+            RouteData routeData = context.GetRouteData();
+            string actorType = (string)routeData.Values["actorType"];
+            string actorId = (string)routeData.Values["aactorId"];
+            string actorPath = $"{actorType}-{actorId}";
+
+            ConcurrentDictionary<string, JToken?> actorStateStore = this.actorStateStore.GetOrAdd(
+                actorPath,
+                _ => new ConcurrentDictionary<string, JToken?>(StringComparer.OrdinalIgnoreCase));
+
+            using var reader = new StreamReader(context.Request.Body);
+            string jsonPayload = await reader.ReadToEndAsync();
+
+            foreach (JToken entry in JToken.Parse(jsonPayload))
+            {
+                if (entry.Type == JTokenType.Property)
+                {
+                    JProperty keyValuePair = (JProperty)entry;
+                    string key = keyValuePair.Name;
+                    JToken? value = keyValuePair.Value;
+
+                    if (value == null)
+                    {
+                        actorStateStore.TryRemove(key, out JToken? _);
+                    }
+                    else
+                    {
+                        actorStateStore[key] = value;
+                    }
+                }
+            }
         }
 
         async Task SaveRequestAsync(HttpRequest request)

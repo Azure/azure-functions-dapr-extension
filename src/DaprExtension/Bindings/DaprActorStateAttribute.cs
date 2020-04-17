@@ -9,7 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     /// <summary>
     /// Parameter attribute for the Dapr actor state input binding.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
     [Binding]
     public sealed class DaprActorStateAttribute : DaprBaseAttribute
     {
@@ -18,12 +18,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// </summary>
         /// <param name="actorType">The actor type to get the state from.</param>
         /// <param name="actorId">The actor id to get the state from.</param>
-        /// <param name="key">The key for the state value</param>
-        public DaprActorStateAttribute(string actorType, string actorId, string key)
+        public DaprActorStateAttribute(string actorType, string actorId)
         {
             this.ActorType = actorType ?? throw new ArgumentNullException(nameof(actorType));
             this.ActorId = actorId ?? throw new ArgumentNullException(nameof(actorId));
-            this.Key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         /// <summary>
@@ -42,6 +40,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// Gets or sets the key for the state of an Dapr actor.
         /// </summary>
         [AutoResolve]
-        public string Key { get; set; }
+        public string? Key { get; set; }
     }
 }

@@ -199,7 +199,8 @@ namespace DaprExtensionTests
             }
         }
 
-        class UserDefinedType
+        // also used in DaprActorStateBindingTests
+        public class UserDefinedType
         {
             public string? P1 { get; set; }
             public int P2 { get; set; }

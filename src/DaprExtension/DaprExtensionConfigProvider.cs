@@ -81,8 +81,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             var daprActorStateConverter = new DaprActorStateConverter(this.daprClient);
             var actorStateRule = context.AddBindingRule<DaprActorStateAttribute>();
-            actorStateRule.BindToInput<JObject>(daprActorStateConverter);
+            actorStateRule.AddConverter<JObject, DaprActorStateRecord>(CreateSaveActorStateParameters);
+            actorStateRule.AddConverter<object, DaprActorStateRecord>(CreateSaveActorStateParameters);
+            actorStateRule.BindToCollector(attr => new DaprSaveActorStateAsyncCollector(attr, this.daprClient));
             actorStateRule.BindToInput<string>(daprActorStateConverter);
+            actorStateRule.BindToInput<JToken>(daprActorStateConverter);
+            actorStateRule.BindToInput<JObject>(daprActorStateConverter);
+            actorStateRule.BindToInput<Stream>(daprActorStateConverter);
+            actorStateRule.BindToInput<byte[]>(daprActorStateConverter);
 
             context.AddBindingRule<DaprMethodTriggerAttribute>()
                 .BindToTrigger(new DaprMethodTriggerBindingProvider(this.daprListener));
@@ -127,6 +133,33 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         internal static DaprStateRecord CreateSaveStateParameters(object parametersValue)
         {
             return new DaprStateRecord(JToken.FromObject(parametersValue));
+        }
+
+        internal static DaprActorStateRecord CreateSaveActorStateParameters(JObject parametersJson)
+        {
+            if (!TryGetValue(parametersJson, "value", out JToken? value))
+            {
+                throw new ArgumentException("A 'value' parameter is required for save actor state operations.", nameof(parametersJson));
+            }
+
+            var parameter = new DaprActorStateRecord(value);
+
+            if (TryGetValue(parametersJson, "key", out string? key))
+            {
+                parameter.Key = key;
+            }
+
+            return parameter;
+        }
+
+        internal static DaprActorStateRecord CreateSaveActorStateParameters(object parametersValue)
+        {
+            return new DaprActorStateRecord(JToken.FromObject(parametersValue));
+        }
+
+        internal static DaprActorStateRecord CreateSaveActorStateParameters(JToken parametersValue)
+        {
+            return new DaprActorStateRecord(parametersValue);
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject parametersJson)

@@ -6,6 +6,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -148,11 +149,30 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return JObject.Parse(secretPayload);
         }
 
-        internal async Task<JObject> GetActorStateAsync(
+        internal async Task<DaprActorStateRecord> GetActorStateAsync(
             string? daprAddress,
             string actorType,
             string actorId,
+            string key,
+            CancellationToken cancellationToken)
+        {
+            this.EnsureDaprAddress(ref daprAddress);
+
+            HttpResponseMessage response = await this.httpClient.GetAsync(
+                $"{daprAddress}/v1.0/actors/{actorType}/{actorId}/state/{key}",
+                cancellationToken);
+
+            // TODO: Error handling (404 Not Found for actor not found etc.)
+            Stream contentStream = await response.Content.ReadAsStreamAsync();
+            return new DaprActorStateRecord(key, contentStream);
+        }
+
+        internal async Task SaveActorStateAsync(
+            string? daprAddress,
+            string? actorType,
+            string? actorId,
             string? key,
+            DaprActorStateRecord record,
             CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(actorType))
@@ -172,15 +192,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             this.EnsureDaprAddress(ref daprAddress);
 
-            HttpResponseMessage response = await this.httpClient.GetAsync(
+            // TODO: Error handling
+            await this.httpClient.PostAsJsonAsync(
                 $"{daprAddress}/v1.0/actors/{actorType}/{actorId}/state/{key}",
+                record.Value,
                 cancellationToken);
-
-            // TODO: Error handling (404 Not Found, etc.)
-            string actorStatePayload = await response.Content.ReadAsStringAsync();
-
-            // The response is always expected to be a JSON object
-            return JObject.Parse(actorStatePayload);
         }
 
         void EnsureDaprAddress(ref string? daprAddress)
