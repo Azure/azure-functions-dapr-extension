@@ -6,7 +6,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -192,11 +192,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             this.EnsureDaprAddress(ref daprAddress);
 
-            // TODO: Error handling
-            await this.httpClient.PostAsJsonAsync(
+            HttpResponseMessage response = await this.httpClient.PostAsJsonAsync(
                 $"{daprAddress}/v1.0/actors/{actorType}/{actorId}/state/{key}",
                 record.Value,
                 cancellationToken);
+
+            if (response.StatusCode != HttpStatusCode.Created)
+            {
+                throw new HttpRequestException($"Http code: {response.StatusCode}; Reason phrase: {response.ReasonPhrase}");
+            }
         }
 
         void EnsureDaprAddress(ref string? daprAddress)

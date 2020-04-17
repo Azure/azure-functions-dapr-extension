@@ -172,23 +172,17 @@ namespace DaprExtensionTests
             using var reader = new StreamReader(context.Request.Body);
             string jsonPayload = await reader.ReadToEndAsync();
 
-            foreach (JToken entry in JToken.Parse(jsonPayload))
-            {
-                if (entry.Type == JTokenType.Property)
-                {
-                    JProperty keyValuePair = (JProperty)entry;
-                    string key = keyValuePair.Name;
-                    JToken? value = keyValuePair.Value;
+            string key = (string)context.GetRouteValue("key");
+            JToken? value = JToken.Parse(jsonPayload);
 
-                    if (value == null)
-                    {
-                        actorStateStore.TryRemove(key, out JToken? _);
-                    }
-                    else
-                    {
-                        actorStateStore[key] = value;
-                    }
-                }
+            if (value != null)
+            {
+                actorStateStore[key] = JToken.Parse(jsonPayload);
+                context.Response.StatusCode = 201;
+            }
+            else
+            {
+                context.Response.StatusCode = 500;
             }
         }
 

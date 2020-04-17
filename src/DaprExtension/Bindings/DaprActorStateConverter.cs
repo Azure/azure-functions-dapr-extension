@@ -39,19 +39,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             // Per Yaron, Dapr only supports JSON payloads over HTTP.
             // By default we assume that the payload is a JSON-serialized base64 string of bytes
             JToken json = JToken.Parse(content);
-            byte[] bytes;
 
             try
             {
-                bytes = json.ToObject<byte[]>();
+                return json.ToObject<byte[]>();
             }
             catch (JsonException)
             {
                 // Looks like it's not actually JSON - just return the raw bytes
-                bytes = Encoding.UTF8.GetBytes(json.ToString());
+                return Encoding.UTF8.GetBytes(json.ToString());
             }
-
-            return bytes;
         }
 
         async Task<JObject> IAsyncConverter<DaprActorStateAttribute, JObject>.ConvertAsync(
@@ -69,7 +66,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             string content = await this.GetStringContentAsync(input, cancellationToken);
             if (string.IsNullOrEmpty(content))
             {
-                return null; // TODO: This will cause a null-ref for value types!
+                return null;
             }
             else
             {

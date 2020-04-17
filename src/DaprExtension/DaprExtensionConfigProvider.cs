@@ -157,11 +157,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return new DaprActorStateRecord(JToken.FromObject(parametersValue));
         }
 
-        internal static DaprActorStateRecord CreateSaveActorStateParameters(JToken parametersValue)
-        {
-            return new DaprActorStateRecord(parametersValue);
-        }
-
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject parametersJson)
         {
             var options = new InvokeMethodParameters();

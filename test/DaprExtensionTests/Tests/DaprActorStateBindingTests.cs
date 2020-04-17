@@ -174,23 +174,23 @@ namespace DaprExtensionTests
         static class Functions
         {
             public static void GetActorState_ExplicitSettings(
-                [DaprActorState("myActor", "abc", Key = "key1")] JObject state,
+                [DaprActorState("myActor", "abc", Key = "key1")] JToken state,
                 ILogger log) => log.LogInformation(state.ToString());
 
 
             public static void GetActorState_BindToActorType(
                 string actorType,
-                [DaprActorState("{actorType}", "abc", Key = "key1")] JObject state,
+                [DaprActorState("{actorType}", "abc", Key = "key1")] JToken state,
                 ILogger log) => log.LogInformation(state.ToString());
 
             public static void GetActorState_BindToActorId(
                 string actorId,
-                [DaprActorState("myActor", "{actorId}", Key = "key1")] JObject state,
+                [DaprActorState("myActor", "{actorId}", Key = "key1")] JToken state,
                 ILogger log) => log.LogInformation(state.ToString());
 
             public static void GetActorState_BindToKey(
                 string key,
-                [DaprActorState("myActor", "abc", Key = "{key}")] JObject state,
+                [DaprActorState("myActor", "abc", Key = "{key}")] JToken state,
                 ILogger log) => log.LogInformation(state.ToString());
 
 

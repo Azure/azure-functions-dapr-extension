@@ -15,17 +15,29 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprActorStateRecord"/> class.
         /// </summary>
+        /// <param name="key">The key of the state record.</param>
         /// <param name="value">The value of the state record.</param>
-        public DaprActorStateRecord(JToken? value)
+        public DaprActorStateRecord(string key, JToken? value)
+        {
+            this.Key = key;
+            this.Value = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DaprActorStateRecord"/> class.
+        /// </summary>
+        /// <param name="value">The value of the state record.</param>
+        internal DaprActorStateRecord(JToken? value)
         {
             this.Value = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprActorStateRecord"/> class.
+        /// </summary>
         /// <param name="key">The key of the state record.</param>
         /// <param name="contentStream">The contentStream of the state record.</param>
-        public DaprActorStateRecord(string key, Stream contentStream)
+        internal DaprActorStateRecord(string key, Stream contentStream)
         {
             this.Key = key;
             this.ContentStream = contentStream;
