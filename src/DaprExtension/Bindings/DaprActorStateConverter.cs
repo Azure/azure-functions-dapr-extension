@@ -119,8 +119,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             DaprActorStateRecord stateRecord = await this.GetActorStateAsync(input, cancellationToken);
             using StreamReader reader = new StreamReader(stateRecord.ContentStream);
-            var stringContent = await reader.ReadToEndAsync();
-            return stringContent;
+            return await reader.ReadToEndAsync();
         }
 
         Task<DaprActorStateRecord> GetActorStateAsync(DaprActorStateAttribute input, CancellationToken cancellationToken)
