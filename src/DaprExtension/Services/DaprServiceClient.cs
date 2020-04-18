@@ -16,6 +16,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     class DaprServiceClient
     {
+        public const string DaprErrorCodePropertyName = "errorCode";
+        public const string DaprErrorMessagePropertyName = "message";
+
         readonly HttpClient httpClient;
         readonly string defaultDaprAddress;
 
@@ -43,13 +46,37 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             if (!response.IsSuccessStatusCode)
             {
-                string content = await response.Content.ReadAsStringAsync();
-                JObject errorMessgae = JObject.Parse(content);
+                string errorCode = "UNKNOWN";
+                string errorMessage = "No meaningful error message is returned.";
 
-                throw new DaprException(
-                    response.StatusCode,
-                    errorMessgae.GetValue("errorCode").ToString(),
-                    errorMessgae.GetValue("message").ToString());
+                try
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    JObject daprError = JObject.Parse(content);
+
+                    if (daprError.TryGetValue(DaprErrorMessagePropertyName, out JToken errorMessageToken))
+                    {
+                        errorMessage = errorMessageToken.ToString();
+                    }
+
+                    if (daprError.TryGetValue(DaprErrorCodePropertyName, out JToken errorCodeToken))
+                    {
+                        errorCode = errorCodeToken.ToString();
+                    }
+
+                    throw new DaprException(
+                       response.StatusCode,
+                       errorCode,
+                       errorMessage);
+                }
+                catch
+                {
+                    // Failed to parse the returned error json
+                    throw new DaprException(
+                       response.StatusCode,
+                       errorCode,
+                       errorMessage);
+                }
             }
 
             return;
