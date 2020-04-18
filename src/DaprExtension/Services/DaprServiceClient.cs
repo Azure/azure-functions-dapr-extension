@@ -6,6 +6,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -38,6 +39,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return $"http://localhost:{daprPort}";
         }
 
+        static async Task EnsureSuccessDaprResponse(HttpResponseMessage response)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                string content = await response.Content.ReadAsStringAsync();
+                JObject errorMessgae = JObject.Parse(content);
+
+                throw new DaprException(
+                    response.StatusCode,
+                    errorMessgae.GetValue("errorCode").ToString(),
+                    errorMessgae.GetValue("message").ToString());
+            }
+
+            return;
+        }
+
         internal async Task SaveStateAsync(
             string? daprAddress,
             string? stateStore,
@@ -51,11 +68,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             this.EnsureDaprAddress(ref daprAddress);
 
-            // TODO: Error handling
-            await this.httpClient.PostAsJsonAsync(
+            HttpResponseMessage response = await this.httpClient.PostAsJsonAsync(
                 $"{daprAddress}/v1.0/state/{stateStore}",
                 values,
                 cancellationToken);
+
+            await EnsureSuccessDaprResponse(response);
         }
 
         internal async Task<DaprStateRecord> GetStateAsync(
@@ -66,10 +84,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            // TODO: Error handling
             HttpResponseMessage response = await this.httpClient.GetAsync(
                 $"{daprAddress}/v1.0/state/{stateStore}/{key}",
                 cancellationToken);
+
+            await EnsureSuccessDaprResponse(response);
+
             Stream contentStream = await response.Content.ReadAsStreamAsync();
             string? eTag = response.Headers.ETag?.Tag;
             return new DaprStateRecord(key, contentStream, eTag);
@@ -91,11 +111,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 req.Content = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
             }
 
-            // TODO: Error handling
-            await this.httpClient.SendAsync(req, cancellationToken);
+            HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
+            await EnsureSuccessDaprResponse(response);
         }
 
-        internal Task PublishEventAsync(
+        internal async Task PublishEventAsync(
             string? daprAddress,
             string? topicName,
             JToken? payload,
@@ -109,7 +129,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 req.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");
             }
 
-            return this.httpClient.SendAsync(req, cancellationToken);
+            HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
+
+            await EnsureSuccessDaprResponse(response);
         }
 
         internal async Task<JObject> GetSecretAsync(
@@ -141,7 +163,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
                 cancellationToken);
 
-            // TODO: Error handling (404 Not Found, etc.)
+            await EnsureSuccessDaprResponse(response);
+
             string secretPayload = await response.Content.ReadAsStringAsync();
 
             // The response is always expected to be a JSON object
@@ -151,6 +174,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
+        }
+
+        class DaprException : Exception
+        {
+            public DaprException(HttpStatusCode statusCode, string? errorCode, string message)
+                : base(message)
+            {
+                this.StatusCode = statusCode;
+                this.ErrorCode = errorCode;
+            }
+
+            HttpStatusCode StatusCode { get; }
+
+            string? ErrorCode { get; }
+
+            public override string ToString()
+            {
+                return string.Format("Status Code: {0}; Error Code: {1} ; Message: {2};", this.StatusCode, this.ErrorCode, this.Message);
+            }
         }
     }
 }
