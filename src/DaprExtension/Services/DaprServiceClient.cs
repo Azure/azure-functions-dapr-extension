@@ -231,9 +231,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 this.ErrorCode = errorCode;
             }
 
-            HttpStatusCode StatusCode { get; }
+            HttpStatusCode StatusCode { get; set; }
 
-            string ErrorCode { get; }
+            string ErrorCode { get; set; }
 
             public override string ToString()
             {
@@ -248,7 +248,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 }
 
                 return string.Format(
-                    "Status Code: {0}; Error Code: {1} ; Message: {2};",
+                    "Status Code: {0}; Error Code: {1} ; Message: {2}",
                     this.StatusCode,
                     this.ErrorCode,
                     this.Message);
