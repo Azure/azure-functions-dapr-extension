@@ -58,7 +58,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.SaveState_BindToStoreName), "storeName", storeName);
             SavedHttpRequest req = this.GetSingleSaveStateRequest();
 
-            string expectedKeyName = Uri.EscapeUriString(storeName);
+            string expectedKeyName = Uri.EscapeDataString(storeName);
             Assert.Equal($"/v1.0/state/{expectedKeyName}", req.Path);
             Assert.Equal(@$"[{{""key"":""key1"",""value"":42}}]", req.ContentAsString);
         }
@@ -115,7 +115,7 @@ namespace DaprExtensionTests
             Assert.Equal(2, requests.Length);
             Assert.Single(requests, r => r.Method == "GET");
             Assert.Single(requests, r => r.Method == "POST");
-            Assert.All(requests, r => r.Path.Value.EndsWith(keyName));
+            Assert.All(requests, r => r.Path.EndsWith(keyName));
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.GetState_BindToKeyName));
             Assert.Contains("42", functionLogs);

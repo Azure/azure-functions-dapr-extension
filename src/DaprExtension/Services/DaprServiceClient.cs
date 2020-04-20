@@ -96,7 +96,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             this.EnsureDaprAddress(ref daprAddress);
 
             HttpResponseMessage response = await this.httpClient.PostAsJsonAsync(
-                $"{daprAddress}/v1.0/state/{stateStore}",
+                $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}",
                 values,
                 cancellationToken);
 
