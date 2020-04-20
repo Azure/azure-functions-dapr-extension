@@ -16,9 +16,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     class DaprServiceClient
     {
-        public const string DaprErrorCodePropertyName = "errorCode";
-        public const string DaprErrorMessagePropertyName = "message";
-
         readonly HttpClient httpClient;
         readonly string defaultDaprAddress;
 
@@ -42,41 +39,53 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return $"http://localhost:{daprPort}";
         }
 
-        static async Task EnsureSuccessDaprResponse(HttpResponseMessage response)
+        static async Task ThrowIfDaprFailure(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {
-                string errorCode = "UNKNOWN";
-                string errorMessage = "No meaningful error message is returned.";
+                string errorCode = string.Empty;
+                string errorMessage = string.Empty;
 
-                try
+                if (response.Content != null)
                 {
-                    string content = await response.Content.ReadAsStringAsync();
-                    JObject daprError = JObject.Parse(content);
+                    // parse the error message returned from the Dapr
+                    JObject daprError;
 
-                    if (daprError.TryGetValue(DaprErrorMessagePropertyName, out JToken errorMessageToken))
+                    try
+                    {
+                        string content = await response.Content.ReadAsStringAsync();
+                        daprError = JObject.Parse(content);
+                    }
+                    catch
+                    {
+                        // Failed to parse the returned error json
+                        throw new InvalidOperationException("The returned error message from Dapr Service is not a valid JSON Object.");
+                    }
+
+                    if (daprError.TryGetValue("message", out JToken errorMessageToken))
                     {
                         errorMessage = errorMessageToken.ToString();
                     }
 
-                    if (daprError.TryGetValue(DaprErrorCodePropertyName, out JToken errorCodeToken))
+                    if (daprError.TryGetValue("errorCode", out JToken errorCodeToken))
                     {
                         errorCode = errorCodeToken.ToString();
                     }
+                }
 
-                    throw new DaprException(
-                       response.StatusCode,
-                       errorCode,
-                       errorMessage);
-                }
-                catch
+                // avoid potential overrides: specific 404 error messages can be returned from Dapr
+                if (response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    // Failed to parse the returned error json
                     throw new DaprException(
-                       response.StatusCode,
-                       errorCode,
-                       errorMessage);
+                    response.StatusCode,
+                    string.IsNullOrEmpty(errorCode) ? "ERR_DOES_NOT_EXIST" : errorCode,
+                    string.IsNullOrEmpty(errorMessage) ? "The requested Dapr resource is not properly configured." : errorMessage);
                 }
+
+                throw new DaprException(
+                    response.StatusCode,
+                    string.IsNullOrEmpty(errorCode) ? "ERR_UNKNOWN" : errorCode,
+                    string.IsNullOrEmpty(errorMessage) ? "No meaningful error message is returned." : errorMessage);
             }
 
             return;
@@ -100,7 +109,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 values,
                 cancellationToken);
 
-            await EnsureSuccessDaprResponse(response);
+            await ThrowIfDaprFailure(response);
         }
 
         internal async Task<DaprStateRecord> GetStateAsync(
@@ -115,7 +124,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 $"{daprAddress}/v1.0/state/{stateStore}/{key}",
                 cancellationToken);
 
-            await EnsureSuccessDaprResponse(response);
+            await ThrowIfDaprFailure(response);
 
             Stream contentStream = await response.Content.ReadAsStreamAsync();
             string? eTag = response.Headers.ETag?.Tag;
@@ -139,7 +148,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
-            await EnsureSuccessDaprResponse(response);
+            await ThrowIfDaprFailure(response);
         }
 
         internal async Task PublishEventAsync(
@@ -158,7 +167,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
 
-            await EnsureSuccessDaprResponse(response);
+            await ThrowIfDaprFailure(response);
         }
 
         internal async Task<JObject> GetSecretAsync(
@@ -190,7 +199,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
                 cancellationToken);
 
-            await EnsureSuccessDaprResponse(response);
+            await ThrowIfDaprFailure(response);
 
             string secretPayload = await response.Content.ReadAsStringAsync();
 
@@ -205,7 +214,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         class DaprException : Exception
         {
-            public DaprException(HttpStatusCode statusCode, string? errorCode, string message)
+            public DaprException(HttpStatusCode statusCode, string errorCode, string message)
                 : base(message)
             {
                 this.StatusCode = statusCode;
@@ -214,7 +223,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             HttpStatusCode StatusCode { get; }
 
-            string? ErrorCode { get; }
+            string ErrorCode { get; }
 
             public override string ToString()
             {
