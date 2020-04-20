@@ -48,7 +48,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
                 if (response.Content != null)
                 {
-                    // parse the error message returned from the Dapr
                     JObject daprError;
 
                     try
@@ -58,7 +57,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     }
                     catch
                     {
-                        // Failed to parse the returned error json
                         throw new InvalidOperationException("The returned error message from Dapr Service is not a valid JSON Object.");
                     }
 
@@ -74,6 +72,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 }
 
                 // avoid potential overrides: specific 404 error messages can be returned from Dapr
+                // ex: https://github.com/dapr/docs/blob/master/reference/api/actors_api.md#get-actor-state
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     throw new DaprException(
