@@ -47,6 +47,8 @@ namespace DaprExtensionTests
 
             Assert.Equal("/v1.0/state/store1", req.Path);
             Assert.Equal(@$"[{{""key"":""{keyName}"",""value"":42}}]", req.ContentAsString);
+
+            this.ValidatePersistedState(42, "store1", keyName);
         }
 
         [Theory]
@@ -58,9 +60,10 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.SaveState_BindToStoreName), "storeName", storeName);
             SavedHttpRequest req = this.GetSingleSaveStateRequest();
 
-            string expectedKeyName = Uri.EscapeDataString(storeName);
-            Assert.Equal($"/v1.0/state/{expectedKeyName}", req.Path);
+            Assert.Equal($"/v1.0/state/{Uri.EscapeDataString(storeName)}", req.Path);
             Assert.Equal(@$"[{{""key"":""key1"",""value"":42}}]", req.ContentAsString);
+
+            this.ValidatePersistedState(42, storeName, "key1");
         }
 
         [Fact]
@@ -76,6 +79,8 @@ namespace DaprExtensionTests
 
             Assert.Equal($"/v1.0/state/{parameters.stateStore}", req.Path);
             Assert.Equal(@$"[{{""key"":""{parameters.key}"",""value"":""{parameters.value}""}}]", req.ContentAsString);
+
+            this.ValidatePersistedState(parameters.value, parameters.stateStore, parameters.key);
         }
 
         [Fact]
@@ -102,6 +107,11 @@ namespace DaprExtensionTests
             Array.Sort(actual, comparer);
 
             Assert.Equal(expected, actual);
+
+            foreach (var kvp in inputs)
+            {
+                this.ValidatePersistedState(kvp.Value, "store1", kvp.Key);
+            }
         }
 
         [Fact]
@@ -141,6 +151,13 @@ namespace DaprExtensionTests
             Assert.StartsWith("application/json", req.ContentType);
             Assert.Equal("POST", req.Method);
             return req;
+        }
+
+        void ValidatePersistedState(object expectedState, string targetStateStore, string targetKey)
+        {
+            JToken? actualState = this.FetchSavedStateForUnitTesting(targetStateStore, targetKey);
+            Assert.NotNull(actualState);
+            Assert.Equal(JToken.FromObject(expectedState), actualState);
         }
 
         static class Functions
