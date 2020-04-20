@@ -80,9 +80,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     throw new DaprException(
-                    response.StatusCode,
-                    string.IsNullOrEmpty(errorCode) ? "ERR_DOES_NOT_EXIST" : errorCode,
-                    string.IsNullOrEmpty(errorMessage) ? "The requested Dapr resource is not properly configured." : errorMessage);
+                        response.StatusCode,
+                        string.IsNullOrEmpty(errorCode) ? "ERR_DOES_NOT_EXIST" : errorCode,
+                        string.IsNullOrEmpty(errorMessage) ? "The requested Dapr resource is not properly configured." : errorMessage);
                 }
 
                 throw new DaprException(
