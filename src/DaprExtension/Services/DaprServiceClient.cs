@@ -55,9 +55,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                         string content = await response.Content.ReadAsStringAsync();
                         daprError = JObject.Parse(content);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        throw new InvalidOperationException("The returned error message from Dapr Service is not a valid JSON Object.");
+                        throw new DaprException(
+                            response.StatusCode,
+                            "ERR_UNKNOWN",
+                            "The returned error message from Dapr Service is not a valid JSON Object.",
+                            e);
                     }
 
                     if (daprError.TryGetValue("message", out JToken errorMessageToken))
@@ -220,13 +224,34 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 this.ErrorCode = errorCode;
             }
 
+            public DaprException(HttpStatusCode statusCode, string errorCode, string message, Exception innerException)
+                : base(message, innerException)
+            {
+                this.StatusCode = statusCode;
+                this.ErrorCode = errorCode;
+            }
+
             HttpStatusCode StatusCode { get; }
 
             string ErrorCode { get; }
 
             public override string ToString()
             {
-                return string.Format("Status Code: {0}; Error Code: {1} ; Message: {2};", this.StatusCode, this.ErrorCode, this.Message);
+                if (this.InnerException != null)
+                {
+                    return string.Format(
+                        "Status Code: {0}; Error Code: {1} ; Message: {2}; Inner Exception: {3}",
+                        this.StatusCode,
+                        this.ErrorCode,
+                        this.Message,
+                        this.InnerException);
+                }
+
+                return string.Format(
+                    "Status Code: {0}; Error Code: {1} ; Message: {2};",
+                    this.StatusCode,
+                    this.ErrorCode,
+                    this.Message);
             }
         }
     }
