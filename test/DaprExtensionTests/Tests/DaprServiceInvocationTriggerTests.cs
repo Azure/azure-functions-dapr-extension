@@ -16,9 +16,9 @@ namespace DaprExtensionTests
     using Xunit;
     using Xunit.Abstractions;
 
-    public class DaprMethodTriggerTests : DaprTestBase
+    public class DaprServiceInvocationTriggerTests : DaprTestBase
     {
-        public DaprMethodTriggerTests(ITestOutputHelper output)
+        public DaprServiceInvocationTriggerTests(ITestOutputHelper output)
             : base(output)
         {
             this.AddFunctions(typeof(Functions));
@@ -87,30 +87,30 @@ namespace DaprExtensionTests
 
         static class Functions
         {
-            public static int ReturnInt([DaprMethodTrigger] int input) => input;
+            public static int ReturnInt([DaprServiceInvocationTrigger] int input) => input;
 
-            public static double ReturnDouble([DaprMethodTrigger] double input) => input;
+            public static double ReturnDouble([DaprServiceInvocationTrigger] double input) => input;
 
-            public static bool ReturnBoolean([DaprMethodTrigger] bool input) => input;
+            public static bool ReturnBoolean([DaprServiceInvocationTrigger] bool input) => input;
 
-            public static string ReturnString([DaprMethodTrigger] string input) => input;
+            public static string ReturnString([DaprServiceInvocationTrigger] string input) => input;
 
-            public static DateTime ReturnDateTime([DaprMethodTrigger] DateTime input) => input;
+            public static DateTime ReturnDateTime([DaprServiceInvocationTrigger] DateTime input) => input;
 
-            public static Stream ReturnStream([DaprMethodTrigger] Stream input) => input;
+            public static Stream ReturnStream([DaprServiceInvocationTrigger] Stream input) => input;
 
-            public static byte[] ReturnBytes([DaprMethodTrigger] byte[] input) => input;
+            public static byte[] ReturnBytes([DaprServiceInvocationTrigger] byte[] input) => input;
 
-            public static JObject ReturnJObject([DaprMethodTrigger] JObject input) => input;
+            public static JObject ReturnJObject([DaprServiceInvocationTrigger] JObject input) => input;
 
-            public static CustomType ReturnCustomType([DaprMethodTrigger] CustomType input) => input;
+            public static CustomType ReturnCustomType([DaprServiceInvocationTrigger] CustomType input) => input;
 
-            public static object ReturnUnknownType([DaprMethodTrigger] object input) => input;
+            public static object ReturnUnknownType([DaprServiceInvocationTrigger] object input) => input;
 
-            public static object DotNetMethodName([DaprMethodTrigger(MethodName = "DaprMethodName")] string input) => input;
+            public static object DotNetMethodName([DaprServiceInvocationTrigger(MethodName = "DaprMethodName")] string input) => input;
 
             [FunctionName("Add")]
-            public static string Sample([DaprMethodTrigger] JObject args, ILogger log)
+            public static string Sample([DaprServiceInvocationTrigger] JObject args, ILogger log)
             {
                 log.LogInformation("C# processed a method request from the Dapr runtime");
 
@@ -121,7 +121,7 @@ namespace DaprExtensionTests
             // TODO: Write tests for these
             [FunctionName(nameof(GetState1))]
             public static string GetState1(
-                [DaprMethodTrigger] string stateKey,
+                [DaprServiceInvocationTrigger] string stateKey,
                 [DaprState("store1", Key = "{stateKey}")] string existingState)
             {
                 return existingState;
@@ -129,7 +129,7 @@ namespace DaprExtensionTests
 
             [FunctionName(nameof(GetState2))]
             public static string GetState2(
-                [DaprMethodTrigger] JObject input,
+                [DaprServiceInvocationTrigger] JObject input,
                 [DaprState("store1", Key = "{input.stateKey}")] string existingState)
             {
                 // TODO: Not sure yet if this binding expression will work - needs testing.

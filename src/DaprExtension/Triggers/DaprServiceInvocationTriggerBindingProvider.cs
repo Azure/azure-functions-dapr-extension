@@ -11,11 +11,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
 
-    class DaprMethodTriggerBindingProvider : ITriggerBindingProvider
+    class DaprServiceInvocationTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;
 
-        public DaprMethodTriggerBindingProvider(DaprServiceListener serviceListener)
+        public DaprServiceInvocationTriggerBindingProvider(DaprServiceListener serviceListener)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
         }
@@ -23,7 +23,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
         {
             ParameterInfo parameter = context.Parameter;
-            var attribute = parameter.GetCustomAttribute<DaprMethodTriggerAttribute>(inherit: false);
+            var attribute = parameter.GetCustomAttribute<DaprServiceInvocationTriggerAttribute>(inherit: false);
             if (attribute == null)
             {
                 return Utils.NullTriggerBindingTask;
@@ -37,15 +37,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprMethodTriggerBinding(this.serviceListener, methodName, parameter));
+                new DaprServiceInvocationTriggerBinding(this.serviceListener, methodName, parameter));
         }
 
-        class DaprMethodTriggerBinding : DaprTriggerBindingBase
+        class DaprServiceInvocationTriggerBinding : DaprTriggerBindingBase
         {
             readonly DaprServiceListener serviceListener;
             readonly string methodName;
 
-            public DaprMethodTriggerBinding(
+            public DaprServiceInvocationTriggerBinding(
                 DaprServiceListener serviceListener,
                 string methodName,
                 ParameterInfo parameter)
@@ -57,15 +57,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprMethodListener(this.serviceListener, executor, this.methodName);
+                return new DaprServiceInvocationListener(this.serviceListener, executor, this.methodName);
             }
 
-            sealed class DaprMethodListener : DaprListenerBase
+            sealed class DaprServiceInvocationListener : DaprListenerBase
             {
                 readonly ITriggeredFunctionExecutor executor;
                 readonly string methodName;
 
-                public DaprMethodListener(
+                public DaprServiceInvocationListener(
                     DaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
                     string methodName)

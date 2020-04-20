@@ -79,8 +79,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<byte[]>(daprSecretConverter);
 
-            context.AddBindingRule<DaprMethodTriggerAttribute>()
-                .BindToTrigger(new DaprMethodTriggerBindingProvider(this.daprListener));
+            context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
+                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener));
 
             context.AddBindingRule<DaprTopicTriggerAttribute>()
                 .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
