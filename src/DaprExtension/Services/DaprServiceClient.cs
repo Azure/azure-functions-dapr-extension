@@ -95,6 +95,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             await this.httpClient.SendAsync(req, cancellationToken);
         }
 
+        internal async Task SendToDaprBindingAsync(
+            string? daprAddress,
+            DaprBindingMessage message,
+            CancellationToken cancellationToken)
+        {
+            this.EnsureDaprAddress(ref daprAddress);
+
+            await this.httpClient.PostAsJsonAsync(
+                $"{daprAddress}/v1.0/bindings/{message.BindingName}",
+                message,
+                cancellationToken);
+        }
+
         internal Task PublishEventAsync(
             string? daprAddress,
             string? topicName,
