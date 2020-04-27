@@ -4,7 +4,6 @@
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using Microsoft.Azure.WebJobs.Description;
@@ -125,7 +124,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(json));
             }
 
-            DaprBindingMessage message = new DaprBindingMessage(data);
+            DaprBindingMessage message = new DaprBindingMessage(data!);
 
             if (TryGetValue(json, "metadata", out JObject? metadata))
             {

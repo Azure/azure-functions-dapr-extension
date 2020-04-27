@@ -19,7 +19,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <param name="data">The data of the message sent to the Dapr binding.</param>
         /// <param name="metadata">The bag of key value pairs for binding-specific metadata.</param>
         /// <param name="binding">The name of binding.</param>
-        public DaprBindingMessage(object? data, Dictionary<string, object>? metadata = null, string? binding = null)
+        public DaprBindingMessage(object data, Dictionary<string, object>? metadata = null, string? binding = null)
         {
             this.Data = JToken.FromObject(data ?? throw new ArgumentNullException(nameof(data)));
             this.Metadata = metadata;

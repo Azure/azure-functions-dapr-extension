@@ -172,7 +172,7 @@ namespace DaprExtensionTests
             [NoAutomaticTrigger]
             public static Task JObjectAsyncCollector(
                 JObject input,
-                [DaprBinding()] IAsyncCollector<JObject> events) => events.AddAsync(input);
+                [DaprBinding] IAsyncCollector<JObject> events) => events.AddAsync(input);
 
             [NoAutomaticTrigger]
             public static void ObjectOutputParameter(
