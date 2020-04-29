@@ -5,7 +5,6 @@ namespace DaprExtensionTests
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
@@ -15,6 +14,7 @@ namespace DaprExtensionTests
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Xunit.Sdk;
 
     sealed class DaprRuntimeEmulator : IDisposable
     {
@@ -72,7 +72,7 @@ namespace DaprExtensionTests
         async Task OnSaveState(HttpContext context)
         {
             RouteData routeData = context.GetRouteData();
-            string storeName = (string)routeData.Values["storeName"];
+            string storeName = Uri.UnescapeDataString((string)routeData.Values["storeName"]);
 
             ConcurrentDictionary<string, JToken?> namedStore = this.stateStore.GetOrAdd(
                 storeName,
@@ -100,7 +100,7 @@ namespace DaprExtensionTests
         async Task OnGetState(HttpContext context)
         {
             RouteData routeData = context.GetRouteData();
-            string storeName = (string)routeData.Values["storeName"];
+            string storeName = Uri.UnescapeDataString((string)routeData.Values["storeName"]);
             string key = (string)routeData.Values["key"];
 
             ConcurrentDictionary<string, JToken?>? namedStore;
@@ -121,6 +121,22 @@ namespace DaprExtensionTests
 
             using var writer = new StreamWriter(context.Response.Body);
             await writer.WriteAsync(value.ToString(Formatting.None));
+        }
+
+        /// <summary>
+        /// Directly retrieve the saved state from mock state store for unit testing
+        /// </summary>
+        /// <returns></returns>
+        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key)
+        {
+            try
+            {
+                return this.stateStore[stateStore]?[key];
+            }
+            catch
+            {
+                throw new XunitException($"The state with key ({key}) was not found in state store ({stateStore}).");
+            }      
         }
 
         async Task OnInvoke(HttpContext context)
