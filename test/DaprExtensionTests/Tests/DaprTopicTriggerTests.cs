@@ -157,7 +157,7 @@ namespace DaprExtensionTests
 
             [FunctionName("MyFunctionName")]
             public static void DotNetMethodName(
-                [DaprTopicTrigger(TopicName = "MyTopic")] int input,
+                [DaprTopicTrigger(Topic = "MyTopic")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
         }
 

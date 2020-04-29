@@ -31,15 +31,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 return Utils.NullTriggerBindingTask;
             }
 
-            string? topicName = attribute.TopicName;
-            if (topicName == null)
+            string? topic = attribute.Topic;
+            if (topic == null)
             {
                 MemberInfo method = parameter.Member;
-                topicName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
+                topic = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
             }
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprTopicTriggerBinding(this.serviceListener, topicName, parameter));
+                new DaprTopicTriggerBinding(this.serviceListener, topic, parameter));
         }
 
         class DaprTopicTriggerBinding : DaprTriggerBindingBase
