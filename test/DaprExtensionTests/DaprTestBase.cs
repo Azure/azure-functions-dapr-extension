@@ -17,6 +17,7 @@ namespace DaprExtensionTests
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -118,6 +119,9 @@ namespace DaprExtensionTests
         }
 
         internal SavedHttpRequest[] GetDaprRequests() => this.daprRuntime.GetReceivedRequests();
+
+        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key) 
+            => this.daprRuntime.FetchSavedStateForUnitTesting(stateStore, key);
 
         Task IAsyncLifetime.InitializeAsync()
         {
