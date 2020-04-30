@@ -13,14 +13,17 @@ namespace dotnet_azurefunction
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
-    using Newtonsoft.Json.Linq;
 
     public static class InvokeOutputBinding
     {
+        /// <summary>
+        /// Sample to use a Dapr Invoke Output Binding to perform a Dapr Server Invocation operation hosted in another Darp'd app.
+        /// Here this function acts like a proxy
+        /// </summary>
         [FunctionName("InvokeOutputBinding")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{methodName}")] HttpRequest req,
-            [DaprInvoke(AppId = "function2", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodParameters> output,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{appId}/{methodName}")] HttpRequest req,
+            [DaprInvoke(AppId = "{appId}", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodParameters> output,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
@@ -29,10 +32,7 @@ namespace dotnet_azurefunction
 
             var outputContent = new InvokeMethodParameters
             {
-                Body = JObject.FromObject(new 
-                {
-                    message = requestBody
-                })
+                Body = requestBody
             };
 
             await output.AddAsync(outputContent);

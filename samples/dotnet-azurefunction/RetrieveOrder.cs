@@ -8,8 +8,7 @@ namespace dotnet_azurefunction
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
-    using Newtonsoft.Json.Linq;
-
+ 
     public static class RetrieveOrder
     {
         /// <summary>
