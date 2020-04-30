@@ -4,7 +4,6 @@
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using Microsoft.Azure.WebJobs.Description;
@@ -73,6 +72,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             publishRule.AddConverter<object, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.BindToCollector(attr => new DaprPublishAsyncCollector(attr, this.daprClient));
 
+            var daprBindingRule = context.AddBindingRule<DaprBindingAttribute>();
+            daprBindingRule.AddConverter<JObject, DaprBindingMessage>(CreateBindingMessage);
+            daprBindingRule.AddConverter<byte[], DaprBindingMessage>(CreateBindingMessage);
+            daprBindingRule.AddConverter<object, DaprBindingMessage>(CreateBindingMessage);
+            daprBindingRule.BindToCollector(attr => new DaprBindingAsyncCollector(attr, this.daprClient));
+
             var daprSecretConverter = new DaprSecretConverter(this.daprClient);
             var secretsRule = context.AddBindingRule<DaprSecretAttribute>();
             secretsRule.BindToInput<JObject>(daprSecretConverter);
@@ -100,6 +105,38 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             return e;
+        }
+
+        static DaprBindingMessage CreateBindingMessage(object paramValues)
+        {
+            return new DaprBindingMessage(paramValues);
+        }
+
+        static DaprBindingMessage CreateBindingMessage(byte[] paramValues)
+        {
+            return CreateBindingMessage(JObject.Parse(System.Text.Encoding.UTF8.GetString(paramValues)));
+        }
+
+        static DaprBindingMessage CreateBindingMessage(JObject json)
+        {
+            if (!TryGetValue(json, "data", out object? data))
+            {
+                throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(json));
+            }
+
+            DaprBindingMessage message = new DaprBindingMessage(data!);
+
+            if (TryGetValue(json, "metadata", out JObject? metadata))
+            {
+                message.Metadata = metadata?.ToObject<Dictionary<string, object>>();
+            }
+
+            if (TryGetValue(json, "bindingName", out string? binding))
+            {
+                message.BindingName = binding;
+            }
+
+            return message;
         }
 
         internal static DaprStateRecord CreateSaveStateParameters(JObject parametersJson)

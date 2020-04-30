@@ -58,6 +58,10 @@ namespace DaprExtensionTests
                     // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md
                     routes.MapGet("v1.0/secrets/{storeName}/{name}", this.OnGetSecret);
 
+                    // Output binding API
+                    // https://github.com/dapr/docs/blob/master/reference/api/bindings_api.md
+                    routes.MapPost("v1.0/bindings/{name}", this.OnSendMessage);
+
                     app.UseRouter(routes.Build());
                 })
                 .Build();
@@ -155,6 +159,11 @@ namespace DaprExtensionTests
             // depending on the secret store provider.
             string secretName = (string)context.GetRouteValue("name");
             await context.Response.WriteAsync(@$"{{""{secretName}"":""secret!""}}");
+        }
+
+        async Task OnSendMessage(HttpContext context)
+        {
+            await Task.CompletedTask;
         }
 
         async Task SaveRequestAsync(HttpRequest request)
