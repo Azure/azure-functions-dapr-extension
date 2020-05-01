@@ -20,29 +20,38 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
         readonly HashSet<string> topics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
+        readonly string appAddress;
         readonly ILogger log;
 
         IWebHost? host;
         int serverStarted;
 
-        public DaprServiceListener(ILoggerFactory loggerFactory)
+        public DaprServiceListener(ILoggerFactory loggerFactory, INameResolver resolver)
         {
             this.log = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.appAddress = GetDefaultAppAddress(resolver);
         }
 
         public void Dispose() => this.host?.Dispose();
+
+        static string GetDefaultAppAddress(INameResolver resolver)
+        {
+            if (!int.TryParse(resolver.Resolve("DAPR_APP_PORT"), out int appPort))
+            {
+                appPort = 3001;
+            }
+
+            return $"http://127.0.0.1:{appPort}";
+        }
 
         internal async Task EnsureStartedAsync(CancellationToken cancellationToken)
         {
             if (Interlocked.CompareExchange(ref this.serverStarted, 1, 0) == 0)
             {
-                string listenUrl = "http://localhost:3001"; // TODO: Configurable
-
                 this.host = new WebHostBuilder()
                     .UseKestrel()
                     .ConfigureServices(s => s.AddRouting())
-                    .UseUrls(listenUrl)
+                    .UseUrls(this.appAddress)
                     .Configure(app =>
                     {
                         var routes = new RouteBuilder(app);
@@ -61,7 +70,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     })
                     .Build();
 
-                this.log.LogInformation($"Starting Dapr HTTP listener on {listenUrl} with {this.listeners.Count} function listener(s) registered.");
+                this.log.LogInformation($"Starting Dapr HTTP listener on {this.appAddress} with {this.listeners.Count} function listener(s) registered.");
                 await this.host.StartAsync(cancellationToken);
                 this.log.LogInformation("Dapr HTTP host started successfully.");
             }
