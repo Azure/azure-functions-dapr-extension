@@ -85,8 +85,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             context.AddBindingRule<DaprTopicTriggerAttribute>()
                 .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
 
-            context.AddBindingRule<DaprInputBindingTriggerAttribute>()
-                .BindToTrigger(new DaprInputBindingTriggerBindingProvider(this.daprListener));
+            context.AddBindingRule<DaprBindingTriggerAttribute>()
+                .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(object arg)

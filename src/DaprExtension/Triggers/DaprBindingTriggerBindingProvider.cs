@@ -1,4 +1,7 @@
-﻿namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     using System;
     using System.Reflection;
@@ -8,11 +11,11 @@
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
 
-    class DaprInputBindingTriggerBindingProvider : ITriggerBindingProvider
+    class DaprBindingTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;
 
-        public DaprInputBindingTriggerBindingProvider(DaprServiceListener serviceListener)
+        public DaprBindingTriggerBindingProvider(DaprServiceListener serviceListener)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
         }
@@ -20,13 +23,13 @@
         public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
         {
             ParameterInfo parameter = context.Parameter;
-            var attribute = parameter.GetCustomAttribute<DaprInputBindingTriggerAttribute>(inherit: false);
+            var attribute = parameter.GetCustomAttribute<DaprBindingTriggerAttribute>(inherit: false);
             if (attribute == null)
             {
                 return Utils.NullTriggerBindingTask;
             }
 
-            string? triggerName = attribute.TriggerName;
+            string? triggerName = attribute.BindingName;
             if (triggerName == null)
             {
                 MemberInfo method = parameter.Member;

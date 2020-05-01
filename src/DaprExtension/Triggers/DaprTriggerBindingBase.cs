@@ -21,7 +21,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     abstract class DaprTriggerBindingBase : ITriggerBinding
     {
         readonly DaprServiceListener serviceListener;
-        protected readonly ParameterInfo parameter;
+        readonly ParameterInfo parameter;
 
         public DaprTriggerBindingBase(DaprServiceListener serviceListener, ParameterInfo parameter)
         {
@@ -45,7 +45,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         protected abstract DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor);
 
-        public async virtual Task<ITriggerData> BindAsync(object value, ValueBindingContext context)
+        async Task<ITriggerData> ITriggerBinding.BindAsync(object value, ValueBindingContext context)
         {
             HttpContext requestContext = (HttpContext)value;
             Stream inputStream = requestContext.Request.Body;
@@ -128,7 +128,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return new ParameterDescriptor { Name = this.parameter.Name };
         }
 
-        protected class ObjectValueProvider : IValueProvider
+        class ObjectValueProvider : IValueProvider
         {
             private readonly object? value;
             private readonly Task<object?> valueAsTask;
@@ -152,7 +152,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             public string? ToInvokeString() => this.value?.ToString();
         }
 
-        protected class HttpContextReturnValueBinder : IValueBinder
+        class HttpContextReturnValueBinder : IValueBinder
         {
             readonly HttpContext context;
 
