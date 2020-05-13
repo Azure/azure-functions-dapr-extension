@@ -74,7 +74,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             string path = context.Request.Path;
 
-            if (path.Equals("dapr/subscribe", StringComparison.OrdinalIgnoreCase))
+            if (path.Equals("/dapr/subscribe", StringComparison.OrdinalIgnoreCase))
             {
                 return this.GetTopicsAsync(context);
             }
