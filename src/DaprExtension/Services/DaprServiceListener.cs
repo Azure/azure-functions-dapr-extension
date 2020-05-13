@@ -101,11 +101,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         internal void AddFunctionListener(DaprListenerBase daprListener)
         {
-            if (this.serverStarted > 0)
-            {
-                throw new InvalidOperationException("Cannot add listeners after the host has been started.");
-            }
-
             this.listeners.Add(daprListener);
             daprListener.AddRoutes(this.triggerHandler);
         }
