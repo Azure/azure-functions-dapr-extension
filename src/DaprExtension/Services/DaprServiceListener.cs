@@ -5,12 +5,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     using System;
     using System.Collections.Generic;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -18,6 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     sealed class DaprServiceListener : IDisposable
     {
+        readonly TriggerRouteHandler triggerHandler = new TriggerRouteHandler();
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
         readonly HashSet<string> topics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         readonly string appAddress;
@@ -54,19 +57,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     .UseUrls(this.appAddress)
                     .Configure(app =>
                     {
-                        var routes = new RouteBuilder(app);
-                        foreach (DaprListenerBase listener in this.listeners)
-                        {
-                            // CONSIDER: Each listener should return a route object (or a collection)
-                            //           instead of having direct access to the builder. This will
-                            //           improve encapsulation and enable better logging.
-                            listener.AddRoute(routes);
-                        }
-
-                        // See https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-a-route-for-dapr-to-discover-topic-subscriptions
-                        routes.MapGet("dapr/subscribe", this.GetTopicsAsync);
-
-                        app.UseRouter(routes.Build());
+                        // We use a generic RequestDelegate to handle requests instead of
+                        // a RouteBuilder, because we don't know the routes at the time that we need
+                        // to start the server.
+                        app.Run(this.HandleRequest);
                     })
                     .Build();
 
@@ -76,9 +70,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
         }
 
+        private Task HandleRequest(HttpContext context)
+        {
+            string path = context.Request.Path;
+
+            if (path.Equals("dapr/subscribe", StringComparison.OrdinalIgnoreCase))
+            {
+                return this.GetTopicsAsync(context);
+            }
+            else
+            {
+                return this.triggerHandler.RouteToTriggerAsync(context);
+            }
+        }
+
         internal async Task DeregisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
         {
             this.listeners.Remove(listener);
+            listener.DeleteRoutes(this.triggerHandler);
 
             if (this.host != null &&
                 this.listeners.Count == 0 &&
@@ -98,6 +107,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             this.listeners.Add(daprListener);
+            daprListener.AddRoutes(this.triggerHandler);
         }
 
         internal void RegisterTopic(string topicName)

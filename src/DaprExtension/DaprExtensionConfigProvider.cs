@@ -6,6 +6,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;
@@ -92,6 +94,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             context.AddBindingRule<DaprBindingTriggerAttribute>()
                 .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener));
+
+            // We don't need to await starting this Kestrel server. If no triggers are present, it will start
+            // eventually, and if triggers are present, the kestrel server will already be started or will
+            // be started and awaited on when we start the listeners for the triggers.
+            Task.Run(() => this.daprListener.EnsureStartedAsync(CancellationToken.None));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(object arg)

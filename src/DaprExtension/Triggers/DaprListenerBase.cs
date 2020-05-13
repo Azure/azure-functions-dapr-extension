@@ -7,6 +7,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
     using Microsoft.Azure.WebJobs.Host.Listeners;
 
     abstract class DaprListenerBase : IListener
@@ -18,7 +19,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             this.serviceListener = serviceListener;
         }
 
-        public abstract void AddRoute(IRouteBuilder routeBuilder);
+        public abstract void AddRoutes(TriggerRouteHandler triggerHandler);
+
+        public abstract void DeleteRoutes(TriggerRouteHandler triggerHandler);
 
         public virtual void Cancel()
         {

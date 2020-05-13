@@ -4,10 +4,12 @@
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
     using System;
+    using System.Net.Http;
     using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
 
@@ -80,10 +82,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     // no-op
                 }
 
-                public override void AddRoute(IRouteBuilder routeBuilder)
+                public override void AddRoutes(TriggerRouteHandler triggerHandler)
                 {
-                    routeBuilder.MapPost(this.triggerName, this.DispatchAsync);
-                    routeBuilder.MapVerb("OPTIONS", this.triggerName, this.Success);
+                    triggerHandler.AddRoute(HttpMethod.Post, this.triggerName, this.DispatchAsync);
+                    triggerHandler.AddRoute(HttpMethod.Options, this.triggerName, this.Success);
+                }
+
+                public override void DeleteRoutes(TriggerRouteHandler triggerHandler)
+                {
+                    triggerHandler.DeleteRoute(HttpMethod.Post, this.triggerName);
+                    triggerHandler.DeleteRoute(HttpMethod.Options, this.triggerName);
                 }
 
                 public async Task Success(HttpContext context)
