@@ -12,15 +12,19 @@ namespace dotnet_azurefunction
 
     public static class ConsumeMessageFromKafka
     {
+        // The function is triggered by Kafka messages in the Kafka instance referenced by
+        // the Kafka binding configured under components/kafka-bindings.yaml
+        // Can be used as an alternative for the node-app in the Dapr Bindings sample
+        // found at https://github.com/dapr/samples/tree/master/5.bindings/nodeapp
         [FunctionName("ConsumeMessageFromKafka")]
-        public static async void Run(
-            [DaprServiceInvocationTrigger] JObject payload,
-            [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<object> messages,
+        public static void Run(
+            // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
+            [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JObject triggerData,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("Hello from Kafka!");
 
-            await messages.AddAsync(payload);
+            log.LogInformation($"Trigger data: {triggerData}");
         }
     }
 }

@@ -216,15 +216,20 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
+Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/samples/tree/master/5.bindings) to spin up your the Kafka locally. In the example below, we use `DaprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
 
-TODO @ConnorMcMahon: Replace the node app by Function `DaprBindingTrigger`.
+```csharp
+[FunctionName("ConsumeMessageFromKafka")]
+public static void Run(
+    // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
+    [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JObject triggerData,
+    ILogger log)
+{
+    log.LogInformation("Hello from Kafka!");
 
-Open a new command prompt to spin up the node app. It will consume the Kafka events by printing out the message content.
-```powershell
-cd nodeapp
-dapr run --app-id nodeapp node app.js
+    log.LogInformation($"Trigger data: {triggerData}");
+}
 ```
-
 Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance.
 
 ```csharp
@@ -249,15 +254,17 @@ dapr invoke --app-id functionapp --method SendMessageToKafka --payload '{\"messa
 
 The Dapr'd function logs should show the following:
 ```
-== APP == [TIMESTAMP]] Executing 'SendMessageToDaprBinding' (Reason='', Id=<ExecutionId>)
+== APP == [TIMESTAMP] Executing 'SendMessageToDaprBinding' (Reason='', Id=<ExecutionId>)
 == APP == [TIMESTAMP] C# HTTP trigger function processed a request.
 == APP == [TIMESTAMP] Executed 'SendMessageToDaprBinding' (Succeeded, Id=<ExecutionId>)
 ```
 
-The node app logs should show the following:
+Since we have both functions deployed in the same app, you should also see we have consumed the message by see the folowing:
 ```
-== APP == Hello from Kafka!
-== APP == { message: 'hello!' }
+== APP == [TIMESTAMP] Executing 'ConsumeMessageFromKafka' (Reason='', Id=<ExecutionId>)
+== APP == [TIMESTAMP] Hello from Kafka!
+== APP == [TIMESTAMP] Trigger data: { message: 'hello!' }
+== APP == [TIMESTAMP] Executed 'ConsumeMessageFromKafka' (Succeeded, Id=<ExecutionId>)
 ```
 
 

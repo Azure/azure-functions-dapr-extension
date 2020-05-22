@@ -5,14 +5,11 @@
     <RootNamespace>dotnet_azurefunction</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="nodeapp\node_modules\.bin\mime" />
-    <None Include="nodeapp\node_modules\.bin\mime.cmd" />
-    <None Include="nodeapp\node_modules\.bin\mime.ps1" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Dapr" Version="0.1.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DaprExtension\DaprExtension.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="components\messagebus.yaml">
