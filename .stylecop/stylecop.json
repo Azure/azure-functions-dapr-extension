@@ -4,15 +4,16 @@
         "orderingRules": {
             "systemUsingDirectivesFirst": true
         },
-        "documentationRules": {
-            "companyName": "Microsoft",
-            "copyrightText": "Copyright (c) {companyName}. All rights reserved.\nLicensed under the {licenseName} License. See {licenseFile} in the project root for license information.",
-            "documentInternalElements": false,
-            "variables": {
-                "licenseName": "MIT",
-                "licenseFile": "LICENSE"
-            },
-            "xmlHeader": false
-        }
+      "documentationRules": {
+        "companyName": "Microsoft",
+        "copyrightText": "Copyright (c) Microsoft Corporation.\nLicensed under the MIT License.",
+        "headerDecoration": "------------------------------------------------------------",
+        "documentInternalElements": false,
+        "variables": {
+          "licenseName": "MIT",
+          "licenseFile": "LICENSE"
+        },
+        "xmlHeader": false
+      }
     }
 }

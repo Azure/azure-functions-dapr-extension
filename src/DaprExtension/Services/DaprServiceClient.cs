@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT License. See LICENSE in the project root for license information.
+﻿// ------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+// ------------------------------------------------------------
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
@@ -165,7 +167,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 $"{daprAddress}/v1.0/bindings/{message.BindingName}",
                 message,
                 cancellationToken);
-          
+
             await ThrowIfDaprFailure(response);
         }
 
