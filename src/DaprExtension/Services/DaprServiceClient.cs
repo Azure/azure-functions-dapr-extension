@@ -6,6 +6,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -48,6 +49,61 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return $"http://127.0.0.1:{daprPort}";
         }
 
+        static async Task ThrowIfDaprFailure(HttpResponseMessage response)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                string errorCode = string.Empty;
+                string errorMessage = string.Empty;
+
+                if (response.Content != null)
+                {
+                    JObject daprError;
+
+                    try
+                    {
+                        string content = await response.Content.ReadAsStringAsync();
+                        daprError = JObject.Parse(content);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new DaprException(
+                            response.StatusCode,
+                            "ERR_UNKNOWN",
+                            "The returned error message from Dapr Service is not a valid JSON Object.",
+                            e);
+                    }
+
+                    if (daprError.TryGetValue("message", out JToken errorMessageToken))
+                    {
+                        errorMessage = errorMessageToken.ToString();
+                    }
+
+                    if (daprError.TryGetValue("errorCode", out JToken errorCodeToken))
+                    {
+                        errorCode = errorCodeToken.ToString();
+                    }
+                }
+
+                // avoid potential overrides: specific 404 error messages can be returned from Dapr
+                // ex: https://github.com/dapr/docs/blob/master/reference/api/actors_api.md#get-actor-state
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    throw new DaprException(
+                        response.StatusCode,
+                        string.IsNullOrEmpty(errorCode) ? "ERR_DOES_NOT_EXIST" : errorCode,
+                        string.IsNullOrEmpty(errorMessage) ? "The requested Dapr resource is not properly configured." : errorMessage);
+                }
+
+                throw new DaprException(
+                    response.StatusCode,
+                    string.IsNullOrEmpty(errorCode) ? "ERR_UNKNOWN" : errorCode,
+                    string.IsNullOrEmpty(errorMessage) ? "No meaningful error message is returned." : errorMessage);
+            }
+
+            return;
+        }
+
         internal async Task SaveStateAsync(
             string? daprAddress,
             string? stateStore,
@@ -61,11 +117,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             this.EnsureDaprAddress(ref daprAddress);
 
-            // TODO: Error handling
-            await this.httpClient.PostAsJsonAsync(
-                $"{daprAddress}/v1.0/state/{stateStore}",
+            HttpResponseMessage response = await this.httpClient.PostAsJsonAsync(
+                $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}",
                 values,
                 cancellationToken);
+
+            await ThrowIfDaprFailure(response);
         }
 
         internal async Task<DaprStateRecord> GetStateAsync(
@@ -76,10 +133,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            // TODO: Error handling
             HttpResponseMessage response = await this.httpClient.GetAsync(
                 $"{daprAddress}/v1.0/state/{stateStore}/{key}",
                 cancellationToken);
+
+            await ThrowIfDaprFailure(response);
+
             Stream contentStream = await response.Content.ReadAsStreamAsync();
             string? eTag = response.Headers.ETag?.Tag;
             return new DaprStateRecord(key, contentStream, eTag);
@@ -101,8 +160,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 req.Content = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
             }
 
-            // TODO: Error handling
-            await this.httpClient.SendAsync(req, cancellationToken);
+            HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
+            await ThrowIfDaprFailure(response);
         }
 
         internal async Task SendToDaprBindingAsync(
@@ -112,13 +171,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            await this.httpClient.PostAsJsonAsync(
+            HttpResponseMessage response = await this.httpClient.PostAsJsonAsync(
                 $"{daprAddress}/v1.0/bindings/{message.BindingName}",
                 message,
                 cancellationToken);
+          
+            await ThrowIfDaprFailure(response);
         }
 
-        internal Task PublishEventAsync(
+        internal async Task PublishEventAsync(
             string? daprAddress,
             string? topicName,
             JToken? payload,
@@ -132,7 +193,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 req.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");
             }
 
-            return this.httpClient.SendAsync(req, cancellationToken);
+            HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
+
+            await ThrowIfDaprFailure(response);
         }
 
         internal async Task<JObject> GetSecretAsync(
@@ -164,7 +227,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
                 cancellationToken);
 
-            // TODO: Error handling (404 Not Found, etc.)
+            await ThrowIfDaprFailure(response);
+
             string secretPayload = await response.Content.ReadAsStringAsync();
 
             // The response is always expected to be a JSON object
@@ -174,6 +238,46 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
+        }
+
+        class DaprException : Exception
+        {
+            public DaprException(HttpStatusCode statusCode, string errorCode, string message)
+                : base(message)
+            {
+                this.StatusCode = statusCode;
+                this.ErrorCode = errorCode;
+            }
+
+            public DaprException(HttpStatusCode statusCode, string errorCode, string message, Exception innerException)
+                : base(message, innerException)
+            {
+                this.StatusCode = statusCode;
+                this.ErrorCode = errorCode;
+            }
+
+            HttpStatusCode StatusCode { get; set; }
+
+            string ErrorCode { get; set; }
+
+            public override string ToString()
+            {
+                if (this.InnerException != null)
+                {
+                    return string.Format(
+                        "Status Code: {0}; Error Code: {1} ; Message: {2}; Inner Exception: {3}",
+                        this.StatusCode,
+                        this.ErrorCode,
+                        this.Message,
+                        this.InnerException);
+                }
+
+                return string.Format(
+                    "Status Code: {0}; Error Code: {1} ; Message: {2}",
+                    this.StatusCode,
+                    this.ErrorCode,
+                    this.Message);
+            }
         }
     }
 }
