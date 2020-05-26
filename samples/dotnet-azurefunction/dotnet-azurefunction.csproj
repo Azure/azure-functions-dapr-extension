@@ -5,9 +5,6 @@
     <RootNamespace>dotnet_azurefunction</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="nuget.config" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
   </ItemGroup>
