@@ -175,7 +175,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 $"{daprAddress}/v1.0/bindings/{message.BindingName}",
                 message,
                 cancellationToken);
-          
+
             await ThrowIfDaprFailure(response);
         }
 
