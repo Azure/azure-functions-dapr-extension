@@ -31,22 +31,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         static string GetDefaultDaprAddress(INameResolver resolver)
         {
-            // resolve Dapr HTTP Port from environment variables if it has been overridden
-            string? daprPort = Environment.GetEnvironmentVariable("DAPR_HTTP_PORT");
-
-            // resolve from App Setting
-            if (string.IsNullOrEmpty(daprPort))
+            if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
             {
-                daprPort = resolver.Resolve("DAPR_HTTP_PORT");
+                    daprPort = 3500;
             }
 
-            if (string.IsNullOrEmpty(daprPort))
-            {
-                daprPort = "3500"; // default port
-            }
-
-            // use ip address rather than localhost out of DNS performance concern
-            return $"http://127.0.0.1:{daprPort}";
+            return $"http://localhost:{daprPort}";
         }
 
         static async Task ThrowIfDaprFailure(HttpResponseMessage response)
