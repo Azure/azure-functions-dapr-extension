@@ -33,7 +33,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
             {
-                    daprPort = 3500;
+                daprPort = 3500;
             }
 
             return $"http://localhost:{daprPort}";
