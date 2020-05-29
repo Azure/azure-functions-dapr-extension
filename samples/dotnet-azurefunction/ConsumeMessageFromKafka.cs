@@ -5,9 +5,9 @@
 
 namespace dotnet_azurefunction
 {
+    using Dapr.AzureFunctions.Extension;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Newtonsoft.Json.Linq;
 
     public static class ConsumeMessageFromKafka

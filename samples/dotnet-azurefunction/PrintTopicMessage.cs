@@ -7,7 +7,7 @@ namespace dotnet_azurefunction
 {
     using CloudNative.CloudEvents;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
+    using Dapr.AzureFunctions.Extension;
     using Microsoft.Extensions.Logging;
 
     public static class PrintTopicMessage

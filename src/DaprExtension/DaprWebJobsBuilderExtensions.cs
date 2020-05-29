@@ -3,9 +3,10 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Dapr.AzureFunctions.Extension
 {
     using System;
+    using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
