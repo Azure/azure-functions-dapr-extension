@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://dapr.io</PackageProjectUrl>
     <PackageIcon>images\logo-transparent.png</PackageIcon>
     <PackageTags>Dapr</PackageTags>
-    <RepositoryUrl>https://github.com/dapr/dotnet-sdk</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dapr/azure-functions-extension</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageOutputPath>$(RepoRoot)bin\$(Configuration)\nugets</PackageOutputPath>
   </PropertyGroup>
