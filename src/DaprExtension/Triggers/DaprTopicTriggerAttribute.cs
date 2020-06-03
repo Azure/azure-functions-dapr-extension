@@ -18,6 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <summary>
         /// Gets or sets the name of the topic.
         /// </summary>
+        [AutoResolve]
         public string? Topic { get; set; }
     }
 }
