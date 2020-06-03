@@ -23,6 +23,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <remarks>
         /// If not specified, the name of the function is used as the trigger name.
         /// </remarks>
+        [AutoResolve]
         public string? BindingName { get; set; }
     }
 }
