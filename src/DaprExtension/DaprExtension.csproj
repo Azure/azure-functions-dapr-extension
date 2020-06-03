@@ -1,29 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
-    <PackageId>Microsoft.Azure.WebJobs.Extensions.Dapr</PackageId>
-    <Description>This extension adds bindings for Dapr</Description>
-    <Version>0.1.0$(VersionSuffix)</Version>
-    <CommitHash Condition="$(CommitHash) == ''">N/A</CommitHash>
-    <InformationalVersion>$(Version) Commit hash: $(CommitHash)</InformationalVersion>
-    <AssemblyName>Microsoft.Azure.WebJobs.Extensions.Dapr</AssemblyName>
-    <RootNamespace>Microsoft.Azure.WebJobs.Extensions.Dapr</RootNamespace>
-    <Authors>Microsoft</Authors>
-    <Company>Microsoft</Company>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Azure/azure-functions-dapr-extension</RepositoryUrl>
-    <PackageReleaseNotes>$(RepositoryUrl)/releases/</PackageReleaseNotes>
+    <PackageId>Microsoft.Azure.WebJobs.Extensions.Dapr</PackageId>    
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
-    <IncludeSymbols>false</IncludeSymbols>
-    <RepositoryType>git</RepositoryType>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <!-- Additional Nuget package properties. -->
+  <PropertyGroup>
+    <Description>This extension adds bindings for Dapr</Description>
+  </PropertyGroup>
+
+  <!-- Use C# 8.0 features -->
+  <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->
