@@ -1,1 +1,8 @@
 local.settings.json
+components/
+deploy/
+README.md
+.gitignore
+.dockerignore
+docker-compose-single-kafka.yml
+kafka-non-persistence.yaml
