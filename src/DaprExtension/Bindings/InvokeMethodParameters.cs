@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Dapr.AzureFunctions.Extension
 {
     using Newtonsoft.Json.Linq;
 

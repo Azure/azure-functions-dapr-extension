@@ -12,9 +12,9 @@ namespace DaprExtensionTests
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using Dapr.AzureFunctions.Extension;
     using DaprExtensionTests.Logging;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;

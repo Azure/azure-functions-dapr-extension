@@ -5,9 +5,8 @@
             "systemUsingDirectivesFirst": true
         },
       "documentationRules": {
-        "companyName": "Microsoft",
-        "copyrightText": "Copyright (c) Microsoft Corporation.\nLicensed under the MIT License.",
-        "headerDecoration": "------------------------------------------------------------",
+        "companyName": "Microsoft Corporation",
+        "copyrightText": "------------------------------------------------------------\nCopyright (c) {companyName}.\nLicensed under the {licenseName} License.\n------------------------------------------------------------",
         "documentInternalElements": false,
         "variables": {
           "licenseName": "MIT",

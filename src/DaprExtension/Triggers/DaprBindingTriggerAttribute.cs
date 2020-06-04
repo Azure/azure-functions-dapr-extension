@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Dapr.AzureFunctions.Extension
 {
     using System;
     using Microsoft.Azure.WebJobs.Description;
@@ -23,6 +23,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <remarks>
         /// If not specified, the name of the function is used as the trigger name.
         /// </remarks>
+        [AutoResolve]
         public string? BindingName { get; set; }
     }
 }

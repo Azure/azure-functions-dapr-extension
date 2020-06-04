@@ -3,13 +3,14 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Dapr.AzureFunctions.Extension
 {
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
 

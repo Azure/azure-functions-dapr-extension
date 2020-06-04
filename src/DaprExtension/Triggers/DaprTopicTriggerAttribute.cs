@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Dapr.AzureFunctions.Extension
 {
     using System;
     using Microsoft.Azure.WebJobs.Description;
@@ -18,6 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <summary>
         /// Gets or sets the name of the topic.
         /// </summary>
+        [AutoResolve]
         public string? Topic { get; set; }
     }
 }

@@ -3,12 +3,13 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-using Microsoft.Azure.WebJobs.Extensions.Dapr;
+using Dapr.AzureFunctions.Extension;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 
 [assembly: WebJobsStartup(typeof(DaprWebJobsStartup))]
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Dapr.AzureFunctions.Extension
 {
     /// <summary>
     /// Startup configuration class for the Dapr extension.

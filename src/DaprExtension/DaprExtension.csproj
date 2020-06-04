@@ -1,29 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Dapr.AzureFunctions.Extension</PackageId>    
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Additional Nuget package properties. -->
+  <PropertyGroup>
+    <Description>This extension adds bindings for Dapr</Description>
+  </PropertyGroup>
+
+  <!-- Use C# 8.0 features -->
+  <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
-    <PackageId>Microsoft.Azure.WebJobs.Extensions.Dapr</PackageId>
-    <Description>This extension adds bindings for Dapr</Description>
-    <Version>0.1.0$(VersionSuffix)</Version>
-    <CommitHash Condition="$(CommitHash) == ''">N/A</CommitHash>
-    <InformationalVersion>$(Version) Commit hash: $(CommitHash)</InformationalVersion>
-    <AssemblyName>Microsoft.Azure.WebJobs.Extensions.Dapr</AssemblyName>
-    <RootNamespace>Microsoft.Azure.WebJobs.Extensions.Dapr</RootNamespace>
-    <Authors>Microsoft</Authors>
-    <Company>Microsoft</Company>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Azure/azure-functions-dapr-extension</RepositoryUrl>
-    <PackageReleaseNotes>$(RepositoryUrl)/releases/</PackageReleaseNotes>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
-    <IncludeSymbols>false</IncludeSymbols>
-    <RepositoryType>git</RepositoryType>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
@@ -55,7 +45,7 @@
 
   <!-- Copy the nuget package file to the sample folder -->
   <Target Name="CopyPackage" AfterTargets="Pack">
-    <Copy SourceFiles="bin\$(ConfigurationName)\Microsoft.Azure.WebJobs.Extensions.Dapr.0.1.0.nupkg"
+    <Copy SourceFiles="bin\$(ConfigurationName)\Dapr.AzureFunctions.Extension.0.1.0.nupkg"
           DestinationFolder="..\..\samples\dotnet-azurefunction\localNuget" />
   </Target>
 </Project>
