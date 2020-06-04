@@ -18,6 +18,7 @@ namespace Dapr.AzureFunctions.Extension
         /// <summary>
         /// Gets or sets the name of the topic to publish to.
         /// </summary>
+        [AutoResolve]
         public string? Topic { get; set; }
     }
 }
