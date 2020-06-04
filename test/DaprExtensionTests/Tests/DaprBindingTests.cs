@@ -9,7 +9,7 @@ namespace DaprExtensionTests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
+    using Dapr.AzureFunctions.Extension;
     using Microsoft.Azure.WebJobs.Host;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

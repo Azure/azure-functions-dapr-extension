@@ -12,7 +12,7 @@ namespace dotnet_azurefunction
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
+    using Dapr.AzureFunctions.Extension;
 
     public static class InvokeOutputBinding
     {
