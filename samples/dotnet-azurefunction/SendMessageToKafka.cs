@@ -9,11 +9,12 @@ namespace dotnet_azurefunction
     using Microsoft.Extensions.Logging;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Newtonsoft.Json.Linq;
+    using System.Threading.Tasks;
 
     public static class SendMessageToKafka
     {
         [FunctionName("SendMessageToKafka")]
-        public static async void Run(
+        public static async Task Run(
             [DaprServiceInvocationTrigger] JObject payload,
             [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<object> messages,
             ILogger log)
