@@ -1,4 +1,4 @@
-# .NET Azure Function Sample
+# Node Azure Function Sample
 
 This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-javascript) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
@@ -19,7 +19,7 @@ Now that we've locally set up Dapr, clone the repo, then navigate to the javascr
 
 ```bash
 git clone https://github.com/dapr/azure-functions-extension.git
-cd samples/dotnet-azurefunction
+cd samples/javascript-azurefunction
 ```
 In this folder, you will find `local.settings.json`, which lists a few app settings we used in our trigger/binding attributes. 
 
@@ -124,17 +124,17 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 }
 ```
 
-**Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
+**Note**: in this sample, `daprServiceInvocationTrigger` binding in the function.json does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `methodName` field to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
 
 ```powershell
-dapr invoke --app-id nodeapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
 
 ```
 == APP == [TIMESTAMP] Executing 'CreateNewOrder' (Reason='', Id=<ExecutionId>)
-== APP == [TIMESTAMP] C# function processed a CreateNewOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] Node function processed a CreateNewOrder request from the Dapr Runtime.
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
@@ -155,7 +155,7 @@ In your terminal window, you should see logs to confirm the expected result:
 
 ```
 == APP == [TIMESTAMP]  Executing 'RetrieveOrder' (Reason='', Id=<ExecutionId>)
-== APP == [TIMESTAMP]  C# function processed a RetrieveOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP]  Node function processed a RetrieveOrder request from the Dapr Runtime.
 == APP == [TIMESTAMP]  {"orderId":"41"}
 == APP == [TIMESTAMP]  Executed 'RetrieveOrder' (Succeeded, Id=<ExecutionId>)
 ```
@@ -197,10 +197,10 @@ dapr publish --topic A --payload 'This is a test'
 The Dapr logs should show the following:
 ```
 == APP == [TIMESTAMP] Executing 'TransferEventBetweenTopics' (Reason='',Id={ExectuionId})
-== APP == [TIMESTAMP] C# function processed a TransferEventBetweenTopics request from the Dapr Runtime.
+== APP == [TIMESTAMP] Node function processed a TransferEventBetweenTopics request from the Dapr Runtime.
 == APP == [TIMESTAMP] Executed 'TransferEventBetweenTopics' (Succeeded, Id={ExectuionId})
 == APP == [TIMESTAMP] Executing 'PrintTopicMessage' (Reason='', Id={AnotherExectuionId})
-== APP == [TIMESTAMP] C# function processed a PrintTopicMessage request from the Dapr Runtime.
+== APP == [TIMESTAMP] Node function processed a PrintTopicMessage request from the Dapr Runtime.
 == APP == [TIMESTAMP] Topic B received a message: Transfer from Topic A: This is a test.
 == APP == [TIMESTAMP] Executed 'PrintTopicMessage' (Succeeded, Id={AnotherExectuionId})
 ```
@@ -223,7 +223,7 @@ module.exports = async function (context) {
     context.bindings.messages = context.bindings.payload;
 };
 ```
-`DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. `IAsyncCollector<object>` allows you to send multiple message by calling `AddAsync` with different payloads. 
+`DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding.
 
 Now we can use service invocation to invoke this function:
 
@@ -253,5 +253,4 @@ To stop your services from running, simply stop the "dapr run" process. Alternat
 
 ```bash
 dapr stop --app-id functionapp
-dapr stop --app-id nodeapp
 ```
