@@ -11,16 +11,19 @@ namespace Dapr.AzureFunctions.Extension
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
 
     class DaprServiceInvocationTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;
+        readonly INameResolver nameResolver;
 
-        public DaprServiceInvocationTriggerBindingProvider(DaprServiceListener serviceListener)
+        public DaprServiceInvocationTriggerBindingProvider(DaprServiceListener serviceListener, INameResolver resolver)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
+            this.nameResolver = resolver;
         }
 
         public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
@@ -32,11 +35,15 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
-            string? methodName = attribute.MethodName;
-            if (methodName == null)
+            string methodName;
+            if (attribute.MethodName == null)
             {
                 MemberInfo method = parameter.Member;
                 methodName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
+            }
+            else if (!this.nameResolver.TryResolveWholeString(attribute.MethodName, out methodName))
+            {
+                methodName = attribute.MethodName;
             }
 
             return Task.FromResult<ITriggerBinding?>(

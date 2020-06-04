@@ -9,6 +9,7 @@ namespace Dapr.AzureFunctions.Extension
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;
@@ -23,12 +24,14 @@ namespace Dapr.AzureFunctions.Extension
     {
         readonly DaprServiceClient daprClient;     // TODO: Use an interface for mocking
         readonly DaprServiceListener daprListener; // TODO: Use an interface for mocking
+        readonly INameResolver nameResolver;
         readonly ILogger logger;
 
         public DaprExtensionConfigProvider(
             DaprServiceClient daprClient,
             DaprServiceListener daprListener,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            INameResolver nameResolver)
         {
             this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
             this.daprListener = daprListener ?? throw new ArgumentNullException(nameof(daprListener));
@@ -39,6 +42,7 @@ namespace Dapr.AzureFunctions.Extension
             }
 
             this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.nameResolver = nameResolver;
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -91,13 +95,13 @@ namespace Dapr.AzureFunctions.Extension
             secretsRule.BindToInput<byte[]>(daprSecretConverter);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
-                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener));
+                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener, this.nameResolver));
 
             context.AddBindingRule<DaprTopicTriggerAttribute>()
-                .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
+                .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener, this.nameResolver));
 
             context.AddBindingRule<DaprBindingTriggerAttribute>()
-                .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener));
+                .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener, this.nameResolver));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(byte[] arg)
