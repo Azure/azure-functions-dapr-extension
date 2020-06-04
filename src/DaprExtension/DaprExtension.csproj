@@ -24,6 +24,7 @@
     <IncludeSymbols>false</IncludeSymbols>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->
@@ -51,4 +52,10 @@
     <AdditionalFiles Include="..\..\.stylecop\stylecop.json" />
     <Compile Include="..\..\.stylecop\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
   </ItemGroup>
+
+  <!-- Copy the nuget package file to the sample folder -->
+  <Target Name="CopyPackage" AfterTargets="Pack">
+    <Copy SourceFiles="bin\$(ConfigurationName)\Microsoft.Azure.WebJobs.Extensions.Dapr.0.1.0.nupkg"
+          DestinationFolder="..\..\samples\dotnet-azurefunction\localNuget" />
+  </Target>
 </Project>
