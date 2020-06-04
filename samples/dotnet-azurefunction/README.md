@@ -119,7 +119,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 **Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
 
 ```powershell
-dapr invoke --app-id nodeapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
@@ -274,5 +274,37 @@ To stop your services from running, simply stop the "dapr run" process. Alternat
 
 ```bash
 dapr stop --app-id functionapp
-dapr stop --app-id nodeapp
 ```
+
+# Next Steps
+
+Now that you're successfully having your Dapr'd function app with running locally, you probably want to deploy to kubernetes cluster. If you have update the sample code to fit your scenario, you need to create new images with your updated code. First YOU need to install docker on your machine. Next, follow these steps to build your custom container image for your function:
+
+1. Update function app as you see fit!
+2. Navigate to the directory of the app you want to build a new image for, in this example, the root directory is `/dotnet-azurefunction`. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image. 
+> **Note**:  In this dotnet sample, the project file has a **nuget reference** for the `Dapr.AzureFunctions.Extension`, instead of a project reference. You can certainly swtich to project reference to build this dotnet sample, especially when you are actively using this sample to test changes in `DaprExtension` project. Here we choose Nuget reference for easier docker build process. If you have updated any code in `DaprExtension` project, please make sure the lastest `.nupkg` file has been copied over into `/dotnet-azurefunction/localNuget` folder. This copy step is supposed to be taken care in `DaprExtension` build step. The specific command can be found in the `DaprExtension.csproj` as:
+    
+        <Target Name="CopyPackage" AfterTargets="Pack">
+            <Copy SourceFiles="bin\Debug\Dapr.AzureFunctions.Extension.0.1.0.nupkg"
+                DestinationFolder="..\..\samples\dotnet-azurefunction\localNuget" />
+        </Target>
+ >        
+
+3. Run docker build command and specify your image name:
+     ```
+     docker build -t my-docker-id . 
+     ```
+     If you're planning on hosting it on docker hub, then it should be
+   
+    ```
+    docker build -t my-docker-id/mydocker-image .
+    ```
+
+4.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`. You can ignore the storage connection to test this, but you might see exception thrown from your container log complaining storage is not defined.
+    ```
+    docker run -e AzureWebjobStorage='connection-string` -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
+    ```
+
+5.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
+6.  Update your .yaml file to reflect the new image name.
+7.  Deploy your updated Dapr enabled app: `kubectl apply -f <YOUR APP NAME>.yaml`.
