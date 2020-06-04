@@ -23,8 +23,13 @@ namespace DaprExtensionTests
 
     public class DaprTopicTriggerTests : DaprTestBase
     {
+        private static readonly IDictionary<string, string> EnvironmentVariables = new Dictionary<string, string>()
+        {
+            { "TopicName", "MyBoundTopic" }
+        };
+
         public DaprTopicTriggerTests(ITestOutputHelper output)
-            : base(output)
+            : base(output, EnvironmentVariables)
         {
             this.AddFunctions(typeof(Functions));
         }
@@ -48,6 +53,27 @@ namespace DaprExtensionTests
             IEnumerable<string> functionLogs = this.GetFunctionLogs("MyFunctionName");
             Assert.Contains(input.ToString(), functionLogs);
         }
+
+        [Fact]
+        public async Task TopicNameInAttributeAsBindingExpression()
+        {
+            int input = 42;
+
+            // The method name is DotNetMethodName
+            // The function name is FunctionName
+            // The topic name is MyTopic
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/MyBoundTopic",
+                jsonContent: CreateCloudEventMessage(input));
+
+            Assert.Equal(0, response.Content.Headers.ContentLength);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.DotNetBindingResolution));
+            Assert.Contains(input.ToString(), functionLogs);
+        }
+
 
         [Fact]
         public async Task InvokeSubscriptionEndpoint()
@@ -160,6 +186,10 @@ namespace DaprExtensionTests
             [FunctionName("MyFunctionName")]
             public static void DotNetMethodName(
                 [DaprTopicTrigger(Topic = "MyTopic")] int input,
+                ILogger log) => log.LogInformation(input.ToString());
+
+            public static void DotNetBindingResolution(
+                [DaprTopicTrigger(Topic = "%TopicName%")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
         }
 

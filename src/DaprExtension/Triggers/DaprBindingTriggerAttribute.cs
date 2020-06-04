@@ -23,7 +23,6 @@ namespace Dapr.AzureFunctions.Extension
         /// <remarks>
         /// If not specified, the name of the function is used as the trigger name.
         /// </remarks>
-        [AutoResolve]
         public string? BindingName { get; set; }
     }
 }
