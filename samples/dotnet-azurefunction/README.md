@@ -282,12 +282,12 @@ Now that you're successfully having your Dapr'd function app with running locall
 
 1. Update function app as you see fit!
 2. Navigate to the directory of the app you want to build a new image for, in this example, the root directory is `/dotnet-azurefunction`. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image. 
-> **Note**:  In this dotnet sample, the project file has a **nuget reference** for the `Dapr.AzureFunctions.Extension`, instead of a project reference. You can certainly swtich to project reference to build this dotnet sample, especially when you are actively using this sample to test changes in `DaprExtension` project. Here we choose Nuget reference for easier docker build process. If you have updated any code in `DaprExtension` project, please make sure the lastest `.nupkg` file has been copied over into `/dotnet-azurefunction/localNuget` folder. This copy step is supposed to be taken care in `DaprExtension` build step. The specific command can be found in the `DaprExtension.csproj` as:
+> **Note**:  In this dotnet sample, the project file has a **nuget reference** for the `Dapr.AzureFunctions.Extension`, instead of a project reference. Using a package reference simplifies the docker build step. You can certainly swtich to project reference to build this dotnet sample, especially when you are actively using this sample to test changes in `DaprExtension` project. If you have updated any code in `DaprExtension` project, please make sure the lastest `.nupkg` file has been copied over into `/dotnet-azurefunction/localNuget` folder. This copy step is supposed to be taken care in `DaprExtension` build step. The specific command can be found in the `DaprExtension.csproj` as:
     
-        <Target Name="CopyPackage" AfterTargets="Pack">
-            <Copy SourceFiles="bin\Debug\Dapr.AzureFunctions.Extension.0.1.0.nupkg"
-                DestinationFolder="..\..\samples\dotnet-azurefunction\localNuget" />
-        </Target>
+      <Target Name="CopyPackage" AfterTargets="Build">
+        <Copy SourceFiles="$(RepoRoot)bin\$(Configuration)\nugets\$(PackageId).$(NupkgVersion).nupkg"
+              DestinationFolder="$(RepoRoot)samples\dotnet-azurefunction\localNuget" />
+      </Target>
  >        
 
 3. Run docker build command and specify your image name:

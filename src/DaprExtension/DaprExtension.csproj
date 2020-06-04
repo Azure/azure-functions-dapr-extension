@@ -44,8 +44,8 @@
   </ItemGroup>
 
   <!-- Copy the nuget package file to the sample folder -->
-  <Target Name="CopyPackage" AfterTargets="Pack">
-    <Copy SourceFiles="bin\$(ConfigurationName)\Dapr.AzureFunctions.Extension.0.1.0.nupkg"
-          DestinationFolder="..\..\samples\dotnet-azurefunction\localNuget" />
+  <Target Name="CopyPackage" AfterTargets="Build">
+    <Copy SourceFiles="$(RepoRoot)bin\$(Configuration)\nugets\$(PackageId).$(NupkgVersion).nupkg"
+          DestinationFolder="$(RepoRoot)samples\dotnet-azurefunction\localNuget" />
   </Target>
 </Project>
