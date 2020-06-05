@@ -1,0 +1,40 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: functionapp
+  namespace: default
+data:
+  AzureWebJobsStorage: <encoded-connection-string>
+  StateStoreName: <encoded-state-store-name>
+  KafkaBindingName: <encoded-kafka-binding-name>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: functionapp
+  labels:
+    app: functionapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: functionapp
+  template:
+    metadata:
+      labels:
+        app: functionapp
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/id: "functionapp"
+        dapr.io/port: "3001"
+    spec:
+      containers:
+      - name: functionapp
+        image: <your-docker-hub-id>/<your-image-name>
+        ports:
+        - containerPort: 3001
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: functionapp

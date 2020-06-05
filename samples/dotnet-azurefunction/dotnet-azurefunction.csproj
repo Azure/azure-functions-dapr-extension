@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
-    <PackageReference Include="Dapr.AzureFunctions.Extension" Version="$(NupkgVersion)"/>
+    <PackageReference Include="Dapr.AzureFunctions.Extension" Version="$(NupkgVersion)" />
   </ItemGroup>
   <!-- Switch to Project Reference by uncomment this line and remove the Package Reference line  -->
   <!--<ItemGroup>
