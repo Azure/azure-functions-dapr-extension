@@ -113,7 +113,7 @@ namespace DaprExtensionTests
             FunctionInvocationException error = await Assert.ThrowsAsync<FunctionInvocationException>(() =>
                 this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input));
 
-            // The exception message should reflect the fact that no binding name was specified
+            // The exception message should reflect the fact that no operation was specified
             ArgumentException innerError = Assert.IsType<ArgumentException>(error.GetBaseException());
             Assert.Contains("A non-null binding name must be specified", innerError.Message);
 
