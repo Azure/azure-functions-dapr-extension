@@ -20,5 +20,11 @@ namespace Dapr.AzureFunctions.Extension
         /// </summary>
         [AutoResolve]
         public string? BindingName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the configured operation.
+        /// </summary>
+        [AutoResolve]
+        public string? Operation { get; set; }
     }
 }

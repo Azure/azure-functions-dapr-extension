@@ -34,6 +34,7 @@ namespace DaprExtensionTests
             JObject expectedPayload = JObject.Parse(
                 $@"{{
                         ""data"": {JsonConvert.SerializeObject(input)},
+                        ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
                         }}
@@ -50,6 +51,7 @@ namespace DaprExtensionTests
             JObject input = JObject.Parse(
                 $@"{{
                         ""data"": {JsonConvert.SerializeObject(message)},
+                        ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
                         }},
@@ -59,6 +61,7 @@ namespace DaprExtensionTests
             JObject expectedPayload = JObject.Parse(
                 $@"{{
                         ""data"": {JsonConvert.SerializeObject(message)},
+                        ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
                         }}
@@ -80,7 +83,8 @@ namespace DaprExtensionTests
 
             JObject expectedPayload = JObject.Parse(
                 $@"{{
-                       ""data"": {JsonConvert.SerializeObject(inputMessage)}
+                       ""data"": {JsonConvert.SerializeObject(inputMessage)},
+                       ""operation"": ""create""
                    }}");
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
@@ -90,12 +94,12 @@ namespace DaprExtensionTests
         [Fact]
         public async Task SendMessage_ReturnValue()
         {
-            var input = new DaprBindingMessage("hello", new Dictionary<string, object> { { "key", "myKey" } }, "myBinding" );
+            var input = new DaprBindingMessage("hello", new Dictionary<string, object> { { "key", "myKey" } }, "myBinding", "create");
 
             await this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input);
             SavedHttpRequest req = this.GetSingleSendMessgaeRequest();
 
-            JObject expectedPayload = JObject.Parse($@"{{""data"": ""hello"", ""metadata"": {{""key"": ""myKey""}}}}");
+            JObject expectedPayload = JObject.Parse($@"{{""data"": ""hello"", ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
             
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
             Assert.Equal(JsonConvert.SerializeObject(expectedPayload), req.ContentAsString);
@@ -105,13 +109,29 @@ namespace DaprExtensionTests
         public async Task SendMessage_NoBindingNameSpecified()
         {
             // No binding name is specified in the attribute or in the message
-            var input = new DaprBindingMessage("Hello, world!", new Dictionary<string, object>{ { "key", "myKey" } });
+            var input = new DaprBindingMessage("Hello, world!", new Dictionary<string, object>{ { "key", "myKey" } }, operation: "create");
             FunctionInvocationException error = await Assert.ThrowsAsync<FunctionInvocationException>(() =>
                 this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input));
 
             // The exception message should reflect the fact that no binding name was specified
             ArgumentException innerError = Assert.IsType<ArgumentException>(error.GetBaseException());
             Assert.Contains("A non-null binding name must be specified", innerError.Message);
+
+            // No requests should have been sent
+            Assert.Empty(this.GetDaprRequests());
+        }
+
+        [Fact]
+        public async Task SendMessage_NoOperationSpecified()
+        {
+            // No operation is specified in the attribute or in the message
+            var input = new DaprBindingMessage("Hello, world!", new Dictionary<string, object> { { "key", "myKey" } }, binding: "bindingName");
+            FunctionInvocationException error = await Assert.ThrowsAsync<FunctionInvocationException>(() =>
+                this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input));
+
+            // The exception message should reflect the fact that no operation was specified
+            ArgumentException innerError = Assert.IsType<ArgumentException>(error.GetBaseException());
+            Assert.Contains("A non-null operation must be specified", innerError.Message);
 
             // No requests should have been sent
             Assert.Empty(this.GetDaprRequests());
@@ -128,8 +148,8 @@ namespace DaprExtensionTests
             Assert.All(requests, req => Assert.Equal("POST", req.Method));
             Assert.All(requests, req => Assert.StartsWith("application/json", req.ContentType));
 
-            JObject expectedPayload1 = JObject.Parse($@"{{""data"": 1, ""metadata"": {{""key"": ""myKey""}}}}");
-            JObject expectedPayload2 = JObject.Parse($@"{{""data"": 2, ""metadata"": {{""key"": ""myKey""}}}}");
+            JObject expectedPayload1 = JObject.Parse($@"{{""data"": 1, ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
+            JObject expectedPayload2 = JObject.Parse($@"{{""data"": 2, ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
 
             // The order of the requests is not guaranteed
             SavedHttpRequest req1 = Assert.Single(requests, req => req.Path == "/v1.0/bindings/myBinding1");
@@ -166,9 +186,9 @@ namespace DaprExtensionTests
             [NoAutomaticTrigger]
             public static Task ObjectAsyncCollector(
                 object input,
-                [DaprBinding(BindingName = "myBinding")] IAsyncCollector<DaprBindingMessage> events)
+                [DaprBinding(BindingName = "myBinding", Operation = "create")] IAsyncCollector<DaprBindingMessage> events)
             {
-                return events.AddAsync(new DaprBindingMessage(input, new Dictionary<string, object> { { "key", "myKey" } }));
+                return events.AddAsync(new DaprBindingMessage(input,  new Dictionary<string, object> { { "key", "myKey" } }));
             }
 
             [NoAutomaticTrigger]
@@ -179,7 +199,7 @@ namespace DaprExtensionTests
             [NoAutomaticTrigger]
             public static void ObjectOutputParameter(
                 object input,
-               [DaprBinding(BindingName = "myBinding")] out object eventData) => eventData = input;
+               [DaprBinding(BindingName = "myBinding", Operation = "create")] out object eventData) => eventData = input;
 
             [NoAutomaticTrigger]
             [return: DaprBinding]
@@ -187,10 +207,10 @@ namespace DaprExtensionTests
 
             [NoAutomaticTrigger]
             public static async Task AsyncCollectorMultipleItems(
-                [DaprBinding(BindingName = "myBinding")] IAsyncCollector<DaprBindingMessage> events)
+                [DaprBinding(Operation = "create")] IAsyncCollector<DaprBindingMessage> events)
             {
-                await events.AddAsync(new DaprBindingMessage(1, new Dictionary<string, object> { { "key", "myKey" } }, "myBinding1"));
-                await events.AddAsync(new DaprBindingMessage(2, new Dictionary<string, object> { { "key", "myKey" } }, "myBinding2"));
+                await events.AddAsync(new DaprBindingMessage(1,  new Dictionary<string, object> { { "key", "myKey" } }, "myBinding1"));
+                await events.AddAsync(new DaprBindingMessage(2,  new Dictionary<string, object> { { "key", "myKey" } }, "myBinding2"));
             }
         }
 

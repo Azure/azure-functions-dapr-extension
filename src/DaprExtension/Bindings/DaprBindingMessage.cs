@@ -21,11 +21,13 @@ namespace Dapr.AzureFunctions.Extension
         /// <param name="data">The data of the message sent to the Dapr binding.</param>
         /// <param name="metadata">The bag of key value pairs for binding-specific metadata.</param>
         /// <param name="binding">The name of binding.</param>
-        public DaprBindingMessage(object data, Dictionary<string, object>? metadata = null, string? binding = null)
+        /// <param name="operation">The operation to do with the Dapr binding.</param>
+        public DaprBindingMessage(object data, Dictionary<string, object>? metadata = null, string? binding = null, string? operation = null)
         {
             this.Data = JToken.FromObject(data ?? throw new ArgumentNullException(nameof(data)));
             this.Metadata = metadata;
             this.BindingName = binding;
+            this.Operation = operation;
         }
 
         /// <summary>
@@ -33,6 +35,12 @@ namespace Dapr.AzureFunctions.Extension
         /// </summary>
         [JsonProperty("data")]
         public JToken Data { get; set; }
+
+        /// <summary>
+        /// Gets or sets the operation.
+        /// </summary>
+        [JsonProperty("operation", NullValueHandling = NullValueHandling.Ignore)]
+        public string? Operation { get; set; }
 
         /// <summary>
         /// Gets or sets the metadata required for this operation.
