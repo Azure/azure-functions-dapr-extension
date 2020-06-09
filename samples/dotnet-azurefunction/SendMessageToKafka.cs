@@ -15,7 +15,7 @@ namespace dotnet_azurefunction
         [FunctionName("SendMessageToKafka")]
         public static async void Run(
             [DaprServiceInvocationTrigger] JObject payload,
-            [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<object> messages,
+            [DaprBinding(BindingName = "%KafkaBindingName%", Operation = "create")] IAsyncCollector<object> messages,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
