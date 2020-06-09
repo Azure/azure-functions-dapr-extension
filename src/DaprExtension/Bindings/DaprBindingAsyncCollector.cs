@@ -25,15 +25,8 @@ namespace Dapr.AzureFunctions.Extension
 
         public Task AddAsync(DaprBindingMessage item, CancellationToken cancellationToken = default)
         {
-            if (item.BindingName == null)
-            {
-                item.BindingName = this.attr.BindingName ?? throw new ArgumentException("A non-null binding name must be specified.");
-            }
-
-            if (item.Operation == null)
-            {
-                item.Operation = this.attr.Operation ?? throw new ArgumentException("A non-null operation must be specified.");
-            }
+            item.BindingName ??= this.attr.BindingName ?? throw new ArgumentException("A non-null binding name must be specified");
+            item.Operation ??= this.attr.Operation ?? throw new ArgumentException("A non-null operation must be specified");
 
             this.requests.Enqueue(item);
             return Task.CompletedTask;

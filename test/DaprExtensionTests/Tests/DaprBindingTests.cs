@@ -113,7 +113,7 @@ namespace DaprExtensionTests
             FunctionInvocationException error = await Assert.ThrowsAsync<FunctionInvocationException>(() =>
                 this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input));
 
-            // The exception message should reflect the fact that no operation was specified
+            // The exception message should reflect the fact that no binding name was specified
             ArgumentException innerError = Assert.IsType<ArgumentException>(error.GetBaseException());
             Assert.Contains("A non-null binding name must be specified", innerError.Message);
 
@@ -209,8 +209,8 @@ namespace DaprExtensionTests
             public static async Task AsyncCollectorMultipleItems(
                 [DaprBinding(Operation = "create")] IAsyncCollector<DaprBindingMessage> events)
             {
-                await events.AddAsync(new DaprBindingMessage(1,  new Dictionary<string, object> { { "key", "myKey" } }, "myBinding1"));
-                await events.AddAsync(new DaprBindingMessage(2,  new Dictionary<string, object> { { "key", "myKey" } }, "myBinding2"));
+                await events.AddAsync(new DaprBindingMessage(1, new Dictionary<string, object> { { "key", "myKey" } }, "myBinding1"));
+                await events.AddAsync(new DaprBindingMessage(2, new Dictionary<string, object> { { "key", "myKey" } }, "myBinding2"));
             }
         }
 
