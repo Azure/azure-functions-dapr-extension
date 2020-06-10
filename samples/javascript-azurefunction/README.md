@@ -63,6 +63,12 @@ Build the function app:
 dotnet build -o bin extensions.csproj
 ```
 
+Note that this extensions.csproj file is required in order to reference the exception as a project rather than as an nuget package. To do the equivalent step with a published version of the extension on nuget.org, run the following step:
+
+```
+func extensions install -p Dapr.AzureFunctions.Extension -v <version>
+```
+
 Run function host with Dapr: 
 
 ```
