@@ -14,17 +14,9 @@
       "type": "daprState",
       "direction": "in",
       "dataType": "string",
-      "name": "daprState",
+      "name": "state",
       "stateStore": "statestore",
-      "key": "{key}",
-      "daprAddress": "%daprAddress%"
-    },
-    {
-      "type": "daprInvoke",
-      "direction": "out",
-      "dataType": "string",
-      "name": "daprInvoke",
-      "daprAddress": "%daprAddress%"
+      "key": "{key}"
     },
     {
       "type": "http",
