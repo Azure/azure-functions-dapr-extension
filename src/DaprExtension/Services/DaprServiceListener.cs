@@ -22,7 +22,7 @@ namespace Dapr.AzureFunctions.Extension
     sealed class DaprServiceListener : IDisposable
     {
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
-        readonly HashSet<string> topics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        readonly HashSet<DaprTopicSubscription> topics = new HashSet<DaprTopicSubscription>(new DaprTopicSubscriptionComparer());
         readonly string appAddress;
         readonly ILogger log;
 
@@ -103,11 +103,11 @@ namespace Dapr.AzureFunctions.Extension
             this.listeners.Add(daprListener);
         }
 
-        internal void RegisterTopic(string topicName)
+        internal void RegisterTopic(DaprTopicSubscription topic)
         {
-            if (this.topics.Add(topicName))
+            if (this.topics.Add(topic))
             {
-                this.log.LogInformation("Registered topic: {TopicName}", topicName);
+                this.log.LogInformation("Registered topic: {TopicName}", topic.Topic);
             }
         }
 
@@ -116,6 +116,38 @@ namespace Dapr.AzureFunctions.Extension
             string topicListJson = JsonConvert.SerializeObject(this.topics);
             context.Response.ContentType = "application/json";
             return context.Response.WriteAsync(topicListJson);
+        }
+
+        /// <summary>
+        /// Helper class to define comparer of Dapr Topic Subscription.
+        /// </summary>
+        class DaprTopicSubscriptionComparer : IEqualityComparer<DaprTopicSubscription>
+        {
+            public bool Equals(DaprTopicSubscription topic1, DaprTopicSubscription topic2)
+            {
+                if (topic2 == null && topic1 == null)
+                {
+                    return true;
+                }
+                else if (topic1 == null || topic2 == null)
+                {
+                    return false;
+                }
+                else if (topic1.Topic.Equals(topic2.Topic, StringComparison.OrdinalIgnoreCase)
+                    && topic1.Route.Equals(topic2.Route, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            public int GetHashCode(DaprTopicSubscription topic)
+            {
+                return Tuple.Create(topic.Topic.ToLowerInvariant(), topic.Route.ToLowerInvariant()).GetHashCode();
+            }
         }
     }
 }
