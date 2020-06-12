@@ -12,12 +12,6 @@
     <ProjectReference Include="..\..\src\DaprExtension\DaprExtension.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="components\messagebus.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="components\statestore.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

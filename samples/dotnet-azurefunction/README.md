@@ -52,7 +52,7 @@ spec:
 Run function host with Dapr: 
 
 ```
-dapr run --app-id functionapp --app-port 3001 --port 3501 func host start
+dapr run --app-id functionapp --app-port 3001 --port 3501 --components-path ..\components\ -- func host start
 ```
 
 The command should output the dapr logs that look like the following:
@@ -201,7 +201,7 @@ public static void Run(
 Then let's see what will happen if we publish a message to topic A using the Dapr cli:
 
 ```powershell
-dapr publish --topic A --payload 'This is a test'
+dapr publish --topic A --data 'This is a test'
 ```
 
 The Dapr logs should show the following:
