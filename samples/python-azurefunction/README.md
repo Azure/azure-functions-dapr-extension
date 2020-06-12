@@ -14,11 +14,7 @@ This sample requires you to have the following installed on your machine:
     - This sample uses Python 3.7.6. Some nuance or issue is expected if using other version
 - [Set up Python Environment in Visual Studio Code](https://code.visualstudio.com/docs/python/python-tutorial)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download), used for install Dapr Extension for non .NET language
-<<<<<<< HEAD
 - [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
-=======
-- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings)
->>>>>>> c19b0bc... consolidate the components and update doc to reflect the new cli
 
 # Step 1 - Understand the Settings 
 
@@ -116,12 +112,7 @@ You're up and running! Both Dapr and your app logs will appear here.
     ```
     Project Dapr.AzureFunctions.Extension is not compatible with netcore31 (.NETCore,Version=v3.1). Project Dapr.AzureFunctions.Extension supports: netstandard2.0 (.NETStandard,Version=v2.0)
     ```
-<<<<<<< HEAD
     Make sure the target framework for `extension.proj` is netstandard 2.0. Since we have a project reference for our Dapr Extension, build step tries to restore `Dapr.AzureFunctions.Extension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you swtich to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
-=======
-    Make sure the target framework for `extension.proj` is netstandard 2.0. Since we have a project reference for our Dapr Extension, build step tries to restore `DaprExtension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you swtich to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
->>>>>>> c19b0bc... consolidate the components and update doc to reflect the new cli
-
 
 
 # Step 3 - Understand the Sample
