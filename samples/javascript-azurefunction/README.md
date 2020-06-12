@@ -11,7 +11,7 @@ This sample requires you to have the following installed on your machine:
 - [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md#environment-setup) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download)
-- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings)
+- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
 
 # Step 1 - Understand the Settings 
 
