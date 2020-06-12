@@ -146,8 +146,7 @@ namespace Dapr.AzureFunctions.Extension
 
             public int GetHashCode(DaprTopicSubscription topic)
             {
-                string combined = topic.Topic + topic.Route;
-                return combined.ToLowerInvariant().GetHashCode();
+                return Tuple.Create(topic.Topic.ToLowerInvariant(), topic.Route.ToLowerInvariant()).GetHashCode();
             }
         }
     }
