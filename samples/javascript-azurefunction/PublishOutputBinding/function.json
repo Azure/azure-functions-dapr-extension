@@ -1,0 +1,22 @@
+{
+  "bindings": [
+    {
+      "type": "httpTrigger",
+      "name": "req",
+      "authLevel": "function",
+      "method": [ "post" ],
+      "route": "topic/{topicName}"
+    },
+    {
+      "type": "daprPublish",
+      "direction": "out",
+      "topic": "{topicName}",
+      "name": "payload"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}

@@ -131,6 +131,11 @@ namespace Dapr.AzureFunctions.Extension
 
             DaprBindingMessage message = new DaprBindingMessage(data!);
 
+            if (TryGetValue(json, "operation", out string? operation))
+            {
+                message.Operation = operation;
+            }
+
             if (TryGetValue(json, "metadata", out JObject? metadata))
             {
                 message.Metadata = metadata?.ToObject<Dictionary<string, object>>();

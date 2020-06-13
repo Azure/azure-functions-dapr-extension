@@ -1,0 +1,15 @@
+{
+  "bindings": [
+    {
+      "type": "daprServiceInvocationTrigger",
+      "name": "payload"
+    },
+    {
+      "type": "daprState",
+      "direction": "in",
+      "key": "order",
+      "stateStore": "%StateStoreName%",
+      "name": "data"
+    }
+  ]
+}

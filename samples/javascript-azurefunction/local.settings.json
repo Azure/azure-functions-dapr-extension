@@ -1,11 +1,9 @@
 {
-    "IsEncrypted": false,
-    "Values": {
-      "FUNCTIONS_WORKER_RUNTIME": "node",
-      "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-      "daprAddress": "http://localhost:3501"
-    },
-    "Host": {
-      "LocalHttpPort": 7071
-    }
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "StateStoreName": "statestore", // should be same as metatdata.name in components/statestore.yaml
+    "KafkaBindingName": "sample-topic" // should be same as metatdata.name in components/kafka_binding.yaml
   }
+}
