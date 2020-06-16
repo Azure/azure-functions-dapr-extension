@@ -17,5 +17,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\DaprExtension\DaprExtension.csproj" />
   </ItemGroup>
-
+  
 </Project>
