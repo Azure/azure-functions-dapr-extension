@@ -7,4 +7,4 @@ def main(payload,
     logging.info('Python function processed a CreateNewOrder request from the Dapr Runtime.')  
     payload_json = json.loads(payload)
     logging.info(payload_json["data"])
-    order.set(json.dumps(payload_json["data"]))
+    order.set(json.dumps({"value": payload_json["data"]}))
