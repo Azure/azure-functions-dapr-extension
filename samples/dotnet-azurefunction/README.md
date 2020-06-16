@@ -281,14 +281,21 @@ dapr stop --app-id functionapp
 Now that you're successfully having your Dapr'd function app with running locally, you probably want to deploy to kubernetes cluster. If you have update the sample code to fit your scenario, you need to create new images with your updated code. First you need to install docker on your machine. Next, follow these steps to build your custom container image for your function:
 
 1. Update function app as you see fit!
-2. Navigate to the directory of the app you want to build a new image for, in this example, the root directory is `/dotnet-azurefunction`. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image. 
-> **Note**:  In this dotnet sample, the project file has a **nuget reference** for the `Dapr.AzureFunctions.Extension`, instead of a project reference. Using a package reference simplifies the docker build step. You can certainly swtich to project reference to build this dotnet sample, especially when you are actively using this sample to test changes in `DaprExtension` project. If you have updated any code in `DaprExtension` project, please make sure the lastest `.nupkg` file has been copied over into `/dotnet-azurefunction/localNuget` folder. This copy step is supposed to be taken care in `DaprExtension` build step. The specific command can be found in the `DaprExtension.csproj` as:
-    
-      <Target Name="CopyPackage" AfterTargets="Build">
-        <Copy SourceFiles="$(RepoRoot)bin\$(Configuration)\nugets\$(PackageId).$(NupkgVersion).nupkg"
-              DestinationFolder="$(RepoRoot)samples\dotnet-azurefunction\localNuget" />
-      </Target>
- >        
+2. There are two ways you can build the docker images. In this dotnet sample, the project file has a **project reference** for the `Dapr.AzureFunctions.Extension`, instead of a **nuget reference**. 
+   
+    ### Approach 1: Using a Project Reference
+
+    1a. Go to the root directory of this repo, you should see a `dockerfile` under `/azure-functions-extension` folder.
+
+    2a. Continue step 3
+
+    ### Approach 2: Using a Nuget Reference
+
+    1b. Navigate to `/dotnet-azurefunction` directory. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image.
+
+    2b. Change the csproj file to use the nuget package. It will try to resolve the Dapr Extension package reference from the local nuget source which points to the `localnuget` folder. See the definition in `nuget.config` file.
+
+    3b. Copy the lastest `.nupkg` file from `$RepoRoot/bin/Debug/nugets` or  `$RepoRoot/bin/Release/nugets` into `/dotnet-azurefunction/localNuget` folder. 
 
 3. Run docker build command and specify your image name:
      ```
@@ -358,7 +365,7 @@ If you need a non-default namespace or in production environment, Helm has to be
     dapr-kafka-zookeeper-1   1/1     Running   0          2m13s
     dapr-kafka-zookeeper-2   1/1     Running   0          109s
    ```
-- Run `kubectl apply -f ./deploy/kafka.yaml` and observe that your kafka was successfully configured!
+- Run `kubectl apply -f .\deploy\kafka.yaml` and observe that your kafka was successfully configured!
    ```
    component.dapr.io/sample-topic created
    ```
@@ -366,7 +373,7 @@ If you need a non-default namespace or in production environment, Helm has to be
 
 #### [Optional] Setting up the Pub/Sub in Kubernetes
   - In this demo, we use Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store
-  - Run `kubectl apply -f ./deploy/redis.yaml` and observe that your state store was successfully configured!
+  - Run `kubectl apply -f .\deploy\redis.yaml` and observe that your state store was successfully configured!
     ```
     component.dapr.io/messagebus configured
     ```

@@ -7,12 +7,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
-    <PackageReference Include="Dapr.AzureFunctions.Extension" Version="$(NupkgVersion)" />
+    <!-- Switch to Nuget Reference by uncomment this line and remove the Project Reference line  -->
+    <!--<PackageReference Include="Dapr.AzureFunctions.Extension" Version="$(NupkgVersion)" />-->
   </ItemGroup>
-  <!-- Switch to Project Reference by uncomment this line and remove the Package Reference line  -->
-  <!--<ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\DaprExtension\DaprExtension.csproj" />
-  </ItemGroup>-->
+  </ItemGroup>
   <ItemGroup>
     <None Update="components\kafka_bindings.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
