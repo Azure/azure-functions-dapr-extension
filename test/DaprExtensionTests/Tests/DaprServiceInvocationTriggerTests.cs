@@ -20,8 +20,13 @@ namespace DaprExtensionTests
 
     public class DaprServiceInvocationTriggerTests : DaprTestBase
     {
+        private static readonly IDictionary<string, string> EnvironmentVariables = new Dictionary<string, string>()
+        {
+            { "DaprMethodName", "MyBoundMethodName" }
+        };
+
         public DaprServiceInvocationTriggerTests(ITestOutputHelper output)
-            : base(output)
+            : base(output, EnvironmentVariables)
         {
             this.AddFunctions(typeof(Functions));
         }
@@ -72,6 +77,22 @@ namespace DaprExtensionTests
             Assert.Equal(serializedInput, result);
         }
 
+        [Fact]
+        public async Task MethodNameInAttributeBindingExpression()
+        {
+            string input = "hello";
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                $"http://localhost:3001/myBoundMethodName",
+                input);
+
+            Assert.NotNull(response.Content);
+            string result = await response.Content.ReadAsStringAsync();
+
+            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            Assert.Equal(serializedInput, result);
+        }
+
         // TODO: Error response tests
 
         [Fact]
@@ -110,6 +131,8 @@ namespace DaprExtensionTests
             public static object ReturnUnknownType([DaprServiceInvocationTrigger] object input) => input;
 
             public static object DotNetMethodName([DaprServiceInvocationTrigger(MethodName = "DaprMethodName")] string input) => input;
+
+            public static object DotNetBindingExpression([DaprServiceInvocationTrigger(MethodName = "%DaprMethodName%")] string input) => input;
 
             [FunctionName("Add")]
             public static string Sample([DaprServiceInvocationTrigger] JObject args, ILogger log)

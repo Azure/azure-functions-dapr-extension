@@ -12,6 +12,7 @@ namespace Dapr.AzureFunctions.Extension
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
     using Newtonsoft.Json.Linq;
@@ -19,10 +20,12 @@ namespace Dapr.AzureFunctions.Extension
     class DaprTopicTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;
+        readonly INameResolver nameResolver;
 
-        public DaprTopicTriggerBindingProvider(DaprServiceListener serviceListener)
+        public DaprTopicTriggerBindingProvider(DaprServiceListener serviceListener, INameResolver nameResolver)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
+            this.nameResolver = nameResolver;
         }
 
         public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
@@ -34,12 +37,7 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
-            string? topic = attribute.Topic;
-            if (topic == null)
-            {
-                MemberInfo method = parameter.Member;
-                topic = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
-            }
+            string topic = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.Topic);
 
             // Verison 0.8 only support route to be the same as the topic name
             return Task.FromResult<ITriggerBinding?>(
