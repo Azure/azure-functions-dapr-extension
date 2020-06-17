@@ -11,7 +11,6 @@ namespace Dapr.AzureFunctions.Extension
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
 
@@ -35,16 +34,7 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
-            string methodName;
-            if (attribute.MethodName == null)
-            {
-                MemberInfo method = parameter.Member;
-                methodName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
-            }
-            else if (!this.nameResolver.TryResolveWholeString(attribute.MethodName, out methodName))
-            {
-                methodName = attribute.MethodName;
-            }
+            string methodName = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.MethodName);
 
             return Task.FromResult<ITriggerBinding?>(
                 new DaprServiceInvocationTriggerBinding(this.serviceListener, methodName, parameter));
