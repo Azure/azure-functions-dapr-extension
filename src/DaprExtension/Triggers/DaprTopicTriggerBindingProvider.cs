@@ -37,16 +37,7 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
-            string topic;
-            if (attribute.Topic == null)
-            {
-                MemberInfo method = parameter.Member;
-                topic = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
-            }
-            else if (!this.nameResolver.TryResolveWholeString(attribute.Topic, out topic))
-            {
-                topic = attribute.Topic;
-            }
+            string topic = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.Topic);
 
             return Task.FromResult<ITriggerBinding?>(
                 new DaprTopicTriggerBinding(this.serviceListener, topic, parameter));
