@@ -8,6 +8,7 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Text;
@@ -91,18 +92,31 @@ namespace DaprExtensionTests
             JArray array = Assert.IsType<JArray>(result);
             Assert.NotEmpty(array);
 
-            Assert.Contains(nameof(Functions.IntTopic), array);
-            Assert.Contains(nameof(Functions.CustomTypeTopic), array);
-            Assert.Contains(nameof(Functions.StringTopic), array);
-            Assert.Contains(nameof(Functions.StreamTopic), array);
-            Assert.Contains(nameof(Functions.BytesTopic), array);
-            Assert.Contains(nameof(Functions.JObjectTopic), array);
-            Assert.Contains(nameof(Functions.CloudEventTopic), array);
+            // verify the topic name is correctly registered
+            IEnumerable<string> topics = array.Select(item => (JObject)item).Select(obj => (string)obj.GetValue("topic"));          
+            Assert.Contains(nameof(Functions.IntTopic), topics);
+            Assert.Contains(nameof(Functions.CustomTypeTopic), topics);
+            Assert.Contains(nameof(Functions.StringTopic), topics);
+            Assert.Contains(nameof(Functions.StreamTopic), topics);
+            Assert.Contains(nameof(Functions.BytesTopic), topics);
+            Assert.Contains(nameof(Functions.JObjectTopic), topics);
+            Assert.Contains(nameof(Functions.CloudEventTopic), topics);
+
+            // verify the route is correctly registered
+            // Version 0.8 only support route to match topic name
+            IEnumerable<string> routes = array.Select(item => (JObject)item).Select(obj => (string)obj.GetValue("route"));
+            Assert.Contains(nameof(Functions.IntTopic), routes);
+            Assert.Contains(nameof(Functions.CustomTypeTopic), routes);
+            Assert.Contains(nameof(Functions.StringTopic), routes);
+            Assert.Contains(nameof(Functions.StreamTopic), routes);
+            Assert.Contains(nameof(Functions.BytesTopic), routes);
+            Assert.Contains(nameof(Functions.JObjectTopic), routes);
+            Assert.Contains(nameof(Functions.CloudEventTopic), routes);
 
             // Make sure the explicit topic names are handled correctly
-            Assert.Contains("MyTopic", array);
-            Assert.DoesNotContain(nameof(Functions.DotNetMethodName), array);
-            Assert.DoesNotContain("MyFunctionName", array);
+            Assert.Contains("MyTopic", topics);
+            Assert.DoesNotContain(nameof(Functions.DotNetMethodName), topics);
+            Assert.DoesNotContain("MyFunctionName", topics);
         }
 
         [Theory]

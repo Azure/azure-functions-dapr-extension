@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "type": "httpTrigger",
+      "name": "req",
+      "authLevel": "function",
+      "method": [ "get" ],
+      "route": "invoke/{appId}/{methodName}"
+    },
+    {
+      "type": "daprInvoke",
+      "direction": "out",
+      "appId": "{appId}",
+      "methodName": "{methodName}",
+      "httpVerb": "post",
+      "name": "payload"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}

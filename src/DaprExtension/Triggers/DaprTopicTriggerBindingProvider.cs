@@ -39,8 +39,9 @@ namespace Dapr.AzureFunctions.Extension
 
             string topic = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.Topic);
 
+            // Verison 0.8 only support route to be the same as the topic name
             return Task.FromResult<ITriggerBinding?>(
-                new DaprTopicTriggerBinding(this.serviceListener, topic, parameter));
+                new DaprTopicTriggerBinding(this.serviceListener, topic, route: topic, parameter));
         }
 
         class DaprTopicTriggerBinding : DaprTriggerBindingBase
@@ -49,20 +50,23 @@ namespace Dapr.AzureFunctions.Extension
 
             readonly DaprServiceListener serviceListener;
             readonly string topicName;
+            readonly string route;
 
             public DaprTopicTriggerBinding(
                 DaprServiceListener serviceListener,
                 string topicName,
+                string route,
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
             {
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
                 this.topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
+                this.route = route ?? throw new ArgumentNullException(nameof(route));
             }
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprTopicListener(this.serviceListener, executor, this.topicName);
+                return new DaprTopicListener(this.serviceListener, executor, new DaprTopicSubscription(this.topicName, this.route));
             }
 
             protected override object ConvertFromJson(JToken jsonValue, Type destinationType)
@@ -88,18 +92,18 @@ namespace Dapr.AzureFunctions.Extension
             sealed class DaprTopicListener : DaprListenerBase
             {
                 readonly ITriggeredFunctionExecutor executor;
-                readonly string topicName;
+                readonly DaprTopicSubscription topic;
 
                 public DaprTopicListener(
                     DaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
-                    string topicName)
+                    DaprTopicSubscription topic)
                     : base(serviceListener)
                 {
                     this.executor = executor;
-                    this.topicName = topicName;
+                    this.topic = topic;
 
-                    serviceListener.RegisterTopic(topicName);
+                    serviceListener.RegisterTopic(this.topic);
                 }
 
                 public override void Dispose()
@@ -109,9 +113,10 @@ namespace Dapr.AzureFunctions.Extension
 
                 public override void AddRoute(IRouteBuilder routeBuilder)
                 {
-                    // Example: POST /Topic1
+                    // Example: POST /orders
+                    // { "topic": "newOrder", "route": "/orders"}
                     // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-routes-for-dapr-to-deliver-topic-events
-                    routeBuilder.MapPost(this.topicName, this.DispatchAsync);
+                    routeBuilder.MapPost(this.topic.Route, this.DispatchAsync);
                 }
 
                 public override async Task DispatchAsync(HttpContext context)
