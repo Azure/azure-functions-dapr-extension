@@ -15,8 +15,14 @@
 
     public class DaprBindingTriggerTests : DaprTestBase
     {
+        private static readonly IDictionary<string, string> EnvironmentVariables = new Dictionary<string, string>()
+        {
+            { "BindingName", "MyBoundBindingName" }
+        };
+
+
         public DaprBindingTriggerTests(ITestOutputHelper output) 
-            : base(output)
+            : base(output, EnvironmentVariables)
         {
             this.AddFunctions(typeof(Functions));
         }
@@ -43,7 +49,23 @@
             string input = TriggerDataInput;
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
-                $"http://localhost:3001/daprTriggerName",
+                $"http://localhost:3001/daprBindingName",
+                input);
+
+            Assert.NotNull(response.Content);
+            string result = await response.Content.ReadAsStringAsync();
+
+            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            Assert.Equal(serializedInput, result);
+        }
+
+        [Fact]
+        public async Task MethodNameInAttributeBindingExpression()
+        {
+            string input = TriggerDataInput;
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                $"http://localhost:3001/myBoundBindingName",
                 input);
 
             Assert.NotNull(response.Content);
@@ -93,7 +115,9 @@
 
             public static object ReturnUnknownType([DaprBindingTrigger] object input) => input;
 
-            public static object DotNetMethodName([DaprBindingTrigger(BindingName = "DaprTriggerName")] string input) => input;
+            public static object DotNetMethodName([DaprBindingTrigger(BindingName = "DaprBindingName")] string input) => input;
+
+            public static object DotNetBindingExpression([DaprBindingTrigger(BindingName = "%BindingName%")] string input) => input;
 
             [FunctionName("Add")]
             public static string Sample([DaprServiceInvocationTrigger] JObject args, ILogger log)

@@ -27,9 +27,16 @@ namespace DaprExtensionTests
     [Collection("Sequential")]
     public abstract class DaprTestBase : IDisposable, IAsyncLifetime
     {
+        private const int DaprPort = 3501;
+
         static readonly HttpClient HttpClient = new HttpClient()
         {
             Timeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(10),
+        };
+
+        static readonly IDictionary<string, string> DefaultEnvironmentVariables = new Dictionary<string, string>()
+        {
+            { "DAPR_HTTP_PORT", DaprPort.ToString() }
         };
 
         readonly IHost functionsHost;
@@ -39,15 +46,30 @@ namespace DaprExtensionTests
         readonly TestFunctionTypeLocator typeLocator;
         readonly TestNameResolver nameResolver;
 
-        public DaprTestBase(ITestOutputHelper output)
+        public DaprTestBase(ITestOutputHelper output) :
+            this(output, DefaultEnvironmentVariables)
+        {
+        }
+
+        public DaprTestBase(ITestOutputHelper output,
+            IDictionary<string, string> environmentVariables)
         {
             this.logProvider = new TestLogProvider(output);
             this.typeLocator = new TestFunctionTypeLocator();
             this.nameResolver = new TestNameResolver();
 
-            // Use 3501 to avoid conflicting with the real Dapr port number
-            int daprPort = 3501;
-            this.nameResolver.AddSetting("DAPR_HTTP_PORT", daprPort.ToString());
+            foreach (var kvPair in DefaultEnvironmentVariables)
+            {
+                if (!environmentVariables.ContainsKey(kvPair.Key))
+                {
+                    environmentVariables[kvPair.Key] = kvPair.Value;
+                }
+            }
+
+            foreach (var kvPair in environmentVariables)
+            {
+                this.nameResolver.AddSetting(kvPair.Key, kvPair.Value);
+            }
 
             this.functionsHost = new HostBuilder()
                 .ConfigureLogging(loggingBuilder => loggingBuilder.AddProvider(this.logProvider))
@@ -59,7 +81,7 @@ namespace DaprExtensionTests
                         collection.AddSingleton<ITypeLocator>(this.typeLocator);
                     })
                 .Build();
-            this.daprRuntime = new DaprRuntimeEmulator(daprPort);
+            this.daprRuntime = new DaprRuntimeEmulator(DaprPort);
         }
 
         public virtual void Dispose()

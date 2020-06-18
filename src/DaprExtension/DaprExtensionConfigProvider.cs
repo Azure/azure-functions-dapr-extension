@@ -8,6 +8,8 @@ namespace Dapr.AzureFunctions.Extension
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
+    using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;
@@ -22,12 +24,14 @@ namespace Dapr.AzureFunctions.Extension
     {
         readonly DaprServiceClient daprClient;     // TODO: Use an interface for mocking
         readonly DaprServiceListener daprListener; // TODO: Use an interface for mocking
+        readonly INameResolver nameResolver;
         readonly ILogger logger;
 
         public DaprExtensionConfigProvider(
             DaprServiceClient daprClient,
             DaprServiceListener daprListener,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            INameResolver nameResolver)
         {
             this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
             this.daprListener = daprListener ?? throw new ArgumentNullException(nameof(daprListener));
@@ -38,6 +42,7 @@ namespace Dapr.AzureFunctions.Extension
             }
 
             this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.nameResolver = nameResolver;
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -53,6 +58,7 @@ namespace Dapr.AzureFunctions.Extension
 
             // NOTE: The order of conversions for each binding rules is important!
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
+            stateRule.AddConverter<byte[], DaprStateRecord>(CreateSaveStateParameters);
             stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
@@ -66,10 +72,12 @@ namespace Dapr.AzureFunctions.Extension
             stateRule.BindToInput<object?>(daprStateConverter);
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
+            invokeRule.AddConverter<byte[], InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
 
             var publishRule = context.AddBindingRule<DaprPublishAttribute>();
+            publishRule.AddConverter<byte[], DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<JObject, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<object, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.BindToCollector(attr => new DaprPublishAsyncCollector(attr, this.daprClient));
@@ -87,13 +95,18 @@ namespace Dapr.AzureFunctions.Extension
             secretsRule.BindToInput<byte[]>(daprSecretConverter);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
-                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener));
+                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener, this.nameResolver));
 
             context.AddBindingRule<DaprTopicTriggerAttribute>()
-                .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener));
+                .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener, this.nameResolver));
 
             context.AddBindingRule<DaprBindingTriggerAttribute>()
-                .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener));
+                .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener, this.nameResolver));
+        }
+
+        static DaprPubSubEvent CreatePubSubEvent(byte[] arg)
+        {
+            return CreatePubSubEvent(BytesToJObject(arg));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(object arg)
@@ -110,6 +123,12 @@ namespace Dapr.AzureFunctions.Extension
             }
 
             return e;
+        }
+
+        static JObject BytesToJObject(byte[] arg)
+        {
+            string json = Encoding.UTF8.GetString(arg);
+            return JObject.Parse(json);
         }
 
         static DaprBindingMessage CreateBindingMessage(object paramValues)
@@ -149,6 +168,11 @@ namespace Dapr.AzureFunctions.Extension
             return message;
         }
 
+        internal static DaprStateRecord CreateSaveStateParameters(byte[] arg)
+        {
+            return CreateSaveStateParameters(BytesToJObject(arg));
+        }
+
         internal static DaprStateRecord CreateSaveStateParameters(JObject parametersJson)
         {
             if (!TryGetValue(parametersJson, "value", out string? value))
@@ -169,6 +193,11 @@ namespace Dapr.AzureFunctions.Extension
         internal static DaprStateRecord CreateSaveStateParameters(object parametersValue)
         {
             return new DaprStateRecord(JToken.FromObject(parametersValue));
+        }
+
+        internal static InvokeMethodParameters CreateInvokeMethodParameters(byte[] arg)
+        {
+            return CreateInvokeMethodParameters(BytesToJObject(arg));
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject parametersJson)

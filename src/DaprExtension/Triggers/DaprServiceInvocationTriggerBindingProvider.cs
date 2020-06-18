@@ -17,10 +17,12 @@ namespace Dapr.AzureFunctions.Extension
     class DaprServiceInvocationTriggerBindingProvider : ITriggerBindingProvider
     {
         readonly DaprServiceListener serviceListener;
+        readonly INameResolver nameResolver;
 
-        public DaprServiceInvocationTriggerBindingProvider(DaprServiceListener serviceListener)
+        public DaprServiceInvocationTriggerBindingProvider(DaprServiceListener serviceListener, INameResolver resolver)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
+            this.nameResolver = resolver;
         }
 
         public Task<ITriggerBinding?> TryCreateAsync(TriggerBindingProviderContext context)
@@ -32,12 +34,7 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
-            string? methodName = attribute.MethodName;
-            if (methodName == null)
-            {
-                MemberInfo method = parameter.Member;
-                methodName = method.GetCustomAttribute<FunctionNameAttribute>()?.Name ?? method.Name;
-            }
+            string methodName = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.MethodName);
 
             return Task.FromResult<ITriggerBinding?>(
                 new DaprServiceInvocationTriggerBinding(this.serviceListener, methodName, parameter));
