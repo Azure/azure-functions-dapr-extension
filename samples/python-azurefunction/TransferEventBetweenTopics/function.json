@@ -1,0 +1,18 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "daprTopicTrigger",
+      "topic": "A",
+      "name": "subEvent",
+      "direction": "in",
+      "dataType": "string"
+    },
+    {
+      "type": "daprPublish",
+      "direction": "out",
+      "name": "pubEvent",
+      "topic": "B"
+    }
+  ]
+}
