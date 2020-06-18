@@ -1,79 +1,27 @@
 # Azure Functions dapr extensions
 
-![Build and Test](https://github.com/cgillum/azure-functions-dapr-extension/workflows/Build%20and%20Test/badge.svg)
+![Build and Test](https://github.com/dapr/azure-functions-extension/workflows/Build%20and%20Test/badge.svg)
 
-⚠️ This is a proof of concept extensions.  It is not intended for production ⚠️
+⚠️ This extension is currently in preview and not recommended for production. ⚠️
 
-The Azure Functions dapr extension allows you to easily interact with the dapr APIs from an Azure Function.  This would work in local and Kubernetes scenarios.
+The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted and Kubernetes modes.
 
-## State management
+This extension currently supports Azure Functions written in [C#](./samples/dotnet-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), and [Python](./samples/python-azurefunction).
 
-The state management input and output bindings allow you to write state from your Azure Function.
-
-### JavaScript Example
 ```javascript
 module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+    context.log('Function triggered.  Reading Dapr state...');
 
-    // input binding
-    var data = context.bindings.daprInput;
+    context.log('Current state of this function: ' + context.bindings.daprState);
 
-    // output binding
-    context.bindings.daprOutput = {
-        // stateStore: 'statestore-if-not-in-function.json'
-        // key: 'key-if-not-in-function.json'
-        value: data
-    };
+    context.log('Using Dapr service invocation to trigger Function B');
 
-    context.res = {
-        status: 200
-    };
-};
-```
-
-### C# Example
-
-```csharp
-[FunctionName("MyFunction")]
-public static async Task<IActionResult> Run(
-    [HttpTrigger(AuthorizationLevel.Function, "get", Route = "state/{key}")] HttpRequest req,
-    // Input binding
-    [DaprState(StateStore = "statestore", Key = "{key}")] string inputState,
-    // Output binding - to override statestore or key bind to SaveStateOptions
-    [DaprState(StateStore = "statestore", Key = "{key}-output")] IAsyncCollector<string> outputState,
-    ILogger log)
-{
-    // ...
-    await outputState.AddAsync(inputState);
-}
-```
-
-Can bind to `string`, `Stream`, `byte[]`, or `SaveStateOptions`.
-
-### Properties
-
-|Property Name|Description|
-|---|---|
-|DaprAddress|The address to reach dapr. Default is `http://localhost:3500`|
-|StateStore|Name of the state store|
-|Key|Key used to store the data|
-
-## Invoke method
-
-The invoke method output binding allows your function to invoke a downstream dapr app.
-
-### JavaScript Example
-```javascript
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
-
-    // output binding
     context.bindings.daprInvoke = {
-        // appId: 'appId-if-not-in-function.json'
-        // methodName: 'methodName-if-not-in-function.json'
-        // httpVerb: `httpVerb-if-not-in-function.json'
-        body: data
-    };
+        appId: 'function-b',
+        methodName: 'process',
+        httpVerb: 'post',
+        body: context.bindings.daprState
+    }
 
     context.res = {
         status: 200
@@ -81,31 +29,41 @@ module.exports = async function (context, req) {
 };
 ```
 
-### C# Example
+## Function Triggers
 
-```csharp
-[FunctionName("MyFunction")]
-public static async Task<IActionResult> Run(
-    [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{methodName}")] HttpRequest req,
-    [DaprInvoke(AppId = "other-function", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodOptions> output,
-    ILogger log)
-{
-    // ..
+Azure Function triggers start an execution.
 
-    var outputContent = new InvokeMethodOptions(){
-        Body = "SomeData"
-    };
+| Trigger Type | Description | Samples |
+| -- | -- | -- |
+| daprBindingTrigger | Trigger on a Dapr input binding | [C#](), [JavaScript](), [Python]() |
+| daprServiceInvocationTrigger | Trigger on a Dapr service invocation | [C#](), [JavaScript](), [Python]() |
+| daprTopicTrigger | Trigger on a Dapr topic subscription | [C#](), [JavaScript](), [Python]() |
 
-    await output.AddAsync(outputContent);
-}
-```
+## Function Bindings
 
-### Properties
+Azure Function bindings allow you to pull data in or push data out as during an execution.  **Input Bindings** pass in data at the beginning of an execution at the time of triggering.  **Output Bindings** push data out once an execution has completed.
 
-|Property Name|Description|
-|---|---|
-|DaprAddress|The address to reach dapr. Default is `http://localhost:3500`|
-|AppId|ID of the app to invoke|
-|MethodName|Name of the method to invoke|
-|HttpVerb|Http verb to use during invoke (e.g. `get`, `put`, `post`)|
-|Body|Optional. Any content to send with invoke|
+| Binding Type | Direction | Description | Samples |
+| -- | -- | -- | -- |
+| daprState | Input | Pull in Dapr state for an execution | [C#](), [JavaScript](), [Python]() |
+| daprSecret | Input | Pull in Dapr secrets for an execution | [C#](), [JavaScript](), [Python]() |
+| daprState | Output | Save a value to Dapr state | [C#](), [JavaScript](), [Python]() |
+| daprInvoke | Output | Invoke another Dapr app | [C#](), [JavaScript](), [Python]() |
+| daprPublish | Output | Publish a message to a Dapr topic | [C#](), [JavaScript](), [Python]() |
+| daprBinding | Output | Send a value to a Dapr output binding | [C#](), [JavaScript](), [Python]() |
+
+## Getting Started
+
+### Prerequisites
+
+### Creating the function app
+
+### Installing the Dapr extension
+
+### Using Dapr triggers and bindings
+
+### Debugging locally
+
+### Creating an Azure Function Docker image
+
+### Deploying to Kubernetes
