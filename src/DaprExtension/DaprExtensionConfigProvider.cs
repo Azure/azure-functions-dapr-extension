@@ -175,7 +175,7 @@ namespace Dapr.AzureFunctions.Extension
 
         internal static DaprStateRecord CreateSaveStateParameters(JObject parametersJson)
         {
-            if (!TryGetValue(parametersJson, "value", out string? value))
+            if (!TryGetValue(parametersJson, "value", out JToken? value))
             {
                 throw new ArgumentException("A 'value' parameter is required for save-state operations.", nameof(parametersJson));
             }

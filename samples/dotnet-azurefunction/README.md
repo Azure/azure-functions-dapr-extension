@@ -10,7 +10,7 @@ We'll be running a Darp'd function app locally:
 This sample requires you to have the following installed on your machine:
 - [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md#environment-setup) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
-- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings)
+- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
 
 # Step 1 - Understand the Settings 
 
@@ -52,7 +52,7 @@ spec:
 Run function host with Dapr: 
 
 ```
-dapr run --app-id functionapp --app-port 3001 --port 3501 func host start
+dapr run --app-id functionapp --app-port 3001 --port 3501 --components-path ..\components\ -- func host start
 ```
 
 The command should output the dapr logs that look like the following:
@@ -201,7 +201,7 @@ public static void Run(
 Then let's see what will happen if we publish a message to topic A using the Dapr cli:
 
 ```powershell
-dapr publish --topic A --payload 'This is a test'
+dapr publish --topic A --data 'This is a test'
 ```
 
 The Dapr logs should show the following:

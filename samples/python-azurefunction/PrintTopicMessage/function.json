@@ -1,0 +1,11 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "daprTopicTrigger",
+      "topic": "B",
+      "name": "subEvent",
+      "direction": "in"
+    }
+  ]
+}
