@@ -281,23 +281,10 @@ dapr stop --app-id functionapp
 Now that you're successfully having your Dapr'd function app with running locally, you probably want to deploy to kubernetes cluster. If you have update the sample code to fit your scenario, you need to create new images with your updated code. First you need to install docker on your machine. Next, follow these steps to build your custom container image for your function:
 
 1. Update function app as you see fit!
-2. There are two ways you can build the docker images. In this dotnet sample, the project file has a **project reference** for the `Dapr.AzureFunctions.Extension`, instead of a **nuget reference**. 
-   
-    ### Approach 1: Using a Project Reference
-
-    1a. Go to the root directory of this repo, you should see a `dockerfile` under `/azure-functions-extension` folder.
-
-    2a. Continue step 3
-
-    ### Approach 2: Using a Nuget Reference
-
-    1b. Navigate to `/dotnet-azurefunction` directory. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image.
-
-    2b. Change the csproj file to use the nuget package. It will try to resolve the Dapr Extension package reference from the local nuget source which points to the `localnuget` folder. See the definition in `nuget.config` file.
-
-    3b. Copy the lastest `.nupkg` file from `$RepoRoot/bin/Debug/nugets` or  `$RepoRoot/bin/Release/nugets` into `/dotnet-azurefunction/localNuget` folder. 
-
-3. Run docker build command and specify your image name:
+2. Building the docker image. 
+   Samples in the repo uses project reference to DaprExtensions project file. These extensions are available as Dapr.AzureFunctions.Extension nuget package package on nuget.org. For implementing other functions you can add a nuget package reference to Dapr.AzureFunctions.Extension nuget package.
+    
+   Run docker build command and specify your image name:
      ```
      docker build -t my-docker-id . 
      ```
@@ -307,14 +294,14 @@ Now that you're successfully having your Dapr'd function app with running locall
     docker build -t my-docker-id/mydocker-image .
     ```
 
-4.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`. You can ignore the storage connection to test this, but you might see exception thrown from your container log complaining storage is not defined.
+3.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`. You can ignore the storage connection to test this, but you might see exception thrown from your container log complaining storage is not defined.
     ```
     docker run -e AzureWebjobStorage='connection-string` -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
     ```
 
-5.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
-6.  Update your .yaml file to reflect the new image name.
-7.  Deploy your updated Dapr enabled app: `kubectl apply -f <YOUR APP NAME>.yaml`.
+4.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
+5.  Update your .yaml file to reflect the new image name.
+6.  Deploy your updated Dapr enabled app: `kubectl apply -f <YOUR APP NAME>.yaml`.
 
 
 # Deploy Dapr'd Function App into Kubernetes
