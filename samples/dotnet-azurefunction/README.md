@@ -119,7 +119,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 **Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
 
 ```powershell
-dapr invoke --app-id nodeapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
@@ -274,5 +274,254 @@ To stop your services from running, simply stop the "dapr run" process. Alternat
 
 ```bash
 dapr stop --app-id functionapp
-dapr stop --app-id nodeapp
 ```
+
+# Build the Docker Container for Your Function App
+
+Now that you're successfully having your Dapr'd function app with running locally, you probably want to deploy to kubernetes cluster. If you have update the sample code to fit your scenario, you need to create new images with your updated code. First you need to install docker on your machine. Next, follow these steps to build your custom container image for your function:
+
+1. Update function app as you see fit!
+2. There are two ways you can build the docker images. In this dotnet sample, the project file has a **project reference** for the `Dapr.AzureFunctions.Extension`, instead of a **nuget reference**. 
+   
+    ### Approach 1: Using a Project Reference
+
+    1a. Go to the root directory of this repo, you should see a `dockerfile` under `/azure-functions-extension` folder.
+
+    2a. Continue step 3
+
+    ### Approach 2: Using a Nuget Reference
+
+    1b. Navigate to `/dotnet-azurefunction` directory. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image.
+
+    2b. Change the csproj file to use the nuget package. It will try to resolve the Dapr Extension package reference from the local nuget source which points to the `localnuget` folder. See the definition in `nuget.config` file.
+
+    3b. Copy the lastest `.nupkg` file from `$RepoRoot/bin/Debug/nugets` or  `$RepoRoot/bin/Release/nugets` into `/dotnet-azurefunction/localNuget` folder. 
+
+3. Run docker build command and specify your image name:
+     ```
+     docker build -t my-docker-id . 
+     ```
+     If you're planning on hosting it on docker hub, then it should be
+   
+    ```
+    docker build -t my-docker-id/mydocker-image .
+    ```
+
+4.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`. You can ignore the storage connection to test this, but you might see exception thrown from your container log complaining storage is not defined.
+    ```
+    docker run -e AzureWebjobStorage='connection-string` -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
+    ```
+
+5.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
+6.  Update your .yaml file to reflect the new image name.
+7.  Deploy your updated Dapr enabled app: `kubectl apply -f <YOUR APP NAME>.yaml`.
+
+
+# Deploy Dapr'd Function App into Kubernetes
+Next step, we will show steps to get your Dapr'd function app running in a Kubernetes cluster.
+
+## Prerequisites
+Since our sample does cover multiple Dapr components, here we have a long list of requirements. Please skip any step that is not required for your own function app.  
+- Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- Install [helm](https://helm.sh/docs/intro/install/) (you can skip this if your function app does not use Kafka bindings)
+- A Kubernetes cluster, such as [Minikube](https://github.com/dapr/docs/blob/master/getting-started/cluster/setup-minikube.md), [AKS](https://github.com/dapr/docs/blob/master/getting-started/cluster/setup-aks.md) or [GKE](https://cloud.google.com/kubernetes-engine/)
+- A [Azure Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal) to host your function app
+    - Follow this guide to [find out the connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string#configure-a-connection-string-for-an-azure-storage-account).
+- A State Store, such as [Redis Store](https://github.com/dapr/docs/blob/master/howto/configure-redis/README.md) for Dapr state store and pub/sub message delivery (you can skip this if your function does not use the aforementioned components)
+
+## Setup Dapr on your Kubernetes Cluster
+Once you have a cluster, run `dapr init --kubernetes` to deploy Dapr to it. Please follow this( guide on [how to install Dapr on your kubrtnetes](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md#installing-dapr-on-a-kubernetes-cluster) via Dapr CLI or Helm. Dapr CLI does not support non-default namespaces and only is recommended for testing purposes.
+If you need a non-default namespace or in production environment, Helm has to be used.
+
+```
+⌛  Making the jump to hyperspace...
+✅  Deploying the Dapr Operator to your cluster...
+✅  Success! Dapr has been installed. To verify, run 'kubectl get pods -w' in your terminal
+``` 
+## Deploy your Dapr Building Blocks
+#### [Optional] Configure the State Store
+  - Replace the hostname and password in `deploy/redis.yaml`. https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store
+  - Run `kubectl apply -f ./deploy/redis.yaml` and observe that your state store was successfully configured!
+    ```
+    component.dapr.io/statestore configured
+    ```
+   - Follow [secret management](https://github.com/dapr/docs/tree/master/concepts/secrets) instructions to securely manage your secrets in a production-grade application.
+   - More detail can be found in Dapr sample repo [2.hello-kubernetes](https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store)
+
+
+#### [Optional] Setting up a Kafka in Kubernetes
+  - Install Kafka via incubator/kafka helm 
+    ```
+    helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+    helm repo update
+    kubectl create ns kafka
+    helm install dapr-kafka incubator/kafka --namespace kafka -f ./kafka-non-persistence.yaml
+    ```
+ - Run `kubectl -n kafka get pods -w` to see Kafka pods are running. This might take a few minute, but you should see.
+   ```
+    NAME                     READY   STATUS    RESTARTS   AGE
+    dapr-kafka-0             1/1     Running   0          2m7s
+    dapr-kafka-zookeeper-0   1/1     Running   0          2m57s
+    dapr-kafka-zookeeper-1   1/1     Running   0          2m13s
+    dapr-kafka-zookeeper-2   1/1     Running   0          109s
+   ```
+- Run `kubectl apply -f .\deploy\kafka.yaml` and observe that your kafka was successfully configured!
+   ```
+   component.dapr.io/sample-topic created
+   ```
+- Follow [secret management](https://github.com/dapr/docs/tree/master/concepts/secrets) instructions to securely manage your secrets in a production-grade application.
+
+#### [Optional] Setting up the Pub/Sub in Kubernetes
+  - In this demo, we use Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store
+  - Run `kubectl apply -f .\deploy\redis.yaml` and observe that your state store was successfully configured!
+    ```
+    component.dapr.io/messagebus configured
+    ```
+   - See Dapr sample repo [4.pub-sub](https://github.com/dapr/samples/tree/master/4.pub-sub) for more instructions.
+
+Now you should have all Dapr components up and running in your kubernetes cluster. Next we will show how to deploy your function app into your kubernetes cluster with the Dapr Side Car.
+
+## Deploy your Dapr'd Function App
+You can find your function app deployment file `deploy/function.yaml`. Let's take a look:
+
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: functionapp
+  namespace: default
+data:
+  AzureWebJobsStorage: Base64EncodedConnectionString
+  StateStoreName: c3RhdGVzdG9yZQ==
+  KafkaBindingName: c2FtcGxlLXRvcGlj
+```
+- Put your app settings into `data` block. Please note the value has to be Base64 encoded. For example, the `StateStoreName` value is configured to be `statestore` in `deploy/redis.yaml`, string `statestore` get encoded into `c3RhdGVzdG9yZQ==`.
+- The connection string you retrieved should be formatted as `DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=<account-key>`, which would be encoded into `RGVmYXVsdEVuZHBvaW50c1Byb3RvY29sPWh0dHBzO0FjY291bnROYW1lPXN0b3JhZ2VzYW1wbGU7QWNjb3VudEtleT08YWNjb3VudC1rZXk+`
+  
+In the second part of the deployment file, you need to put your image name and specify your app port where your Dapr Trigger will listen on. 
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: functionapp
+  labels:
+    app: functionapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: functionapp
+  template:
+    metadata:
+      labels:
+        app: functionapp
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/id: "functionapp"
+        dapr.io/port: "<app-port>"
+    spec:
+      containers:
+      - name: functionapp
+        image: <your-docker-hub-id>/<your-image-name>
+        ports:
+        - containerPort: <app-port>
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: functionapp
+```
+
+Now run the following command to deploy the function app into your kubernetes cluster.
+
+``` powershell
+$ kubectl apply -f ./deploy/functionapp.yaml
+
+secret/functionapp created
+deployment.apps/functionapp created
+```
+
+Run `kubectl get pods` to see your function app is up and running.
+```
+NAME                                     READY   STATUS    RESTARTS   AGE
+dapr-operator-64b94c8b85-jtbpn           1/1     Running   0          10m
+dapr-placement-844cf4c696-2mv88          1/1     Running   0          10m
+dapr-sentry-7c8fff7759-zwph2             1/1     Running   0          10m
+dapr-sidecar-injector-675df889d5-22wxr   1/1     Running   0          10m
+functionapp-6d4cc6b7f7-2p9n9             2/2     Running   0          8s
+```
+
+## Test your Dapr'd Function App  
+Now let's try invoke our function. You can use the follwoing commad to the logs. Use `--tail` to specify the last `n` lines of logs.
+```powershell
+kubectl logs --selector=app=functionapp -c functionapp --tail=50
+```
+
+
+In order to hit your function app endpoint, you can use port forwarding. Use the pod name for your function app.
+```
+kubectl port-forward functionapp-6d4cc6b7f7-2p9n9 {port-of-your-choice}:3001
+```
+Now similar to what we have done when testing locally, use any of your preferred tool to send HTTP request. Here we use the Rest Client Plugin.
+
+``` http
+POST  http://localhost:{port-of-your-choice}/CreateNewOrder  
+
+{
+    "data": { 
+        "orderId": 41 
+    }
+}
+```
+
+``` http
+POST  http://localhost:{port-of-your-choice}/RetrieveOrder
+```
+
+``` http
+POST  http://localhost:{port-of-your-choice}/SendMessageToKafka 
+
+{"message": "hello!" }
+
+```
+Run kubectl logs command to retrieve the latest log. You should see your function app is getting invoked as you have seen when testing locally.
+
+``` powershell
+: Function.RetrieveOrder[0]
+      Executing 'RetrieveOrder' (Reason='', Id=0f378098-d15a-4f13-81ea-20caee7ae10c)
+: Function.RetrieveOrder.User[0]
+      C# function processed a RetrieveOrder request from the Dapr Runtime.
+: Function.RetrieveOrder.User[0]
+      {"orderId":41}
+: Function.RetrieveOrder[0]
+      Executed 'RetrieveOrder' (Succeeded, Id=0f378098-d15a-4f13-81ea-20caee7ae10c)
+
+: Function.CreateNewOrder[0]
+      Executing 'CreateNewOrder' (Reason='', Id=faa53523-85c3-41cb-808c-02d47cb7dcdc)
+: Function.CreateNewOrder.User[0]
+      C# function processed a CreateNewOrder request from the Dapr Runtime.
+: Function.CreateNewOrder[0]
+      Executed 'CreateNewOrder' (Succeeded, Id=faa53523-85c3-41cb-808c-02d47cb7dcdc)
+
+: Function.SendMessageToKafka.User[0]
+      C# HTTP trigger function processed a request.
+: Function.SendMessageToKafka[0]
+      Executed 'SendMessageToKafka' (Succeeded, Id=5aa8e383-9c8b-4686-90a7-089d71118d81)
+
+: Function.ConsumeMessageFromKafka[0]
+      Executing 'ConsumeMessageFromKafka' (Reason='', Id=aa8d92a6-2da1-44ff-a033-cb217b9c29541)
+: Function.ConsumeMessageFromKafka.User[0]
+     Hello from Kafka!
+: Function.ConsumeMessageFromKafka[0]
+      Trigger {data: {"message": "hello!"}
+: Function.SendMessageToKafka[0]
+      Executed 'ConsumeMessageFromKafka' (Succeeded, Id=aa8d92a6-2da1-44ff-a033-cb217b9c29541)
+
+```
+
+## Cleanup
+Once you're done using the sample, you can spin down your Kubernetes resources by navigating to the `./deploy` directory and running:
+```
+kubectl delete -f .
+```
+This will spin down each resource defined by the .yaml files in the deploy directory.

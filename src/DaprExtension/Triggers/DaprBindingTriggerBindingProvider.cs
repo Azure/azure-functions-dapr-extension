@@ -34,45 +34,45 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
-            string triggerName = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.BindingName);
+            string daprBindingName = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.BindingName);
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprTriggerBinding(this.serviceListener, triggerName, parameter));
+                new DaprTriggerBinding(this.serviceListener, daprBindingName, parameter));
         }
 
         class DaprTriggerBinding : DaprTriggerBindingBase
         {
             readonly DaprServiceListener serviceListener;
-            readonly string methodName;
+            readonly string bindingName;
 
             public DaprTriggerBinding(
                 DaprServiceListener serviceListener,
-                string methodName,
+                string daprBindingName,
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
             {
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
-                this.methodName = methodName ?? throw new ArgumentNullException(nameof(methodName));
+                this.bindingName = daprBindingName ?? throw new ArgumentNullException(nameof(daprBindingName));
             }
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprTriggerListener(this.serviceListener, executor, this.methodName);
+                return new DaprTriggerListener(this.serviceListener, executor, this.bindingName);
             }
 
             sealed class DaprTriggerListener : DaprListenerBase
             {
                 readonly ITriggeredFunctionExecutor executor;
-                readonly string triggerName;
+                readonly string bindingName;
 
                 public DaprTriggerListener(
                     DaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
-                    string methodName)
+                    string bindingName)
                     : base(serviceListener)
                 {
                     this.executor = executor;
-                    this.triggerName = methodName;
+                    this.bindingName = bindingName;
                 }
 
                 public override void Dispose()
@@ -82,8 +82,8 @@ namespace Dapr.AzureFunctions.Extension
 
                 public override void AddRoute(IRouteBuilder routeBuilder)
                 {
-                    routeBuilder.MapPost(this.triggerName, this.DispatchAsync);
-                    routeBuilder.MapVerb("OPTIONS", this.triggerName, this.Success);
+                    routeBuilder.MapPost(this.bindingName, this.DispatchAsync);
+                    routeBuilder.MapVerb("OPTIONS", this.bindingName, this.Success);
                 }
 
                 public async Task Success(HttpContext context)

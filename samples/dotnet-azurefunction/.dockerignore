@@ -1,1 +1,5 @@
 local.settings.json
+deploy/
+README.md
+.gitignore
+.dockerignore
