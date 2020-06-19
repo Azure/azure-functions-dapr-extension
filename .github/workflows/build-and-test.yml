@@ -37,8 +37,8 @@ jobs:
       run: dotnet pack --configuration release --include-symbols --no-build
     - name: upload artifacts
       uses: actions/upload-artifact@master
-        name: release_drop
       with:
+        name: release_drop
         path: ${{ env.NUPKG_OUTDIR }}
     - name: Publish binaries to github for tags
       if: startswith(github.ref, 'refs/tags/v')
