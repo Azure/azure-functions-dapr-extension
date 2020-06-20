@@ -69,7 +69,7 @@ jobs:
         echo performing docker login 
         docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
         echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-        docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.DOCKER_REGISTRY_ID }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
+        docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ secrets.DOCKER_REGISTRY_ID }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
         pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-        docker push ${{ env.DOCKER_REGISTRY_ID }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.APP_VER }}
+        docker push ${{ secrets.DOCKER_REGISTRY_ID }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.APP_VER }}
 
