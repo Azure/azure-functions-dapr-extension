@@ -64,13 +64,15 @@ jobs:
           --name "Dapr Azure Functions Extension v${REL_VERSION}" \
           --prerelease true \
           ${RELEASE_ARTIFACT[*]}    
-    - name: Build and push samples docker images
-      if: startswith(github.ref, 'refs/tags/v')
+    - name: Build samples docker images
+      run: |
+        echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+        docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
+    - name: Push samples docker images
+      if: github.event_name != 'pull_request'
       run: |
         echo performing docker login 
         docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
-        echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-        docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
         echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
         echo tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.APP_VER }}
         docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.APP_VER }}
