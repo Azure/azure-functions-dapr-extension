@@ -112,7 +112,7 @@ You're up and running! Both Dapr and your app logs will appear here.
     ```
     Project Dapr.AzureFunctions.Extension is not compatible with netcore31 (.NETCore,Version=v3.1). Project Dapr.AzureFunctions.Extension supports: netstandard2.0 (.NETStandard,Version=v2.0)
     ```
-    Make sure the target framework for `extension.proj` is netstandard 2.0. Since we have a project reference for our Dapr Extension, build step tries to restore `DaprExtension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you swtich to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
+    Make sure the target framework for `extension.proj` is netstandard 2.0. Since we have a project reference for our Dapr Extension, build step tries to restore `Dapr.AzureFunctions.Extension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you swtich to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
 
 
 

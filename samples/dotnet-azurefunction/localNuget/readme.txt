@@ -1,1 +1,1 @@
-Pre-release nuget packages from can be checked in here until its officially released.
+nuget packages from local build can be copied here to build sample.

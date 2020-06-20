@@ -6,12 +6,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.10" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
-    <!-- Switch to Nuget Reference by uncomment this line and remove the Project Reference line  -->
-    <!--<PackageReference Include="Dapr.AzureFunctions.Extension" Version="$(NupkgVersion)" />-->
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />    
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DaprExtension\DaprExtension.csproj" />
+    <!-- Switch to Nuget Reference by uncommenting following line and removing the Project Reference  -->
+    <!--<PackageReference Include="Dapr.AzureFunctions.Extension" Version="$(NupkgVersion)" />-->
+    <ProjectReference Include="..\..\src\Dapr.AzureFunctions.Extension\Dapr.AzureFunctions.Extension.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
