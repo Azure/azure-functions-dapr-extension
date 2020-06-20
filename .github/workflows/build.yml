@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NUPKG_OUTDIR: bin/Release/nugets
-      APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY_ID }}
+      APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
     steps:
     - uses: actions/checkout@v2
@@ -72,5 +72,6 @@ jobs:
         echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
         docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
         echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+        echo tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.APP_VER }}
         docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.APP_VER }}
 
