@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build
 
 on:
   push:
@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NUPKG_OUTDIR: bin/Release/nugets
+      APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
     steps:
     - uses: actions/checkout@v2
     - name: Parse release version
@@ -61,4 +63,17 @@ jobs:
           --tag "v${REL_VERSION}" \
           --name "Dapr Azure Functions Extension v${REL_VERSION}" \
           --prerelease true \
-          ${RELEASE_ARTIFACT[*]}
+          ${RELEASE_ARTIFACT[*]}    
+    - name: Build samples docker images
+      run: |
+        echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+        docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
+    - name: Push samples docker images
+      if: github.event_name != 'pull_request'
+      run: |
+        echo performing docker login 
+        docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
+        echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+        echo tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
+        docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
+
