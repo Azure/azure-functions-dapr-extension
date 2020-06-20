@@ -281,31 +281,27 @@ dapr stop --app-id functionapp
 Now that you're successfully having your Dapr'd function app with running locally, you probably want to deploy to kubernetes cluster. If you have update the sample code to fit your scenario, you need to create new images with your updated code. First you need to install docker on your machine. Next, follow these steps to build your custom container image for your function:
 
 1. Update function app as you see fit!
-2. There are two ways you can build the docker images. In this dotnet sample, the project file has a **project reference** for the `Dapr.AzureFunctions.Extension`, instead of a **nuget reference**. 
-   
-    ### Approach 1: Using a Project Reference
-
-    1a. Go to the root directory of this repo, you should see a `dockerfile` under `/azure-functions-extension` folder.
-
-    2a. Continue step 3
-
-    ### Approach 2: Using a Nuget Reference
-
-    1b. Navigate to `/dotnet-azurefunction` directory. You should see the default `Dockerfile` provided by Azure Functions which specify the suitable custom container for use and the selected runtime. Please check [here](https://hub.docker.com/_/microsoft-azure-functions-base) for more information on supported base image.
-
-    2b. Change the csproj file to use the nuget package. It will try to resolve the Dapr Extension package reference from the local nuget source which points to the `localnuget` folder. See the definition in `nuget.config` file.
-
-    3b. Copy the lastest `.nupkg` file from `$RepoRoot/bin/Debug/nugets` or  `$RepoRoot/bin/Release/nugets` into `/dotnet-azurefunction/localNuget` folder. 
-
-3. Run docker build command and specify your image name:
+2. Build Docker image.
+   The sample project has a **project reference** for the `Dapr.AzureFunctions.Extension`, instead of a **nuget package reference**.    
+   Run docker build command from repo root and specify your image name:
      ```
-     docker build -t my-docker-id . 
+     docker build -f samples/dotnet-azurefunction/Dockerfile -t my-docker-id .
      ```
      If you're planning on hosting it on docker hub, then it should be
    
     ```
-    docker build -t my-docker-id/mydocker-image .
+    docker build -f samples/dotnet-azurefunction/Dockerfile -t my-docker-id/mydocker-image .
     ```
+
+    ***Note***
+    To build docker image with Nuget packages generated during the build:
+    a. Modify the samples .csproj file to use the nuget package from local build (instructions are in the .csproj file)
+    b. Copy the latest `.nupkg` file from `$RepoRoot/bin/Debug/nugets` or  `$RepoRoot/bin/Release/nugets` to `samples/dotnet-azurefunction/localNuget` folder.
+    c. To build samples with local nuget reference, use `nugetPackageRef.Dockerfile` in samples/dotnet-azurefunction directory.
+    d. Run docker build command from samples/dotnet-azurefunction and specify your image name:    
+    ```
+     docker build -f samples/dotnet-azurefunction/nugetPackageRef.Dockerfile -t my-docker-id .
+     ```
 
 4.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`. You can ignore the storage connection to test this, but you might see exception thrown from your container log complaining storage is not defined.
     ```

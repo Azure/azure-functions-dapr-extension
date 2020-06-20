@@ -2,26 +2,63 @@ name: Build and Test
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - release-*
+    tags:
+      - v*
     paths-ignore: 
       - '**.md'
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - release-*
     paths-ignore: 
       - '**.md'
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    env:
+      NUPKG_OUTDIR: bin/Release/nugets
     steps:
     - uses: actions/checkout@v2
+    - name: Parse release version
+      run: python ./.github/scripts/get_release_version.py
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
-    - name: Build
-      run: dotnet build
-    - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal
+        dotnet-version: 3.1.102
+    - name: Build solution - release 
+      run: dotnet build --configuration release
+    - name: Run Unit Tests Tests - release
+      run: dotnet test --configuration release --no-build --verbosity normal
+    - name: Generate Nuget Packages - release
+      run: dotnet pack --configuration release --include-symbols --no-build
+    - name: upload artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: release_drop
+        path: ${{ env.NUPKG_OUTDIR }}
+    - name: Publish binaries to github for tags
+      if: startswith(github.ref, 'refs/tags/v')
+      run: |
+        sudo npm install --silent --no-progress -g github-release-cli
+        
+        # Parse repository to get owner and repo names
+        OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+        REPO_NAME="${GITHUB_REPOSITORY#*/}"
+        
+        # Get the list of files
+        RELEASE_ARTIFACT=(${{ env.NUPKG_OUTDIR }}/*)
+        
+        export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
+        echo "Uploading Nuget packages to GitHub Release"
+        github-release upload \
+          --owner $OWNER_NAME \
+          --repo $REPO_NAME \
+          --body "Release dapr azure functions extension v${REL_VERSION}" \
+          --tag "v${REL_VERSION}" \
+          --name "Dapr Azure Functions Extension v${REL_VERSION}" \
+          --prerelease true \
+          ${RELEASE_ARTIFACT[*]}

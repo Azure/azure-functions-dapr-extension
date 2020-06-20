@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprExtension", "src\DaprExtension\DaprExtension.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapr.AzureFunctions.Extension", "src\Dapr.AzureFunctions.Extension\Dapr.AzureFunctions.Extension.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprExtensionTests", "test\DaprExtensionTests\DaprExtensionTests.csproj", "{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}"
 EndProject
@@ -14,6 +14,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-azurefunction", "samples\dotnet-azurefunction\dotnet-azurefunction.csproj", "{1B853ACA-BE4D-4246-A539-D19AF1C2C221}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{B272AB9D-4CB7-43E1-8538-6236DE327C28}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{33E065E0-9CB4-422A-9880-FF71D089BAB8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +42,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
+		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9} = {33E065E0-9CB4-422A-9880-FF71D089BAB8}
+		{1B853ACA-BE4D-4246-A539-D19AF1C2C221} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACF358FE-D84B-4EF9-95B4-E4F537B6D76F}

@@ -4,7 +4,7 @@
 			"path": "samples/dotnet-azurefunction"
 		},
 		{
-			"path": "src/DaprExtension"
+			"path": "src/Dapr.AzureFunctions.Extension"
 		},
 		{
 			"path": "samples/javascript-azurefunction"

@@ -1,12 +1,7 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS installer-env
 
-# Copy the Dapr.AzureFunctions.Extension, style cop, and dotnet sample into the installer-env to build
-COPY /src/Dapr.AzureFunctions.Extension /src/src/Dapr.AzureFunctions.Extension 
-COPY /.stylecop /src/.stylecop
-COPY /samples/dotnet-azurefunction /src/samples/dotnet-function-app
-
-# Build project
-RUN cd /src/samples/dotnet-function-app && \
+COPY . /src/dotnet-function-app
+RUN cd /src/dotnet-function-app && \
     mkdir -p /home/site/wwwroot && \
     dotnet publish *.csproj --output /home/site/wwwroot
 
