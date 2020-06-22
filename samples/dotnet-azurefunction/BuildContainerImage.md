@@ -25,11 +25,11 @@ If you have updated the sample code to fit your scenario, you need to create new
      docker build -f samples/dotnet-azurefunction/nugetPackageRef.Dockerfile -t my-docker-id .
      ```
 
-4.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`. You can ignore the storage connection to test this, but you might see exception thrown from your container log complaining storage is not defined.
+3.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`.
     ```
-    docker run -e AzureWebjobStorage='connection-string` -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
+    docker run -e  -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
     ```
 
-5.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
-6.  Update your .yaml file to reflect the new image name.
-7.  Deploy your updated Dapr enabled app: `kubectl apply -f <YOUR APP NAME>.yaml`.
+4.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
+5.  Update your .yaml file to reflect the new image name.
+6.  Deploy your updated Dapr enabled app: `kubectl apply -f <YOUR APP NAME>.yaml`.

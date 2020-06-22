@@ -4,7 +4,8 @@ metadata:
   name: functionapp
   namespace: default
 data:
-  AzureWebJobsStorage: <encoded-connection-string>
+  ## [Optional]
+  ## AzureWebJobsStorage: <encoded-connection-string>
   StateStoreName: <encoded-state-store-name>
   KafkaBindingName: <encoded-kafka-binding-name>
 
@@ -31,7 +32,7 @@ spec:
     spec:
       containers:
       - name: functionapp
-        image: <your-docker-hub-id>/<your-image-name>
+        image: dapriosamples/dotnet-azurefunction
         ports:
         - containerPort: 3001
         imagePullPolicy: Always
