@@ -4,7 +4,8 @@ metadata:
   name: functionapp
   namespace: default
 data:
-  AzureWebJobsStorage: <encoded-connection-string>
+  ## [Optional]
+  ## AzureWebJobsStorage: <encoded-connection-string>
   StateStoreName: <encoded-state-store-name>
   KafkaBindingName: <encoded-kafka-binding-name>
 

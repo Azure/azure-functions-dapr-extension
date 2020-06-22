@@ -286,8 +286,6 @@ Since our sample does cover multiple Dapr components, here we have a long list o
 - Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - Install [helm](https://helm.sh/docs/intro/install/) (you can skip this if your function app does not use Kafka bindings)
 - A Kubernetes cluster, such as [Minikube](https://github.com/dapr/docs/blob/master/getting-started/cluster/setup-minikube.md), [AKS](https://github.com/dapr/docs/blob/master/getting-started/cluster/setup-aks.md) or [GKE](https://cloud.google.com/kubernetes-engine/)
-- A [Azure Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal) to host your function app
-    - Follow this guide to [find out the connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string#configure-a-connection-string-for-an-azure-storage-account).
 - A State Store, such as [Redis Store](https://github.com/dapr/docs/blob/master/howto/configure-redis/README.md) for Dapr state store and pub/sub message delivery (you can skip this if your function does not use the aforementioned components)
 
 ## Setup Dapr on your Kubernetes Cluster
@@ -352,12 +350,14 @@ metadata:
   name: functionapp
   namespace: default
 data:
-  AzureWebJobsStorage: Base64EncodedConnectionString
+  # [NOT Required for this sample]
+  # AzureWebJobsStorage: Base64EncodedConnectionString
   StateStoreName: c3RhdGVzdG9yZQ==
   KafkaBindingName: c2FtcGxlLXRvcGlj
 ```
 - Put your app settings into `data` block. Please note the value has to be Base64 encoded. For example, the `StateStoreName` value is configured to be `statestore` in `deploy/redis.yaml`, string `statestore` get encoded into `c3RhdGVzdG9yZQ==`.
-- The connection string you retrieved should be formatted as `DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=<account-key>`, which would be encoded into `RGVmYXVsdEVuZHBvaW50c1Byb3RvY29sPWh0dHBzO0FjY291bnROYW1lPXN0b3JhZ2VzYW1wbGU7QWNjb3VudEtleT08YWNjb3VudC1rZXk+`
+- This sample does not require an  [Azure Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal). However, certain Azure Functions supported trigger types, ex: timer trigger, do require a storage account. Follow the guide to [find out the connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string#configure-a-connection-string-for-an-azure-storage-account). 
+    - The retrieved connection string should be formatted as `DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=<account-key>`, which would be encoded into `RGVmYXVsdEVuZHBvaW50c1Byb3RvY29sPWh0dHBzO0FjY291bnROYW1lPXN0b3JhZ2VzYW1wbGU7QWNjb3VudEtleT08YWNjb3VudC1rZXk+`.
   
 In the second part of the deployment file, you need to put your image name and specify your app port where your Dapr Trigger will listen on. 
 
@@ -465,7 +465,7 @@ Run kubectl logs command to retrieve the latest log. You should see your functio
       Executed 'CreateNewOrder' (Succeeded, Id=faa53523-85c3-41cb-808c-02d47cb7dcdc)
 
 : Function.SendMessageToKafka.User[0]
-      C# HTTP trigger function processed a request.
+      C# function processed a SendMessageToKafka request.
 : Function.SendMessageToKafka[0]
       Executed 'SendMessageToKafka' (Succeeded, Id=5aa8e383-9c8b-4686-90a7-089d71118d81)
 

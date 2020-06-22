@@ -19,7 +19,7 @@ namespace dotnet_azurefunction
             [DaprBinding(BindingName = "%KafkaBindingName%", Operation = "create")] IAsyncCollector<object> messages,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("C#  function processed a SendMessageToKafka request.");
 
             await messages.AddAsync(payload);
         }
