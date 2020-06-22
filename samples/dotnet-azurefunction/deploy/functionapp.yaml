@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: functionapp
-        image: <your-docker-hub-id>/<your-image-name>
+        image: dapriosamples/dotnet-azurefunction
         ports:
         - containerPort: 3001
         imagePullPolicy: Always
