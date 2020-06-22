@@ -30,13 +30,13 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.102
+        dotnet-version: 3.1.301
     - name: Build solution - release 
       run: dotnet build --configuration release
     - name: Run Unit Tests Tests - release
       run: dotnet test --configuration release --no-build --verbosity normal
     - name: Generate Nuget Packages - release
-      run: dotnet pack --configuration release --include-symbols --no-build
+      run: dotnet pack --configuration release
     - name: upload artifacts
       uses: actions/upload-artifact@master
       with:
@@ -64,6 +64,10 @@ jobs:
           --name "Dapr Azure Functions Extension v${REL_VERSION}" \
           --prerelease true \
           ${RELEASE_ARTIFACT[*]}    
+    - name: Publish nuget packages to nuget.org for tags
+      if: startswith(github.ref, 'refs/tags/v')
+      run: |
+        dotnet nuget push ${{ env.NUPKG_OUTDIR }}/DApr*.nupkg --skip-duplicate --api-key ${{ secrets.NUGETORG_DAPR_API_KEY }} --source https://api.nuget.org/v3/index.json
     - name: Build samples docker images
       run: |
         echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
