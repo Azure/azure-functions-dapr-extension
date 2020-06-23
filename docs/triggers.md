@@ -26,7 +26,7 @@ Trigger on a Dapr input binding.
 
 |Property Name|Description|
 |--|--|
-|BindingName|Gets or sets the name of the Dapr trigger. If not specified, the name of the function is used as the trigger name.|
+|BindingName|The name of the Dapr trigger. If not specified, the name of the function is used as the trigger name.|
 
 
 ## Service Invocation Trigger
@@ -50,7 +50,7 @@ Trigger on a Dapr service invocation.
 
 |Property Name|Description|
 |--|--|
-|MethodName|Optional. Gets or sets the name of the method the Dapr caller should use. If not specified, the name of the function is used as the method name.|
+|MethodName|Optional. The name of the method the Dapr caller should use. If not specified, the name of the function is used as the method name.|
 
 ## Topic Trigger
 Trigger on a Dapr topic subscription.  The trigger will automatically expose and endpoint and communicate with the Dapr sidecar which topics it is interested in receiving data for based on trigger configuration.
@@ -74,4 +74,4 @@ Trigger on a Dapr topic subscription.  The trigger will automatically expose and
 
 |Property Name|Description|
 |--|--|
-|Topic|Gets or sets the name of the topic.|
+|Topic|The name of the Dapr topic.|
