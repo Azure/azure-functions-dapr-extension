@@ -6,7 +6,9 @@
 
 The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted and Kubernetes modes.
 
-If you are unfamiliar with Azure Functions, it's recommended to [try out a quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model.
+If you are unfamiliar with Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model.  
+
+You can also jump to the [Dapr + Functions quickstart](./docs/quickstart.md) below.
 
 This extension currently supports Azure Functions written in [C#](./samples/dotnet-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), and [Python](./samples/python-azurefunction).
 
@@ -54,21 +56,39 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 | [daprPublish][publish-output-docs] | Output | Publish a message to a Dapr topic | [C#][csharp-publish-output], [JavaScript][javascript-publish-output], [Python][python-publish-output] |
 | [daprBinding][binding-output-docs] | Output | Send a value to a Dapr output binding | [C#][csharp-binding-output], [JavaScript][javascript-binding-output], [Python][python-binding-output] |
 
-## Getting Started
+## Quickstart
 
-### Prerequisites
+You can run through a quickstart of developing some JavaScript Azure Functions that leverage Dapr with the [following tutorial](./docs/quickstart.md)
 
-### Creating the function app
+## Installing the extension
 
-### Installing the Dapr extension
+### .NET Functions
 
-### Using Dapr triggers and bindings
+[Install the NuGet package](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension) for this extension into your function app project.
 
-### Debugging locally
+### Non-.NET Functions
 
-### Creating an Azure Function Docker image
+While this extension is in preview it is not included in the default extension bundle for functions.  You can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
 
-### Deploying to Kubernetes
+1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
+1. Run `func extensions install -p Dapr.AzureFunctions.Extension -v 0.8.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension).
+
+This means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where I could include in my app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
+
+## Dapr ports and listeners
+The Azure Functions Dapr extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  By default, when Azure Functions tries to communicate with Dapr it will call Dapr over the port resolved from the environment variable `DAPR_HTTP_PORT`.  If that is null, it will default to port `3500`.  
+
+You can override the Dapr address used by input and output bindings by setting the `DaprAddress` property in the `function.json` for the binding (or the attribute).  By default it will use `http://localhost:{DAPR_HTTP_PORT}`.
+
+## Running and debugging an app
+
+Normally when debugging an Azure Function you use the `func` command line tool to start up the function app process and trigger your code.  When debugging or running an Azure Function that will leverage Dapr, you need to use `dapr` alongside `func` so both processes are running.
+
+So when running a Dapr app locally using the default ports, you would leverage the `dapr` CLI to start the `func` CLI.
+
+`dapr run --app-id functionA --app-port 3001 --port 3501  --components-path ..\components\ -- func host start --no-build`
+
+## Deploying to Kubernetes
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
