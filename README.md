@@ -49,10 +49,10 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 | -- | -- | -- | -- |
 | [daprState][state-input-docs] | Input | Pull in Dapr state for an execution | [C#][csharp-state-input], [JavaScript][javascript-state-input], [Python][python-state-input] |
 | [daprSecret][secret-input-docs] | Input | Pull in Dapr secrets for an execution | |
-| daprState | Output | Save a value to Dapr state | [C#][], [JavaScript](), [Python]() |
-| daprInvoke | Output | Invoke another Dapr app | [C#](), [JavaScript](), [Python]() |
-| daprPublish | Output | Publish a message to a Dapr topic | [C#](), [JavaScript](), [Python]() |
-| daprBinding | Output | Send a value to a Dapr output binding | [C#](), [JavaScript](), [Python]() |
+| [daprState][state-output-docs] | Output | Save a value to Dapr state | [C#][csharp-state-output], [JavaScript][javascript-state-output], [Python][python-state-output] |
+| [daprInvoke][invoke-output-docs] | Output | Invoke another Dapr app | [C#][csharp-invoke-output], [JavaScript][javascript-invoke-output], [Python][python-invoke-output] |
+| [daprPublish][publish-output-docs] | Output | Publish a message to a Dapr topic | [C#][csharp-publish-output], [JavaScript][javascript-publish-output], [Python][python-publish-output] |
+| [daprBinding][binding-output-docs] | Output | Send a value to a Dapr output binding | [C#][csharp-binding-output], [JavaScript][javascript-binding-output], [Python][python-binding-output] |
 
 ## Getting Started
 
@@ -75,37 +75,37 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 [topic-trigger-docs]: ./docs/triggers.md#topic-trigger
 [state-input-docs]: ./docs/input-bindings.md#state-input-binding
 [secret-input-docs]: ./docs/input-bindings.md#secret-input-binding
-[state-output-docs]:
-[invoke-output-docs]:
-[publish-output-docs]:
-[binding-output-docs]:
+[state-output-docs]: ./docs/output-bindings.md#state-output-binding
+[invoke-output-docs]: ./docs/output-bindings.md#service-invocation-output-binding
+[publish-output-docs]: ./docs/output-bindings.md#topic-publish-output-binding
+[binding-output-docs]: ./docs/output-bindings.md#dapr-binding-output-binding
 
 [csharp-binding-trigger]: ./samples/dotnet-azurefunction/ConsumeMessageFromKafka.cs
 [csharp-service-invocation-trigger]: ./samples/dotnet-azurefunction/RetrieveOrder.cs
 [csharp-topic-trigger]: ./samples/dotnet-azurefunction/PrintTopicMessage.cs
 [csharp-state-input]: ./samples/dotnet-azurefunction/StateInputBinding.cs
 [csharp-secret-input]: ./todo
-[csharp-state-output]:
-[csharp-invoke-output]:
-[csharp-publish-output]:
-[csharp-binding-output]:
+[csharp-state-output]: ./samples/dotnet-azurefunction/StateOutputBinding.cs
+[csharp-invoke-output]:  ./samples/dotnet-azurefunction/InvokeOutputBinding.cs
+[csharp-publish-output]: ./samples/dotnet-azurefunction/PublishOutputBinding.cs
+[csharp-binding-output]: ./samples/dotnet-azurefunction/SendMessageToKafka.cs
 
 [javascript-binding-trigger]: ./samples/javascript-azurefunction/ConsumeMessageFromKafka/index.js
 [javascript-service-invocation-trigger]: ./samples/javascript-azurefunction/RetrieveOrder/index.js
 [javascript-topic-trigger]: ./samples/javascript-azurefunction/PrintTopicMessage/index.js
 [javascript-state-input]: ./samples/javascript-azurefunction/StateInputBinding/index.js
 [javascript-secret-input]: ./todo
-[javascript-state-output]:
-[javascript-invoke-output]:
-[javascript-publish-output]:
-[javascript-binding-output]:
+[javascript-state-output]: ./samples/javascript-azurefunction/StateOutputBinding/index.js
+[javascript-invoke-output]: ./samples/javascript-azurefunction/InvokeOutputBinding/index.js
+[javascript-publish-output]: ./samples/javascript-azurefunction/PublishOutputBinding/index.js
+[javascript-binding-output]: ./samples/javascript-azurefunction/SendMessageToKafka/index.js
 
 [python-binding-trigger]: ./samples/python-azurefunction/ConsumeMessageFromKafka/__init__.py
 [python-service-invocation-trigger]: ./samples/python-azurefunction/RetrieveOrder/__init__.py
 [python-topic-trigger]: ./samples/python-azurefunction/PrintTopicMessage/__init__.py
-[python-state-input]: ./samples/javascript-azurefunction/StateInputBinding/index.js
+[python-state-input]: ./samples/python-azurefunction/StateInputBinding/__init__.py
 [python-secret-input]: ./todo
-[python-state-output]:
-[python-invoke-output]:
-[python-publish-output]:
-[python-binding-output]:
+[python-state-output]: ./samples/python-azurefunction/StateOutputBinding/__init__.py
+[python-invoke-output]: ./samples/python-azurefunction/InvokeOutputBinding/__init__.py
+[python-publish-output]: ./samples/python-azurefunction/PublishOutputBinding/__init__.py
+[python-binding-output]: ./samples/python-azurefunction/SendMessageToKafka/__init__.py

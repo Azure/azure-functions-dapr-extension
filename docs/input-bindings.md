@@ -1,6 +1,6 @@
 # Azure Functions Dapr input bindings
 
-Input bindings allow you to pull data in at the beginning of an execution.  The parameters for the input binding can either be set statically in the `function.json` or attribute definition, use the `%syntax%` to reference a value from environment variables, or pull from surfaced trigger metadata (e.g. the route parameter of an HTTP triggered function).  More details on bindings can be found in the [Azure Functions documentation](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-expressions-patterns).
+Input bindings allow you to pull data in at the beginning of an execution.  The parameters for the input binding can either be set statically in the `function.json` or attribute definition, use the `%syntax%` to reference a value from environment variables, or pull from surfaced trigger metadata (e.g. the route parameter of an HTTP triggered function).  More details on bindings can be found in the [Azure Functions documentation](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-expressions-patterns).  You can always leverage the Dapr SDK directly within your function instead of using an input binding.
 
 ## State Input Binding
 Retrieve the current state for a specified key at the beginning of an execution.
@@ -27,7 +27,7 @@ Retrieve the current state for a specified key at the beginning of an execution.
 
 |Property Name|Description|
 |--|--|
-|StateStore|The name of the state store to retrieve or store state.|
+|StateStore|The name of the state store to retrieve state.|
 |Key|The name of the key to retrieve from the specified state store.|
 
 
