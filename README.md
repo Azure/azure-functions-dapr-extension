@@ -35,9 +35,9 @@ Azure Function triggers start an execution.
 
 | Trigger Type | Description | Samples |
 | -- | -- | -- |
-| daprBindingTrigger | Trigger on a Dapr input binding | [C#](), [JavaScript](), [Python]() |
-| daprServiceInvocationTrigger | Trigger on a Dapr service invocation | [C#](), [JavaScript](), [Python]() |
-| daprTopicTrigger | Trigger on a Dapr topic subscription | [C#](), [JavaScript](), [Python]() |
+| [daprBindingTrigger][binding-trigger-docs] | Trigger on a Dapr input binding | [C#][csharp-binding-trigger], [JavaScript][javascript-binding-trigger], [Python][python-binding-trigger] |
+| [daprServiceInvocationTrigger][service-invocation-trigger-docs] | Trigger on a Dapr service invocation | [C#][csharp-service-invocation-trigger], [JavaScript][javascript-service-invocation-trigger], [Python][python-service-invocation-trigger] |
+| [daprTopicTrigger][topic-trigger-docs] | Trigger on a Dapr topic subscription | [C#][csharp-topic-trigger], [JavaScript][javascript-topic-trigger], [Python][python-topic-trigger] |
 
 ## Function Bindings
 
@@ -67,3 +67,19 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 ### Creating an Azure Function Docker image
 
 ### Deploying to Kubernetes
+
+[binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
+[service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
+[topic-trigger-docs]: ./docs/triggers.md#topic-trigger
+
+[csharp-binding-trigger]: ./samples/dotnet-azurefunction/ConsumeMessageFromKafka.cs
+[csharp-service-invocation-trigger]: ./samples/dotnet-azurefunction/RetrieveOrder.cs
+[csharp-topic-trigger]: ./samples/dotnet-azurefunction/PrintTopicMessage.cs
+
+[javascript-binding-trigger]: ./samples/javascript-azurefunction/ConsumeMessageFromKafka/index.js
+[javascript-service-invocation-trigger]: ./samples/javascript-azurefunction/RetrieveOrder/index.js
+[javascript-topic-trigger]: ./samples/javascript-azurefunction/PrintTopicMessage/index.js
+
+[python-binding-trigger]: ./samples/python-azurefunction/ConsumeMessageFromKafka/__init__.py
+[python-service-invocation-trigger]: ./samples/python-azurefunction/RetrieveOrder/__init__.py
+[python-topic-trigger]: ./samples/python-azurefunction/PrintTopicMessage/__init__.py
