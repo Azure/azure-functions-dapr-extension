@@ -76,9 +76,15 @@ While this extension is in preview it is not included in the default extension b
 This means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where I could include in my app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
 
 ## Dapr ports and listeners
-The Azure Functions Dapr extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  By default, when Azure Functions tries to communicate with Dapr it will call Dapr over the port resolved from the environment variable `DAPR_HTTP_PORT`.  If that is null, it will default to port `3500`.  
+When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  
+
+> IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr in Kubernetes, the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation unless you have a trigger.  Doing so may lock your application from the Dapr sidecar.  Port 3001 does not need to be exposed or defined if only using input and output bindings.
+
+By default, when Azure Functions tries to communicate with Dapr it will call Dapr over the port resolved from the environment variable `DAPR_HTTP_PORT`.  If that is null, it will default to port `3500`.  
 
 You can override the Dapr address used by input and output bindings by setting the `DaprAddress` property in the `function.json` for the binding (or the attribute).  By default it will use `http://localhost:{DAPR_HTTP_PORT}`.
+
+The function app will still expose another port and endpoint for things like HTTP triggers (locally this defaults to 7071, in a container it defaults to 80).
 
 ## Running and debugging an app
 
@@ -86,9 +92,77 @@ Normally when debugging an Azure Function you use the `func` command line tool t
 
 So when running a Dapr app locally using the default ports, you would leverage the `dapr` CLI to start the `func` CLI.
 
-`dapr run --app-id functionA --app-port 3001 --port 3501  --components-path ..\components\ -- func host start --no-build`
+`dapr run --app-id functionA --app-port 3001 --port 3501 -- func host start --no-build`
 
 ## Deploying to Kubernetes
+
+You can annotate your function Kubernetes deployments to include the Dapr sidecar.
+
+> IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr in Kubernetes, the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation unless you have a trigger.  Doing so may lock your application from the Dapr sidecar. Port 3001 does not need to be exposed or defined if only using input and output bindings.
+
+To generate a Dockerfile for your app if you don't already have one, you can run the following command in your function project:
+`func init --docker-only`.
+
+The Azure Function core tools can automatically generate for you Kubernetes deployment files based on your local app.  It's worth noting these manifests expect [KEDA](https://keda.sh) will be present to manage scaling, so if not using KEDA you may need to remove the `ScaledObjects` generated, or craft your own deployment YAML file.
+
+An example of a function app deployment for Kubernetes can be [found below](#sample-kubernetes-deployment).
+
+The following command will generate a `deploy.yaml` file for your project:
+`func kubernetes deploy --name {container-name} --registry {docker-registry} --dry-run > deploy.yaml`
+
+You can then edit the generated `deploy.yaml` to add the dapr annotations.
+
+### Azure Storage account requirements
+
+While an Azure Storage account is required to run functions within Azure, it is NOT required for functions that run in Kubernetes or from a Docker container.  The exception to that is functions that leverage a Timer trigger or Event Hub trigger.  In those cases the storage account is used to coordinate leases for instances, so you will need to set an `AzureWebJobsStorage` connection string if using those triggers.
+
+### Sample Kubernetes deployment
+
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-function
+  namespace: default
+spec:
+  selector:
+    app: my-function
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app: my-function
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-function
+  template:
+    metadata:
+      labels:
+        app: my-function
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/id: "functionapp"
+        # Only define port of Dapr triggers are included
+        dapr.io/port: "3001"
+    spec:
+      containers:
+      - name: my-function
+        image: myregistry/my-function
+        ports:
+        # Port for HTTP triggered functions
+        - containerPort: 80
+---
+```
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger

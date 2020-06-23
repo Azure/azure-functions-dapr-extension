@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-function
+  namespace: default
+spec:
+  selector:
+    app: my-function
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app: my-function
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-function
+  template:
+    metadata:
+      labels:
+        app: my-function
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/id: "functionapp"
+        # Only define port of Dapr triggers are included
+        dapr.io/port: "3001"
+    spec:
+      containers:
+      - name: my-function
+        image: myregistry/my-function
+        ports:
+        # Port for HTTP triggered functions
+        - containerPort: 80
+        envFrom:
+        - secretRef:
+            name: my-function
+---
+
