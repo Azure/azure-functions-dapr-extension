@@ -1,6 +1,6 @@
 # Azure Functions Dapr output bindings
 
-Output bindings allow you to push data to a destination at the end of an execution.  The parameters for the output binding can either be set statically in the `function.json` or attribute definition, use the `%syntax%` to reference a value from environment variables, or pull from surfaced trigger metadata (e.g. the route parameter of an HTTP triggered function).  More details on bindings can be found in the [Azure Functions documentation](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-expressions-patterns).  You can always leverage the Dapr SDK directly within your function instead of using an output binding.
+Output bindings allow you to push data to a destination at the end of an execution.  The parameters for the output binding can either be set statically in the `function.json` or attribute definition, use the `%env_variable_name%` syntax to reference a value from environment variables, or pull from surfaced trigger metadata (e.g. the route parameter of an HTTP triggered function).  More details on bindings can be found in the [Azure Functions documentation](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-expressions-patterns).  You can always leverage the Dapr SDK directly within your function instead of using an output binding.
 
 ## State Output Binding
 Save state to a specified key.

@@ -31,7 +31,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/id: "functionapp"
-        # Only define port of Dapr triggers are included
+        # Only define port if Dapr triggers are included
         dapr.io/port: "3001"
     spec:
       containers:
