@@ -5,10 +5,31 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
+      "route": "state/{key}",
       "methods": [
-        "get",
         "post"
       ]
+    },
+    {
+      "type": "daprState",
+      "direction": "in",
+      "dataType": "string",
+      "name": "stateIn",
+      "stateStore": "statestore",
+      "key": "{key}"
+    },
+    {
+      "type": "daprPublish",
+      "direction": "out",
+      "name": "publish"
+    },
+    {
+      "type": "daprState",
+      "direction": "out",
+      "dataType": "string",
+      "name": "stateOut",
+      "stateStore": "statestore",
+      "key": "{key}"
     },
     {
       "type": "http",

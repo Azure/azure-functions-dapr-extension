@@ -1,16 +1,32 @@
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
-    if (req.query.name || (req.body && req.body.name)) {
-        context.res = {
-            // status: 200, /* Defaults to 200 */
-            body: "Hello " + (req.query.name || req.body.name)
-        };
+    let state = context.bindings.stateIn || "";
+    context.log(`Current state:\n${state}\n`);
+
+    // update state
+    state = `${state}\n${req.body}`;
+
+    context.log(`Updated state:\n${state}\n`);
+
+    // save state using the Dapr output binding
+    context.bindings.stateOut = 
+    {
+        "value": state,
+        // "key": "{Optional. We defined in function.json}",
+        // "etag": "{Optional. The etag value of the state record.}"
+    };
+
+    // publish a message using the Dapr topic publish output binding
+    context.bindings.publish = 
+    {
+        "payload": state,
+        "topic": "myTopic"
     }
-    else {
-        context.res = {
-            status: 400,
-            body: "Please pass a name on the query string or in the request body"
-        };
-    }
+
+    // return an http response using the http output binding
+    context.res = {
+        // status: 200, /* Defaults to 200 */
+        body: `State now updated to: \n${state}`
+    };
 };
