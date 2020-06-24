@@ -40,10 +40,10 @@ Now that we have our HTTP function, we want to add bindings to Dapr to read and 
 
 1. Open the `HttpTrigger/function.json` file.
     This file contains the metadata for all triggers and bindings the function uses.  For our HTTP function it has an HTTP trigger, and an output binding which is the HTTP response.  Let's first change the route of the HTTP trigger to accept a route parameter in the trigger path.
-1. Modify the `httpTrigger` object to include a defined route, so it looks like the below:
+1. Modify the `httpTrigger` object to include a defined route and anonymous auth, so it looks like the below:
     ```json
     {
-      "authLevel": "function",
+      "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",

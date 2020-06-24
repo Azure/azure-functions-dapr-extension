@@ -4,7 +4,7 @@ Content-Type: application/json
 "Hello"
 
 ### Test in Kubernetes
-POST http://40.124.72.152/api/state/hello
+POST http://40.124.72.254/api/state/hello
 Content-Type: application/json
 
 "Hello"
