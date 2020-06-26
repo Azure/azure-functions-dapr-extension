@@ -10,7 +10,7 @@ If you have updated the sample code to fit your scenario, you need to create new
     docker build -f samples/dotnet-azurefunction/Dockerfile -t mydocker-image .
      ```
     If you're planning on hosting it on docker hub, then it should be
-   
+
     ```
     docker build -f samples/dotnet-azurefunction/Dockerfile -t my-docker-id/mydocker-image .
     ```
@@ -27,7 +27,7 @@ If you have updated the sample code to fit your scenario, you need to create new
 
 3.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`.
     ```
-    docker run -e  -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
+    docker run -e StateStoreName=statestore -e KafkaBindingName=sample-topic -p 8080:80 my-docker-id/mydocker-image 
     ```
 
 4.  To publish your docker image to docker hub (or another registry), first login: `docker login`. Then run `docker push my-docker-id/mydocker-image`.
