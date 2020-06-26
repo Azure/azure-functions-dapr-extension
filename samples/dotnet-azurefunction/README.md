@@ -492,7 +492,6 @@ POST  http://localhost:{port-of-your-choice}/RetrieveOrder
 POST  http://localhost:{port-of-your-choice}/SendMessageToKafka 
 
 {"message": "hello!" }
-
 ```
 
 ``` http
@@ -543,15 +542,6 @@ Run kubectl logs command to retrieve the latest log. You should see your functio
       Executed 'RetrieveSecret' (Succeeded, Id=961af93f-9ddc-477e-a490-4d07bf6d026a))
 
 ```
-
-
-``` http
-POST  http://localhost:{port-of-your-choice}/SendMessageToKafka 
-
-{"message": "hello!" }
-
-```
-
 
 ## Cleanup
 Once you're done using the sample, you can spin down your Kubernetes resources by navigating to the `./deploy` directory and running:
