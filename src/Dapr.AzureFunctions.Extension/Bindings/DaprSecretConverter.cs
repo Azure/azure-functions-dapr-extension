@@ -6,6 +6,7 @@
 namespace Dapr.AzureFunctions.Extension
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading;
@@ -16,8 +17,9 @@ namespace Dapr.AzureFunctions.Extension
 
     class DaprSecretConverter :
         IAsyncConverter<DaprSecretAttribute, JObject>,
-        IAsyncConverter<DaprSecretAttribute, string?>,
-        IAsyncConverter<DaprSecretAttribute, byte[]>
+        IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>,
+        IAsyncConverter<DaprSecretAttribute, byte[]>,
+        IAsyncConverter<DaprSecretAttribute, string?>
     {
         readonly DaprServiceClient daprClient;
 
@@ -33,36 +35,28 @@ namespace Dapr.AzureFunctions.Extension
             return this.GetSecretsAsync(input, cancellationToken);
         }
 
-        async Task<string?> IAsyncConverter<DaprSecretAttribute, string?>.ConvertAsync(
+        async Task<IDictionary<string, string>> IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>.ConvertAsync(
             DaprSecretAttribute input,
             CancellationToken cancellationToken)
         {
             JObject result = await this.GetSecretsAsync(input, cancellationToken);
-            return result.PropertyValues().FirstOrDefault()?.ToString();
+            return result.ToObject<Dictionary<string, string>>();
         }
 
         async Task<byte[]> IAsyncConverter<DaprSecretAttribute, byte[]>.ConvertAsync(
             DaprSecretAttribute input,
             CancellationToken cancellationToken)
         {
-            // Just return the first value in the object.
             JObject result = await this.GetSecretsAsync(input, cancellationToken);
-            JToken jsonData = result.PropertyValues().FirstOrDefault();
-            if (jsonData == null)
-            {
-                return Array.Empty<byte>();
-            }
+            return Encoding.UTF8.GetBytes(result.ToString(Formatting.None));
+        }
 
-            if (jsonData.Type == JTokenType.Bytes)
-            {
-                return (byte[])jsonData;
-            }
-            else if (jsonData.Type == JTokenType.String)
-            {
-                return Encoding.UTF8.GetBytes((string)jsonData);
-            }
-
-            return Encoding.UTF8.GetBytes(jsonData.ToString(Formatting.None));
+        async Task<string?> IAsyncConverter<DaprSecretAttribute, string?>.ConvertAsync(
+            DaprSecretAttribute input,
+            CancellationToken cancellationToken)
+        {
+            JObject result = await this.GetSecretsAsync(input, cancellationToken);
+            return result?.ToString(Formatting.None);
         }
 
         Task<JObject> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)

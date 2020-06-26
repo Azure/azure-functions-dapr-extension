@@ -157,10 +157,11 @@ namespace DaprExtensionTests
 
         async Task OnGetSecret(HttpContext context)
         {
-            // This is just one example. The actual set of key/value pairs may differ
-            // depending on the secret store provider.
+            // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md
+            // This is an example that supports multiple kyes in one secret.
+            // Depending on the secret store provider, the binding should return a dictionary of multiple or just one key-value pair
             string secretName = (string)context.GetRouteValue("name");
-            await context.Response.WriteAsync(@$"{{""{secretName}"":""secret!""}}");
+            await context.Response.WriteAsync(@$"{{""{secretName}1"":""secret!"", ""{secretName}2"":""another secret!""}}");
         }
 
         async Task OnSendMessage(HttpContext context)
