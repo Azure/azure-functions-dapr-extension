@@ -1,0 +1,9 @@
+{
+  "bindings": [
+    {
+      "type": "daprTopicTrigger",
+      "topic": "myTopic",
+      "name": "daprTrigger"
+    }
+  ]
+}

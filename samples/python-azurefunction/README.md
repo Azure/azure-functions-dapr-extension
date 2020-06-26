@@ -115,7 +115,6 @@ You're up and running! Both Dapr and your app logs will appear here.
     Make sure the target framework for `extension.proj` is netstandard 2.0. Since we have a project reference for our Dapr Extension, build step tries to restore `Dapr.AzureFunctions.Extension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you swtich to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
 
 
-
 # Step 3 - Understand the Sample
 
 ## 1. Service Invocation and State Management: Create New Order and Retrieve Order

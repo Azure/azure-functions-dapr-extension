@@ -22,7 +22,7 @@ If you have updated the sample code to fit your scenario, you need to create new
     c. To build samples with local nuget reference, use `nugetPackageRef.Dockerfile` in samples/dotnet-azurefunction directory.
     d. Run docker build command from samples/dotnet-azurefunction and specify your image name:    
     ```
-     docker build -f samples/dotnet-azurefunction/nugetPackageRef.Dockerfile -t my-docker-id .
+     docker build -f nugetPackageRef.Dockerfile -t my-docker-id .
      ```
 
 3.  Once your image has built you can see it on your machines by running `docker images`. Try run the image in a local container to test the build. Please use `-e` option to specify the app settings. Open a browser to http://localhost:8080, which should show your function app is up and running with `;-)`.

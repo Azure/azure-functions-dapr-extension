@@ -11,6 +11,9 @@
 		},
 		{
 			"path": ".stylecop"
+		},
+		{
+			"path": "samples/python-azurefunction"
 		}
 	],
 	"settings": {
