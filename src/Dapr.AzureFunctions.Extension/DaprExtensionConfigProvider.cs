@@ -90,9 +90,10 @@ namespace Dapr.AzureFunctions.Extension
 
             var daprSecretConverter = new DaprSecretConverter(this.daprClient);
             var secretsRule = context.AddBindingRule<DaprSecretAttribute>();
-            secretsRule.BindToInput<JObject>(daprSecretConverter);
             secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<byte[]>(daprSecretConverter);
+            secretsRule.BindToInput<JObject>(daprSecretConverter);
+            secretsRule.BindToInput<IDictionary<string, string>>(daprSecretConverter);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
                 .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener, this.nameResolver));

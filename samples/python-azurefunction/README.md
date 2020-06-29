@@ -381,6 +381,45 @@ Since we have both functions deployed in the same app, you should also see we ha
 == APP == [TIMESTAMP] Trigger data: { message: 'hello!' }
 == APP == [TIMESTAMP] Executed 'ConsumeMessageFromKafka' (Succeeded, Id=<ExecutionId>)
 ```
+## 4. Dapr Secret: 
+Next we will show how `daprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://github.com/dapr/docs/tree/master/howto/setup-secret-store) to set up other supported secret stores.
+
+```python
+def main (payload, secret) -> None:
+    logging.info('Python function processed a RetrieveSecret request from the Dapr Runtime.')
+    secret_dict = json.loads(secret)
+
+    for key in secret_dict:
+        logging.info("Stored secret: Key = " + key + ', Value = '+ secret_dict[key])
+```
+
+```json
+{
+  "bindings": [
+    {
+      "type": "daprServiceInvocationTrigger",
+      "name": "payload",
+      "direction": "in"
+    },
+    {
+      "type": "daprSecret",
+      "direction": "in",
+      "name": "secret",
+      "key": "my-secret",
+      "secretStoreName": "kubernetes",
+      "metadata": "metadata.namespace=default"
+    }
+  ]
+}
+```
+
+`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a json string. In the code, we load the json string and converts into a dict. Since Kubernetes Secret supports multiple keys in a secret, we the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
+
+Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://github.com/dapr/docs/blob/master/howto/setup-secret-store/hashicorp-vault.md) example. 
+```json
+"metadata": "metadata.version_id=15&metadata.version_stage=AAA"
+```
+However, secrets for this example are only availble in the cluster and currently Dapr does not have a local secret store development experience, so we cannot verify this locally as the other samples. 
 
 
 # Step 4 - Cleanup

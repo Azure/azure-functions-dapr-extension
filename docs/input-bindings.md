@@ -40,8 +40,9 @@ Retrieve the value of a dapr secret at the beginning of an execution.
 {
     "type": "daprSecret",
     "name": "secret",
-    "secretStoreName": "secretStore",
+    "secretStoreName": "kubernetes",
     "key": "%secret-key%",
+    "metadata": "metadata.namespace=default",
     "direction": "in"
 }
 ```
@@ -49,7 +50,7 @@ Retrieve the value of a dapr secret at the beginning of an execution.
 ### C# Attribute sample
 ```csharp
 // %secret-key% would resolve from the environment variable of `secret-key`
-[DaprSecret("secretStore", "%secret-key%")] JObject secret,
+[DaprSecret("kubernetes", "%secret-key%", Metadata = "metadata.namespace=default")] JObject
 ```
 
 ### Properties

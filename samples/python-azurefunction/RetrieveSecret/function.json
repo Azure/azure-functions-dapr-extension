@@ -1,0 +1,18 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "daprServiceInvocationTrigger",
+      "name": "payload",
+      "direction": "in"
+    },
+    {
+      "type": "daprSecret",
+      "direction": "in",
+      "name": "secret",
+      "key": "my-secret",
+      "secretStoreName": "kubernetes",
+      "metadata": "metadata.namespace=default"
+    }
+  ]
+}

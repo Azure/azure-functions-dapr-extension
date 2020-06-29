@@ -146,7 +146,7 @@ public static void Run(
 }
 ```
 
-Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. However, here we use `DaprState` *input binding* to fetch the latest value of the key `order` and bind the value to string object `data`' before we start exectuing the function block.
+Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. Here we use `DaprState` *input binding* to fetch the latest value of the key `order` and bind the value to string object `data`' before we start exectuing the function block.
 
 In your terminal window, you should see logs to confirm the expected result:
 
@@ -267,6 +267,33 @@ Since we have both functions deployed in the same app, you should also see we ha
 == APP == [TIMESTAMP] Executed 'ConsumeMessageFromKafka' (Succeeded, Id=<ExecutionId>)
 ```
 
+## 4. Dapr Secret: 
+Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://github.com/dapr/docs/tree/master/howto/setup-secret-store) to set up other supported secret stores.
+
+```csharp
+[FunctionName("RetrieveSecret")]
+public static void Run(
+    [DaprServiceInvocationTrigger] object args,
+    [DaprSecret("kubernetes", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
+    ILogger log)
+{
+    log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");
+      
+    foreach (var kvp in secret)
+    {
+        log.LogInformation("Stored secret: Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+    }
+
+}
+```
+
+`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Kubernetes Secret supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
+
+Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://github.com/dapr/docs/blob/master/howto/setup-secret-store/hashicorp-vault.md) example. 
+```csharp
+[DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
+```
+However, secrets for this example are only availble in the cluster and currently Dapr does not have a local secret store development experience, so we cannot verify this locally as the other samples. 
 
 # Step 4 - Cleanup
 
@@ -337,6 +364,28 @@ If you need a non-default namespace or in production environment, Helm has to be
     component.dapr.io/messagebus configured
     ```
    - See Dapr sample repo [4.pub-sub](https://github.com/dapr/samples/tree/master/4.pub-sub) for more instructions.
+
+
+
+#### [Optional] Setting up Secrets in Kubernetes
+
+Create the secret in the kubernetes environment for our Dapr Secret binding sample:
+```shell
+kubectl create secret generic my-secret --from-literal=key1=supersecret --from-literal=key2=topsecret
+```
+
+Confirm the secret is persisted and the value are base64 encoded.
+
+```powershell
+$ kubectl get secret my-secret -o yaml
+
+apiVersion: v1
+data:
+  key1: c3VwZXJzZWNyZXQ= # decoded value: supersecret
+  key2: dG9wc2VjcmV0 # decoded value: topsecret
+kind: Secret
+...
+```
 
 Now you should have all Dapr components up and running in your kubernetes cluster. Next we will show how to deploy your function app into your kubernetes cluster with the Dapr Side Car.
 
@@ -443,7 +492,10 @@ POST  http://localhost:{port-of-your-choice}/RetrieveOrder
 POST  http://localhost:{port-of-your-choice}/SendMessageToKafka 
 
 {"message": "hello!" }
+```
 
+``` http
+POST  http://localhost:{port-of-your-choice}/RetrieveSecret
 ```
 Run kubectl logs command to retrieve the latest log. You should see your function app is getting invoked as you have seen when testing locally.
 
@@ -477,6 +529,17 @@ Run kubectl logs command to retrieve the latest log. You should see your functio
       Trigger {data: {"message": "hello!"}
 : Function.SendMessageToKafka[0]
       Executed 'ConsumeMessageFromKafka' (Succeeded, Id=aa8d92a6-2da1-44ff-a033-cb217b9c29541)
+
+: Function.RetrieveSecret[0]
+      Executing 'RetrieveSecret' (Reason='', Id=961af93f-9ddc-477e-a490-4d07bf6d026a))
+: Function.RetrieveSecret.User[0]
+      C# function processed a RetrieveSecret request from the Dapr Runtime.
+: Function.RetrieveSecret.User[0]
+      Stored secret: Key = key1, Value = super-secret
+: Function.RetrieveSecret[0]
+      Stored secret: Key = key2, Value = top-secret
+: Function.RetrieveSecret[0]
+      Executed 'RetrieveSecret' (Succeeded, Id=961af93f-9ddc-477e-a490-4d07bf6d026a))
 
 ```
 

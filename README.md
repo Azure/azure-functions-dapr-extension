@@ -50,7 +50,7 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 | Binding Type | Direction | Description | Samples |
 | -- | -- | -- | -- |
 | [daprState][state-input-docs] | Input | Pull in Dapr state for an execution | [C#][csharp-state-input], [JavaScript][javascript-state-input], [Python][python-state-input] |
-| [daprSecret][secret-input-docs] | Input | Pull in Dapr secrets for an execution | |
+| [daprSecret][secret-input-docs] | Input | Pull in Dapr secrets for an execution | [C#][csharp-secret-input], [JavaScript][javascript-secret-input], [Python][python-secret-input] ||
 | [daprState][state-output-docs] | Output | Save a value to Dapr state | [C#][csharp-state-output], [JavaScript][javascript-state-output], [Python][python-state-output] |
 | [daprInvoke][invoke-output-docs] | Output | Invoke another Dapr app | [C#][csharp-invoke-output], [JavaScript][javascript-invoke-output], [Python][python-invoke-output] |
 | [daprPublish][publish-output-docs] | Output | Publish a message to a Dapr topic | [C#][csharp-publish-output], [JavaScript][javascript-publish-output], [Python][python-publish-output] |
@@ -182,7 +182,7 @@ spec:
 [csharp-service-invocation-trigger]: ./samples/dotnet-azurefunction/RetrieveOrder.cs
 [csharp-topic-trigger]: ./samples/dotnet-azurefunction/PrintTopicMessage.cs
 [csharp-state-input]: ./samples/dotnet-azurefunction/StateInputBinding.cs
-[csharp-secret-input]: ./todo
+[csharp-secret-input]: ./samples/dotnet-azurefunction/RetrieveSecret.cs
 [csharp-state-output]: ./samples/dotnet-azurefunction/StateOutputBinding.cs
 [csharp-invoke-output]:  ./samples/dotnet-azurefunction/InvokeOutputBinding.cs
 [csharp-publish-output]: ./samples/dotnet-azurefunction/PublishOutputBinding.cs
@@ -192,7 +192,7 @@ spec:
 [javascript-service-invocation-trigger]: ./samples/javascript-azurefunction/RetrieveOrder/index.js
 [javascript-topic-trigger]: ./samples/javascript-azurefunction/PrintTopicMessage/index.js
 [javascript-state-input]: ./samples/javascript-azurefunction/StateInputBinding/index.js
-[javascript-secret-input]: ./todo
+[javascript-secret-input]:./samples/javascript-azurefunction/RetrieveSecret/index.js
 [javascript-state-output]: ./samples/javascript-azurefunction/StateOutputBinding/index.js
 [javascript-invoke-output]: ./samples/javascript-azurefunction/InvokeOutputBinding/index.js
 [javascript-publish-output]: ./samples/javascript-azurefunction/PublishOutputBinding/index.js
@@ -202,7 +202,7 @@ spec:
 [python-service-invocation-trigger]: ./samples/python-azurefunction/RetrieveOrder/__init__.py
 [python-topic-trigger]: ./samples/python-azurefunction/PrintTopicMessage/__init__.py
 [python-state-input]: ./samples/python-azurefunction/StateInputBinding/__init__.py
-[python-secret-input]: ./todo
+[python-secret-input]: /samples/python-azurefunction/RetrieveSecret/__init__.py
 [python-state-output]: ./samples/python-azurefunction/StateOutputBinding/__init__.py
 [python-invoke-output]: ./samples/python-azurefunction/InvokeOutputBinding/__init__.py
 [python-publish-output]: ./samples/python-azurefunction/PublishOutputBinding/__init__.py
