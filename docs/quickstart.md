@@ -148,9 +148,10 @@ If you prefer, you can use VS Code debugging to use the [Azure Functions VS Code
 1. Open the project in VS Code.
 1. Open the command pallette and choose the command **Azure Functions: Initialize Project for Use with VS Code...**
     This will generate a `launch.json` file to easily run and debug your code.
+1. Specify the port you want Dapr to listen on in the `local.settings.json` file by adding a value for `DAPR_HTTP_PORT` of `3501` as shown in [the quickstart sample](../samples/quickstart/local.settings.json).  If you wanted to debug multiple apps at the same time you would need to assign unique ports for each.
 1. Start the debugger
     You will see a window appear with your app running
-1. Open a seperate terminal and start the Dapr sidecar
+1. Open a seperate terminal and start the Dapr sidecar at the specified port.
     `dapr run --app-id function-app --app-port 3001 --port 3501`
 
 Dapr should connect to the Function App and display that you are up and running.  Keep Dapr and the Function App running as you debug.

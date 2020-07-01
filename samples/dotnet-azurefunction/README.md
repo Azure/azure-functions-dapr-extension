@@ -390,7 +390,7 @@ kind: Secret
 Now you should have all Dapr components up and running in your kubernetes cluster. Next we will show how to deploy your function app into your kubernetes cluster with the Dapr Side Car.
 
 ## Deploy your Dapr Function App
-You can find your function app deployment file `deploy/functionapp.yaml`. Let's take a look:
+You can find your function app deployment file `deploy/functionapp.yaml`.
 
 In the second part of the deployment file, you need to put your image name and specify your app port where your Dapr Trigger will listen on. 
 
