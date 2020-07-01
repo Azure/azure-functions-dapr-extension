@@ -5,13 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach by Process ID",
-            "processId": "${command:PickProcess}",
+            "name": "Attach to Node Functions",
+            "type": "node",
             "request": "attach",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "pwa-node"
+            "port": 9229,
+            "preLaunchTask": "func: host start"
         }
     ]
 }

@@ -390,24 +390,8 @@ kind: Secret
 Now you should have all Dapr components up and running in your kubernetes cluster. Next we will show how to deploy your function app into your kubernetes cluster with the Dapr Side Car.
 
 ## Deploy your Dapr Function App
-You can find your function app deployment file `deploy/function.yaml`. Let's take a look:
+You can find your function app deployment file `deploy/functionapp.yaml`.
 
-```yaml
-kind: Secret
-apiVersion: v1
-metadata:
-  name: functionapp
-  namespace: default
-data:
-  # [NOT Required for this sample]
-  # AzureWebJobsStorage: Base64EncodedConnectionString
-  StateStoreName: c3RhdGVzdG9yZQ==
-  KafkaBindingName: c2FtcGxlLXRvcGlj
-```
-- Put your app settings into `data` block. Please note the value has to be Base64 encoded. For example, the `StateStoreName` value is configured to be `statestore` in `deploy/redis.yaml`, string `statestore` get encoded into `c3RhdGVzdG9yZQ==`.
-- This sample does not require an  [Azure Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal). However, certain Azure Functions supported trigger types, ex: timer trigger, do require a storage account. Follow the guide to [find out the connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string#configure-a-connection-string-for-an-azure-storage-account). 
-    - The retrieved connection string should be formatted as `DefaultEndpointsProtocol=https;AccountName=storagesample;AccountKey=<account-key>`, which would be encoded into `RGVmYXVsdEVuZHBvaW50c1Byb3RvY29sPWh0dHBzO0FjY291bnROYW1lPXN0b3JhZ2VzYW1wbGU7QWNjb3VudEtleT08YWNjb3VudC1rZXk+`.
-  
 In the second part of the deployment file, you need to put your image name and specify your app port where your Dapr Trigger will listen on. 
 
 ```yaml
@@ -437,9 +421,11 @@ spec:
         ports:
         - containerPort: <app-port>
         imagePullPolicy: Always
-        envFrom:
-        - secretRef:
-            name: functionapp
+        env:
+        - name: StateStoreName
+          value: <state-store-name>
+        - name: KafkaBindingName
+          value: <dapr-binding-name>
 ```
 
 Now run the following command to deploy the function app into your kubernetes cluster.

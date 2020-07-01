@@ -1,0 +1,8 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "FUNCTIONS_WORKER_RUNTIME": "node",
+      "AzureWebJobsStorage": "none",
+      "DAPR_HTTP_PORT": "3501"
+    }
+  }
