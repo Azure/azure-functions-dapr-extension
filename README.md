@@ -1,6 +1,12 @@
 # Azure Functions dapr extensions
 
 ![Build and Test](https://github.com/dapr/azure-functions-extension/workflows/Build%20and%20Test/badge.svg)
+[![Gitter](https://badges.gitter.im/Dapr/community.svg)](https://gitter.im/Dapr/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+- [dapr.io](https://dapr.io)
+- [@DaprDev](https://twitter.com/DaprDev)
+
 
 ⚠️ This extension is currently in preview and not recommended for production. ⚠️
 
