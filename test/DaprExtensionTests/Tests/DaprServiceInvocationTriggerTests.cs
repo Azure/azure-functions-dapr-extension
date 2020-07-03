@@ -8,10 +8,11 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Microsoft.Azure.WebJobs;
     using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -59,6 +60,47 @@ namespace DaprExtensionTests
             
             string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
             Assert.Equal(serializedInput, result);
+        }
+
+        [Fact]
+        public async Task BindingTests_DaprState_SimpleValue()
+        {
+            string savedValue = Guid.NewGuid().ToString();
+            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/getstate1",
+                "key1");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            string result = (string)JsonConvert.DeserializeObject(resultJson);
+            Assert.Equal(serializedValue, result);
+        }
+
+
+        [Fact]
+        public async Task BindingTests_DaprState_ComplexValue()
+        {
+            string savedValue = Guid.NewGuid().ToString();
+            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/getstate2",
+                new { stateKey = "key1"});
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            string result = (string)JsonConvert.DeserializeObject(resultJson);
+            Assert.Equal(serializedValue, result);
         }
 
         [Fact]
@@ -143,7 +185,6 @@ namespace DaprExtensionTests
                 return result.ToString();
             }
 
-            // TODO: Write tests for these
             [FunctionName(nameof(GetState1))]
             public static string GetState1(
                 [DaprServiceInvocationTrigger] string stateKey,
@@ -157,7 +198,6 @@ namespace DaprExtensionTests
                 [DaprServiceInvocationTrigger] JObject input,
                 [DaprState("store1", Key = "{input.stateKey}")] string existingState)
             {
-                // TODO: Not sure yet if this binding expression will work - needs testing.
                 return existingState;
             }
         }

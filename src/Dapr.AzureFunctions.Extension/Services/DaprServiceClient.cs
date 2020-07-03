@@ -49,7 +49,7 @@ namespace Dapr.AzureFunctions.Extension
                 string errorCode = string.Empty;
                 string errorMessage = string.Empty;
 
-                if (response.Content != null)
+                if (response.Content != null && response.Content.Headers.ContentLength != 0)
                 {
                     JObject daprError;
 

@@ -147,6 +147,9 @@ namespace DaprExtensionTests
         internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key) 
             => this.daprRuntime.FetchSavedStateForUnitTesting(stateStore, key);
 
+        internal void SaveStateForUnitTetsing(string storeName, string key, JToken value)
+            => this.daprRuntime.SaveStateForUnitTesting(storeName, key, value);
+
         Task IAsyncLifetime.InitializeAsync()
         {
             return Task.WhenAll(
