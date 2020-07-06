@@ -53,12 +53,20 @@ namespace Dapr.AzureFunctions.Extension
             Stream inputStream = requestContext.Request.Body;
             Type destinationType = this.parameter.ParameterType;
 
-            var bindingData = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            var bindingData = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
-            object convertedValue;
-            if (inputStream == null)
+            object? convertedValue;
+            if (inputStream == null || requestContext.Request.ContentLength == 0)
             {
-                convertedValue = this.parameter.DefaultValue;
+                // Assigns null for reference types or the default value for value types
+                if (this.parameter.ParameterType.IsValueType)
+                {
+                    convertedValue = Activator.CreateInstance(this.parameter.ParameterType);
+                }
+                else
+                {
+                    convertedValue = null;
+                }
             }
             else if (destinationType.IsAssignableFrom(inputStream.GetType()))
             {

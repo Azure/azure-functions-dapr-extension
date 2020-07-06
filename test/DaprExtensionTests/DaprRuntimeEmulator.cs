@@ -46,6 +46,7 @@ namespace DaprExtensionTests
                     // State APIs
                     // https://github.com/dapr/docs/blob/master/reference/api/state_api.md
                     routes.MapPost("v1.0/state/{storeName}", this.OnSaveState);
+                    routes.MapGet("v1.0/state/{storeName}", this.OnGetState);
                     routes.MapGet("v1.0/state/{storeName}/{key}", this.OnGetState);
 
                     // Service invocation APIs
@@ -108,17 +109,22 @@ namespace DaprExtensionTests
             RouteData routeData = context.GetRouteData();
             string storeName = Uri.UnescapeDataString((string)routeData.Values["storeName"]);
             string key = (string)routeData.Values["key"];
+            if (string.IsNullOrEmpty(key))
+            {
+                context.Response.StatusCode = 204;
+                return;
+            }
 
             ConcurrentDictionary<string, JToken?>? namedStore;
             if (!this.stateStore.TryGetValue(storeName, out namedStore))
             {
-                context.Response.StatusCode = 404;
+                context.Response.StatusCode = 204;
                 return;
             }
 
             if (!namedStore.TryGetValue(key, out JToken? value) || value == null)
             {
-                context.Response.StatusCode = 404;
+                context.Response.StatusCode = 204;
                 return;
             }
 
@@ -143,6 +149,18 @@ namespace DaprExtensionTests
             {
                 throw new XunitException($"The state with key ({key}) was not found in state store ({stateStore}).");
             }      
+        }
+
+        /// <summary>
+        /// Directly write to the state store for unit testing.
+        /// </summary>
+        internal void SaveStateForUnitTesting(string storeName, string key, JToken value)
+        {
+            ConcurrentDictionary<string, JToken?> namedStore = this.stateStore.GetOrAdd(
+                storeName,
+                _ => new ConcurrentDictionary<string, JToken?>(StringComparer.OrdinalIgnoreCase));
+
+            namedStore[key] = value;
         }
 
         async Task OnInvoke(HttpContext context)
