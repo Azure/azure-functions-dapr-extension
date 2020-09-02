@@ -27,10 +27,8 @@ namespace Dapr.AzureFunctions.Extension
 
         public Task AddAsync(DaprPubSubEvent item, CancellationToken cancellationToken = default)
         {
-            if (item.Topic == null)
-            {
-                item.Topic = this.attr.Topic ?? throw new ArgumentException("No topic information was found. Make sure it is configured either in the binding properties or in the data payload.", nameof(item));
-            }
+            item.PubSubName ??= this.attr.PubSubName ?? throw new ArgumentException("No pub/sub name was found. Make sure it is configured either in the binding properties or in the data payload.", nameof(item));
+            item.Topic ??= this.attr.Topic ?? throw new ArgumentException("No topic information was found. Make sure it is configured either in the binding properties or in the data payload.", nameof(item));
 
             this.events.Add(item);
 
@@ -45,11 +43,14 @@ namespace Dapr.AzureFunctions.Extension
             }
 
             // Publish all events in parallel
+            //
+            // Name and Topic cannot be null here - we verify them when the event is added.
             return Task.WhenAll(
                 this.events.Select(
                     e => this.daprClient.PublishEventAsync(
                         this.attr.DaprAddress,
-                        e.Topic,
+                        e.PubSubName!,
+                        e.Topic!,
                         e.Payload,
                         cancellationToken)));
         }

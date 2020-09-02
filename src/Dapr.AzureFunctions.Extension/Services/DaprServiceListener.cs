@@ -107,7 +107,7 @@ namespace Dapr.AzureFunctions.Extension
         {
             if (this.topics.Add(topic))
             {
-                this.log.LogInformation("Registered topic: {TopicName}", topic.Topic);
+                this.log.LogInformation("Registered topic: {PubSubName}/{TopicName} -> {Route}", topic.PubSubName, topic.Topic, topic.Route);
             }
         }
 
@@ -133,7 +133,13 @@ namespace Dapr.AzureFunctions.Extension
                 {
                     return false;
                 }
-                else if (topic1.Topic.Equals(topic2.Topic, StringComparison.OrdinalIgnoreCase)
+                else if (
+
+                    // pub/sub name and topic name are case-sensitive in dapr
+                    //
+                    // routing is handled by ASP.NET and is case-INsensitive
+                    topic1.PubSubName.Equals(topic2.PubSubName, StringComparison.Ordinal)
+                    && topic1.Topic.Equals(topic2.Topic, StringComparison.Ordinal)
                     && topic1.Route.Equals(topic2.Route, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
@@ -146,7 +152,7 @@ namespace Dapr.AzureFunctions.Extension
 
             public int GetHashCode(DaprTopicSubscription topic)
             {
-                return Tuple.Create(topic.Topic.ToLowerInvariant(), topic.Route.ToLowerInvariant()).GetHashCode();
+                return (topic.PubSubName, topic.Topic, topic.Route.ToLowerInvariant()).GetHashCode();
             }
         }
     }

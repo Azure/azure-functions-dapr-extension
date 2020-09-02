@@ -16,13 +16,21 @@ namespace Dapr.AzureFunctions.Extension
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprTopicSubscription"/> class.
         /// </summary>
-        /// <param name="topic">The name of the topic subscription.</param>
+        /// <param name="pubSubName">The name of the pub/sub.</param>
+        /// <param name="topic">The topic of the topic subscription.</param>
         /// <param name="route">The route corresponds to this topic subscription.</param>
-        public DaprTopicSubscription(string topic, string route)
+        public DaprTopicSubscription(string pubSubName, string topic, string route)
         {
+            this.PubSubName = pubSubName;
             this.Topic = topic;
             this.Route = route;
         }
+
+        /// <summary>
+        /// Gets the pub/sub name.
+        /// </summary>
+        [JsonProperty("pubsubname")]
+        public string PubSubName { get; }
 
         /// <summary>
         /// Gets topic name.

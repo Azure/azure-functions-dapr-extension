@@ -1,14 +1,16 @@
 {
   "bindings": [
     {
+      "name": "subEvent",
       "type": "daprTopicTrigger",
-      "topic": "A",
-      "name": "subEvent"
+      "pubsubname": "messagebus",
+      "topic": "A"
     },
     {
+      "name": "pubEvent",
       "type": "daprPublish",
       "direction": "out",
-      "name": "pubEvent",
+      "pubsubname": "messagebus",
       "topic": "B"
     }
   ]

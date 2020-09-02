@@ -59,6 +59,7 @@ Trigger on a Dapr topic subscription.  The trigger will automatically expose and
 ```json
 {
     "type": "daprTopicTrigger",
+    "pubsubname": "pubsub",
     "topic": "myTopic",
     "name": "triggerData",
     "direction": "in"
@@ -67,11 +68,12 @@ Trigger on a Dapr topic subscription.  The trigger will automatically expose and
 
 ### C# Attribute sample
 ```csharp
-[DaprTopicTrigger(Topic = "myTopic")] CloudEvent triggerData,
+[DaprTopicTrigger("pubsub", Topic = "myTopic")] CloudEvent triggerData,
 ```
 
 ### Properties
 
 |Property Name|Description|
 |--|--|
+|PubSubName|The name of the Dapr pub/sub.|
 |Topic|The name of the Dapr topic.|

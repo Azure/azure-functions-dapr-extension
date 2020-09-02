@@ -17,7 +17,7 @@ namespace dotnet_azurefunction
         [FunctionName("PublishOutputBinding")]
         public static void Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "topic/{topicName}")] HttpRequest req,
-            [DaprPublish(Topic = "{topicName}")] out DaprPubSubEvent pubSubEvent,
+            [DaprPublish(PubSubName = "%PubSubName%", Topic = "{topicName}")] out DaprPubSubEvent pubSubEvent,
             ILogger log)
         {
             string requestBody = new StreamReader(req.Body).ReadToEnd();

@@ -17,12 +17,24 @@ namespace Dapr.AzureFunctions.Extension
         /// Initializes a new instance of the <see cref="DaprPubSubEvent"/> class.
         /// </summary>
         /// <param name="payload">The payload of the outbound pub/sub event.</param>
+        /// <param name="pubSubName">The pub/sub name of the outbound pub/sub event.</param>
         /// <param name="topic">The topic of the outbound pub/sub event.</param>
-        public DaprPubSubEvent(JToken payload, string? topic = null)
+        public DaprPubSubEvent(JToken payload, string? pubSubName = null, string? topic = null)
         {
             this.Payload = payload;
+            this.PubSubName = pubSubName;
             this.Topic = topic;
         }
+
+        /// <summary>
+        /// Gets the name of the pub/sub.
+        /// </summary>
+        /// <remarks>
+        /// If the pub/sub name is not specified, it is inferred from the
+        /// <see cref="DaprPublishAttribute"/> binding attribute.
+        /// </remarks>
+        [JsonProperty("pubsubname")]
+        public string? PubSubName { get; internal set; }
 
         /// <summary>
         /// Gets the name of the topic.

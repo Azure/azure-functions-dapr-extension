@@ -37,11 +37,26 @@ namespace Dapr.AzureFunctions.Extension
                 return Utils.NullTriggerBindingTask;
             }
 
+            // Resolve names in pub/sub, topic, and route from settings
+            if (!this.nameResolver.TryResolveWholeString(attribute.PubSubName, out var pubSubName))
+            {
+                pubSubName = attribute.PubSubName;
+            }
+
             string topic = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.Topic);
 
-            // Verison 0.8 only support route to be the same as the topic name
+            if (attribute.Route is null || !this.nameResolver.TryResolveWholeString(attribute.Route, out var route))
+            {
+                route = attribute.Route ?? topic;
+            }
+
+            if (!route.StartsWith("/"))
+            {
+                route = "/" + route;
+            }
+
             return Task.FromResult<ITriggerBinding?>(
-                new DaprTopicTriggerBinding(this.serviceListener, topic, route: topic, parameter));
+                new DaprTopicTriggerBinding(this.serviceListener, pubSubName, topic, route, parameter));
         }
 
         class DaprTopicTriggerBinding : DaprTriggerBindingBase
@@ -49,24 +64,27 @@ namespace Dapr.AzureFunctions.Extension
             static readonly JsonEventFormatter CloudEventFormatter = new JsonEventFormatter();
 
             readonly DaprServiceListener serviceListener;
-            readonly string topicName;
+            readonly string pubSubName;
+            readonly string topic;
             readonly string route;
 
             public DaprTopicTriggerBinding(
                 DaprServiceListener serviceListener,
-                string topicName,
+                string pubSubName,
+                string topic,
                 string route,
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
             {
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
-                this.topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
+                this.pubSubName = pubSubName ?? throw new ArgumentNullException(nameof(pubSubName));
+                this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
                 this.route = route ?? throw new ArgumentNullException(nameof(route));
             }
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprTopicListener(this.serviceListener, executor, new DaprTopicSubscription(this.topicName, this.route));
+                return new DaprTopicListener(this.serviceListener, executor, new DaprTopicSubscription(this.pubSubName, this.topic, this.route));
             }
 
             protected override object ConvertFromJson(JToken jsonValue, Type destinationType)
@@ -114,7 +132,7 @@ namespace Dapr.AzureFunctions.Extension
                 public override void AddRoute(IRouteBuilder routeBuilder)
                 {
                     // Example: POST /orders
-                    // { "topic": "newOrder", "route": "/orders"}
+                    // { "pubsubname": "pubsub", "topic": "newOrder", "route": "/orders"}
                     // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-routes-for-dapr-to-deliver-topic-events
                     routeBuilder.MapPost(this.topic.Route, this.DispatchAsync);
                 }

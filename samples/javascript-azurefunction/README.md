@@ -72,7 +72,7 @@ func extensions install -p Dapr.AzureFunctions.Extension -v <version>
 Run function host with Dapr: 
 
 ```
-dapr run --app-id functionapp --app-port 3001 --port 3501  --components-path ..\components\ -- func host start --no-build
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --components-path ..\components\ -- func host start --no-build
 ```
 
 The command should output the dapr logs that look like the following:
@@ -84,7 +84,7 @@ You're up and running! Both Dapr and your app logs will appear here.
 ...
 ```
 
-> **Note**: there are three ports in this service. The `--app-port`(3001) is where our function host listens on for any Dapr trigger. The `--port`(3501) is where Dapr APIs runs on as well as the  grpc port. The function port (default 7071) is where function host listens on for any HTTP triggred function using `api/{functionName}` URl path. All of these ports are configurable.
+> **Note**: there are three ports in this service. The `--app-port`(3001) is where our function host listens on for any Dapr trigger. The `--dapr-http-port`(3501) is where Dapr APIs runs on as well as the  grpc port. The function port (default 7071) is where function host listens on for any HTTP triggred function using `api/{functionName}` URl path. All of these ports are configurable.
 > 
 
 

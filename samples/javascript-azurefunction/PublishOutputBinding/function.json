@@ -10,6 +10,7 @@
     {
       "type": "daprPublish",
       "direction": "out",
+      "pubsubname": "messagebus",
       "topic": "{topicName}",
       "name": "payload"
     },

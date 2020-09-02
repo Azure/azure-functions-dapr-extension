@@ -55,7 +55,7 @@ namespace DaprExtensionTests
 
                     // PubSub APIs
                     // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md
-                    routes.MapPost("v1.0/publish/{topic}", this.OnPublish);
+                    routes.MapPost("v1.0/publish/{name}/{topic}", this.OnPublish);
 
                     // Secrets API
                     // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md

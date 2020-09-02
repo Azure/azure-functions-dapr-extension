@@ -26,6 +26,7 @@ namespace DaprExtensionTests
     {
         private static readonly IDictionary<string, string> EnvironmentVariables = new Dictionary<string, string>()
         {
+            { "PubSubName", "MyBoundPubSub" },
             { "TopicName", "MyBoundTopic" }
         };
 
@@ -42,10 +43,10 @@ namespace DaprExtensionTests
 
             // The method name is DotNetMethodName
             // The function name is FunctionName
-            // The topic name is MyTopic
+            // The topic name is MyRoute
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
-                "http://localhost:3001/MyTopic",
+                "http://localhost:3001/MyRoute",
                 jsonContent: CreateCloudEventMessage(input));
 
             Assert.Equal(0, response.Content.Headers.ContentLength);
@@ -60,9 +61,10 @@ namespace DaprExtensionTests
         {
             int input = 42;
 
-            // The method name is DotNetMethodName
-            // The function name is FunctionName
+            // The method name is DotNetBindingResolution
+            // The function name is DotNetBindingResolution
             // The topic name is MyTopic
+            // The route is MyBoundTopic
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
                 "http://localhost:3001/MyBoundTopic",
@@ -72,6 +74,27 @@ namespace DaprExtensionTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.DotNetBindingResolution));
+            Assert.Contains(input.ToString(), functionLogs);
+        }
+
+        [Fact]
+        public async Task TopicNameAndRouteAreDifferent()
+        {
+            int input = 42;
+
+            // The method name is DotNetMethodName
+            // The function name is MyFunctionName
+            // The topic name is MyTopic
+            // The route is MyRoute
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/MyRoute",
+                jsonContent: CreateCloudEventMessage(input));
+
+            Assert.Equal(0, response.Content.Headers.ContentLength);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            IEnumerable<string> functionLogs = this.GetFunctionLogs("MyFunctionName");
             Assert.Contains(input.ToString(), functionLogs);
         }
 
@@ -92,31 +115,46 @@ namespace DaprExtensionTests
             JArray array = Assert.IsType<JArray>(result);
             Assert.NotEmpty(array);
 
-            // verify the topic name is correctly registered
-            IEnumerable<string> topics = array.Select(item => (JObject)item).Select(obj => (string)obj.GetValue("topic"));          
-            Assert.Contains(nameof(Functions.IntTopic), topics);
-            Assert.Contains(nameof(Functions.CustomTypeTopic), topics);
-            Assert.Contains(nameof(Functions.StringTopic), topics);
-            Assert.Contains(nameof(Functions.StreamTopic), topics);
-            Assert.Contains(nameof(Functions.BytesTopic), topics);
-            Assert.Contains(nameof(Functions.JObjectTopic), topics);
-            Assert.Contains(nameof(Functions.CloudEventTopic), topics);
+            var subscriptions = array
+                .Cast<JObject>()
+                .Select(obj => (pubSubname: (string)obj.GetValue("pubsubname"), topic: (string)obj.GetValue("topic"), route: (string)obj.GetValue("route")))
+                .OrderBy(t => t.topic)
+                .ToArray();
 
-            // verify the route is correctly registered
-            // Version 0.8 only support route to match topic name
-            IEnumerable<string> routes = array.Select(item => (JObject)item).Select(obj => (string)obj.GetValue("route"));
-            Assert.Contains(nameof(Functions.IntTopic), routes);
-            Assert.Contains(nameof(Functions.CustomTypeTopic), routes);
-            Assert.Contains(nameof(Functions.StringTopic), routes);
-            Assert.Contains(nameof(Functions.StreamTopic), routes);
-            Assert.Contains(nameof(Functions.BytesTopic), routes);
-            Assert.Contains(nameof(Functions.JObjectTopic), routes);
-            Assert.Contains(nameof(Functions.CloudEventTopic), routes);
+            Assert.Collection(
+                subscriptions,
+                s => AssertDefaults(s, nameof(Functions.BytesTopic)),
+                s => AssertDefaults(s, nameof(Functions.CloudEventTopic)),
+                s => AssertDefaults(s, nameof(Functions.CustomTypeTopic)),
+                s => AssertDefaults(s, nameof(Functions.IntTopic)),
+                s => AssertDefaults(s, nameof(Functions.JObjectTopic)),
+                s =>
+                {
+                    // This one has a custom configuration with env-vars
+                    Assert.Equal("MyBoundPubSub", s.pubSubname);
+                    Assert.Equal("MyBoundTopic", s.topic);
+                    Assert.Equal("/MyBoundTopic", s.route);
+                },
+                s =>
+                {
+                    // This one has a custom configuration
+                    Assert.Equal("MyOtherPubSub", s.pubSubname);
+                    Assert.Equal("MyTopic", s.topic);
+                    Assert.Equal("/MyRoute", s.route);
+                },
+                s => AssertDefaults(s, nameof(Functions.StreamTopic)),
+                s => AssertDefaults(s, nameof(Functions.StringTopic)));
 
-            // Make sure the explicit topic names are handled correctly
-            Assert.Contains("MyTopic", topics);
-            Assert.DoesNotContain(nameof(Functions.DotNetMethodName), topics);
-            Assert.DoesNotContain("MyFunctionName", topics);
+            Assert.DoesNotContain(nameof(Functions.DotNetMethodName), subscriptions.Select(s => s.topic));
+            Assert.DoesNotContain("MyFunctionName", subscriptions.Select(s => s.topic));
+
+            void AssertDefaults((string pubSubname, string topic, string route) s, string methodName)
+            {
+                // by default the method name is the topic and the route
+                Assert.Equal("MyPubSub", s.pubSubname);
+                Assert.Equal(methodName, s.topic);
+                Assert.Equal("/" + methodName, s.route); 
+            }
         }
 
         [Theory]
@@ -170,40 +208,40 @@ namespace DaprExtensionTests
         static class Functions
         {
             public static void IntTopic(
-                [DaprTopicTrigger] int input,
+                [DaprTopicTrigger("MyPubSub")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
 
             public static void StringTopic(
-                [DaprTopicTrigger] string input,
+                [DaprTopicTrigger("MyPubSub")] string input,
                 ILogger log) => log.LogInformation(input);
 
             public static async Task StreamTopic(
-                [DaprTopicTrigger] Stream input,
+                [DaprTopicTrigger("MyPubSub")] Stream input,
                 ILogger log) => log.LogInformation(await new StreamReader(input).ReadToEndAsync());
 
             public static void BytesTopic(
-                [DaprTopicTrigger] byte[] input,
+                [DaprTopicTrigger("MyPubSub")] byte[] input,
                 ILogger log) => log.LogInformation(Encoding.UTF8.GetString(input));
 
             public static void JObjectTopic(
-                [DaprTopicTrigger] JObject input,
+                [DaprTopicTrigger("MyPubSub")] JObject input,
                 ILogger log) => log.LogInformation(input.ToString(Formatting.None));
 
             public static void CloudEventTopic(
-                [DaprTopicTrigger] CloudEvent input,
+                [DaprTopicTrigger("MyPubSub")] CloudEvent input,
                 ILogger log) => log.LogInformation(JsonConvert.SerializeObject(input.Data));
 
             public static void CustomTypeTopic(
-                [DaprTopicTrigger] CustomType input,
+                [DaprTopicTrigger("MyPubSub")] CustomType input,
                 ILogger log) => log.LogInformation(JsonConvert.SerializeObject(input));
 
             [FunctionName("MyFunctionName")]
             public static void DotNetMethodName(
-                [DaprTopicTrigger(Topic = "MyTopic")] int input,
+                [DaprTopicTrigger("MyOtherPubSub", Topic = "MyTopic", Route = "MyRoute")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
 
             public static void DotNetBindingResolution(
-                [DaprTopicTrigger(Topic = "%TopicName%")] int input,
+                [DaprTopicTrigger("%PubSubName%", Topic = "%TopicName%")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
         }
 

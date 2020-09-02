@@ -63,7 +63,7 @@ spec:
 Build the function app:
 
 ```
-dotnet build -o bin extensions.csproj
+dotnet build -o bin/ extensions.csproj
 ```
 
 Note that this extensions.csproj file is required in order to reference the exception as a project rather than as an nuget package. To do the equivalent step with a published version of the extension on nuget.org, run the following step:
@@ -87,7 +87,7 @@ You're up and running! Both Dapr and your app logs will appear here.
 ...
 ```
 
-> **Note**: there are three ports in this service. The `--app-port`(3001) is where our function host listens on for any Dapr trigger. The `--port`(3501) is where Dapr APIs runs on as well as the  grpc port. The function port (default 7071) is where function host listens on for any HTTP triggred function using `api/{functionName}` URl path. All of these ports are configurable.
+> **Note**: there are three ports in this service. The `--app-port`(3001) is where our function host listens on for any Dapr trigger. The `--dapr-http-port`(3501) is where Dapr APIs runs on as well as the  grpc port. The function port (default 7071) is where function host listens on for any HTTP triggred function using `api/{functionName}` URl path. All of these ports are configurable.
 > 
 
 ### Troubleshootings:
@@ -268,6 +268,7 @@ def main(subEvent,
   "bindings": [
     {
       "type": "daprTopicTrigger",
+      "pubsubname": "messagebus",
       "topic": "A",
       "name": "subEvent",
       "direction": "in",
@@ -277,6 +278,7 @@ def main(subEvent,
       "type": "daprPublish",
       "direction": "out",
       "name": "pubEvent",
+      "pubsubname": "messagebus",
       "topic": "B"
     }
   ]
