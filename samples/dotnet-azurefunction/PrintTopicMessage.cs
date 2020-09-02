@@ -17,7 +17,7 @@ namespace dotnet_azurefunction
         /// </summary>
         [FunctionName("PrintTopicMessage")]
         public static void Run(
-            [DaprTopicTrigger(Topic = "B")] CloudEvent subEvent,
+            [DaprTopicTrigger("%PubSubName%", Topic = "B")] CloudEvent subEvent,
             ILogger log)
         {
             log.LogInformation("C# function processed a PrintTopicMessage request from the Dapr Runtime.");

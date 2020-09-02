@@ -17,8 +17,14 @@ namespace DaprExtensionTests
 
     public class DaprTopicPublishTests : DaprTestBase
     {
+        private static readonly IDictionary<string, string> EnvironmentVariables = new Dictionary<string, string>()
+        {
+            { "PubSubName", "MyBoundPubSub" },
+            { "TopicName", "MyBoundTopic" },
+        };
+
         public DaprTopicPublishTests(ITestOutputHelper output)
-            : base(output)
+            : base(output, EnvironmentVariables)
         {
             this.AddFunctions(typeof(Functions));
         }
@@ -31,7 +37,7 @@ namespace DaprExtensionTests
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
             string expectedValue = JsonConvert.SerializeObject(input);
-            Assert.Equal("/v1.0/publish/TopicA", req.Path);
+            Assert.Equal("/v1.0/publish/MyPubSub/TopicA", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }
 
@@ -43,20 +49,33 @@ namespace DaprExtensionTests
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
             string expectedValue = JsonConvert.SerializeObject(input);
-            Assert.Equal("/v1.0/publish/TopicA", req.Path);
+            Assert.Equal("/v1.0/publish/MyPubSub/TopicA", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }
 
         [Fact]
         public async Task Publish_ReturnValue()
         {
-            var input = new DaprPubSubEvent("Hello, world!", "TopicB");
+            var input = new DaprPubSubEvent("Hello, world!", pubSubName: "MyPubSub", topic: "TopicB");
 
             await this.CallFunctionAsync(nameof(Functions.DaprPubSubEventReturnValueAnyTopic), "input", input);
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
             string expectedValue = JsonConvert.SerializeObject(input.Payload);
-            Assert.Equal($"/v1.0/publish/{input.Topic}", req.Path);
+            Assert.Equal($"/v1.0/publish/MyPubSub/{input.Topic}", req.Path);
+            Assert.Equal(expectedValue, req.ContentAsString);
+        }
+
+        [Fact]
+        public async Task Publish_ReturnValue_Bound()
+        {
+            var input = new DaprPubSubEvent("Hello, world!");
+
+            await this.CallFunctionAsync(nameof(Functions.DaprPubSubEventReturnValueBound), "input", input);
+            SavedHttpRequest req = this.GetSinglePublishRequest();
+
+            string expectedValue = JsonConvert.SerializeObject(input.Payload);
+            Assert.Equal($"/v1.0/publish/MyBoundPubSub/MyBoundTopic", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }
 
@@ -88,10 +107,10 @@ namespace DaprExtensionTests
             Assert.All(requests, req => Assert.StartsWith("application/json", req.ContentType));
 
             // The order of the requests is not guaranteed
-            SavedHttpRequest req1 = Assert.Single(requests, req => req.Path == "/v1.0/publish/TopicA");
+            SavedHttpRequest req1 = Assert.Single(requests, req => req.Path == "/v1.0/publish/MyPubSub/TopicA");
             Assert.Equal("1", req1.ContentAsString);
 
-            SavedHttpRequest req2 = Assert.Single(requests, req => req.Path == "/v1.0/publish/TopicB");
+            SavedHttpRequest req2 = Assert.Single(requests, req => req.Path == "/v1.0/publish/MyPubSub/TopicB");
             Assert.Equal("2", req2.ContentAsString);
         }
 
@@ -122,7 +141,7 @@ namespace DaprExtensionTests
             [NoAutomaticTrigger]
             public static Task ObjectAsyncCollector(
                 object input,
-                [DaprPublish(Topic = "TopicA")] IAsyncCollector<object> events)
+                [DaprPublish(PubSubName = "MyPubSub", Topic = "TopicA")] IAsyncCollector<object> events)
             {
                 // Any JSON-serializeable type should be supported
                 return events.AddAsync(input);
@@ -131,19 +150,23 @@ namespace DaprExtensionTests
             [NoAutomaticTrigger]
             public static void ObjectOutputParameter(
                 object input,
-                [DaprPublish(Topic = "TopicA")] out object eventData) => eventData = input;
+                [DaprPublish(PubSubName = "MyPubSub", Topic = "TopicA")] out object eventData) => eventData = input;
 
             [NoAutomaticTrigger]
-            [return: DaprPublish]
+            [return: DaprPublish(PubSubName = "MyPubSub")]
             public static DaprPubSubEvent DaprPubSubEventReturnValueAnyTopic(DaprPubSubEvent input) => input;
+
+            [NoAutomaticTrigger]
+            [return: DaprPublish(PubSubName = "%PubSubName%", Topic = "%TopicName%")]
+            public static DaprPubSubEvent DaprPubSubEventReturnValueBound(DaprPubSubEvent input) => input;
 
             [NoAutomaticTrigger]
             public static async Task AsyncCollectorMultipleItems(
                 object input,
-                [DaprPublish(Topic = "TopicA")] IAsyncCollector<DaprPubSubEvent> events)
+                [DaprPublish(PubSubName = "MyPubSub", Topic = "TopicA")] IAsyncCollector<DaprPubSubEvent> events)
             {
                 await events.AddAsync(new DaprPubSubEvent(1));
-                await events.AddAsync(new DaprPubSubEvent(2, "TopicB"));
+                await events.AddAsync(new DaprPubSubEvent(2, topic: "TopicB"));
             }
         }
 

@@ -52,7 +52,7 @@ spec:
 Run function host with Dapr: 
 
 ```
-dapr run --app-id functionapp --app-port 3001 --port 3501 --components-path ..\components\ -- func host start
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- func host start
 ```
 
 The command should output the dapr logs that look like the following:
@@ -64,7 +64,7 @@ You're up and running! Both Dapr and your app logs will appear here.
 ...
 ```
 
-> **Note**: there are three ports in this service. The `--app-port`(3001) is where our function host listens on for any Dapr trigger. The `--port`(3501) is where Dapr APIs runs on as well as the  grpc port. The function port (default 7071) is where function host listens on for any HTTP triggred function using `api/{functionName}` URl path. All of these ports are configurable.
+> **Note**: there are three ports in this service. The `--app-port`(3001) is where our function host listens on for any Dapr trigger. The `--dapr-http-port`(3501) is where Dapr APIs runs on as well as the  grpc port. The function port (default 7071) is where function host listens on for any HTTP triggred function using `api/{functionName}` URl path. All of these ports are configurable.
 > 
 
 
@@ -163,8 +163,8 @@ In your terminal window, you should see logs to confirm the expected result:
 ```csharp
 [FunctionName("TransferEventBetweenTopics")]
 public static void Run(
-    [DaprTopicTrigger(Topic = "A")] CloudEvent subEvent,
-    [DaprPublish(Topic = "B")] out DaprPubSubEvent pubEvent,
+    [DaprTopicTrigger("%PubSubName%", Topic = "A")] CloudEvent subEvent,
+    [DaprPublish(PubSubName = "%PubSubName%", Topic = "B")] out DaprPubSubEvent pubEvent,
     ILogger log)
 {
     log.LogInformation("C# function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
@@ -190,7 +190,7 @@ At the same time, we also have a function that subscribes to topic `B`, and it w
 ```csharp
 [FunctionName("PrintTopicMessage")]
 public static void Run(
-    [DaprTopicTrigger(Topic = "B")] CloudEvent subEvent,
+    [DaprTopicTrigger("%PubSubName%", Topic = "B")] CloudEvent subEvent,
     ILogger log)
 {
     log.LogInformation("C# function processed a PrintTopicMessage request from the Dapr Runtime.");
@@ -201,7 +201,7 @@ public static void Run(
 Then let's see what will happen if we publish a message to topic A using the Dapr cli:
 
 ```powershell
-dapr publish --topic A --data 'This is a test'
+dapr publish --pubsub messagebus --topic A --data 'This is a test'
 ```
 
 The Dapr logs should show the following:

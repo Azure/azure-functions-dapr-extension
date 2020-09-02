@@ -16,6 +16,12 @@ namespace Dapr.AzureFunctions.Extension
     public class DaprPublishAttribute : DaprBaseAttribute
     {
         /// <summary>
+        /// Gets or sets the pub/sub name to publish to.
+        /// </summary>
+        [AutoResolve]
+        public string? PubSubName { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the topic to publish to.
         /// </summary>
         [AutoResolve]

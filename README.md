@@ -81,6 +81,21 @@ While this extension is in preview it is not included in the default extension b
 
 This also means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where you could include in your app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
 
+### Developing the extension
+
+The samples in this repo (other than the quickstart) are set up to run using a local build of the extension.
+
+You can use a development build of the extension for any function by:
+
+- Referencing the Dapr.AzureFunctions.Extension project in your .NET function
+- Publishing the extension to the `bin/` directory of your non-.NET function
+
+Example for non-.NET function:
+
+```sh
+dotnet publish <path-to...>/Dapr.AzureFunctions.Extension -o bin/
+```
+
 ## Dapr ports and listeners
 When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  
 
@@ -99,10 +114,10 @@ Normally when debugging an Azure Function you use the `func` command line tool t
 So when running a Dapr app locally using the default ports, you would leverage the `dapr` CLI to start the `func` CLI.
 
 ### If no Dapr triggers are in the app
-`dapr run --app-id functionA --port 3501 -- func host start --no-build`
+`dapr run --app-id functionA --dapr-http-port 3501 -- func host start --no-build`
 
 ### If Dapr triggers are in the app
-`dapr run --app-id functionA --app-port 3001 --port 3501 -- func host start --no-build`
+`dapr run --app-id functionA --app-port 3001 --dapr-http-port 3501 -- func host start --no-build`
 
 ## Deploying to Kubernetes
 

@@ -88,6 +88,7 @@ If binding to a `byte[]` or JSON object, the object should be of format:
 ```json
 {
     "payload": "The subscribers will receive this payload as the body of a Cloud Event envelope.",
+    "pubsubname": "{Optional. Name of the pub/sub if not defined in function.json}",
     "topic": "{Optional. Name of the topic if not defined in function.json}"
 }
 ```
@@ -98,19 +99,21 @@ If binding to a `byte[]` or JSON object, the object should be of format:
     "type": "daprPublish",
     "direction": "out",
     "name": "pubEvent",
+    "pubsubname": "pubsub",
     "topic": "myTopic"
 }
 ```
 
 ### C# Attribute sample
 ```csharp
-[DaprPublish(Topic = "myTopic")] IAsyncCollector<DaprPubSubEvent> pubEvent,
+[DaprPublish(PubSubName = "pubsub", Topic = "myTopic")] IAsyncCollector<DaprPubSubEvent> pubEvent,
 ```
 
 ### Properties
 
 |Property Name|Description|
 |--|--|
+|PubSubName|The name of the Dapr pub/sub to send the message.|
 |Topic|The name of the Dapr topic to send the message.|
 
 ## Dapr Binding Output Binding

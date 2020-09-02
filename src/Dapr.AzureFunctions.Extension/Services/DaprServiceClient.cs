@@ -174,13 +174,14 @@ namespace Dapr.AzureFunctions.Extension
 
         internal async Task PublishEventAsync(
             string? daprAddress,
-            string? topicName,
+            string name,
+            string topicName,
             JToken? payload,
             CancellationToken cancellationToken)
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            var req = new HttpRequestMessage(HttpMethod.Post, $"{daprAddress}/v1.0/publish/{topicName}");
+            var req = new HttpRequestMessage(HttpMethod.Post, $"{daprAddress}/v1.0/publish/{name}/{topicName}");
             if (payload != null)
             {
                 req.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");

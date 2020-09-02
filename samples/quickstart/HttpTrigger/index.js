@@ -21,6 +21,7 @@ module.exports = async function (context, req) {
     context.bindings.publish = 
     {
         "payload": state,
+        "pubsubname": "pubsub",
         "topic": "myTopic"
     }
 

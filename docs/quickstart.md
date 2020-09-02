@@ -121,6 +121,7 @@ module.exports = async function (context, req) {
     context.bindings.publish = 
     {
         "payload": state,
+        "pubsubname": "pubsub",
         "topic": "myTopic"
     }
 
@@ -139,7 +140,7 @@ Now that we have our first function, we can test it out locally.
 ### Running from single line command
 You can use the Dapr CLI to start the function app.  This will expose a port for the language to attach any debugger to (by default in node it's port 9229).
 
-`dapr run --app-id function-app --port 3501 -- func start -p 7071`
+`dapr run --app-id function-app --dapr-http-port 3501 -- func start -p 7071`
 
 ### Running using VS Code debugger / breakpoints
 If you prefer, you can use VS Code debugging to use the [Azure Functions VS Code](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) extension in conjunction with the Dapr CLI to attach a debugger and set breakpoints easily.
@@ -152,7 +153,7 @@ If you prefer, you can use VS Code debugging to use the [Azure Functions VS Code
 1. Start the debugger
     You will see a window appear with your app running
 1. Open a seperate terminal and start the Dapr sidecar at the specified port.
-    `dapr run --app-id function-app --app-port 3001 --port 3501`
+    `dapr run --app-id function-app --app-port 3001 --dapr-http-port 3501`
 
 Dapr should connect to the Function App and display that you are up and running.  Keep Dapr and the Function App running as you debug.
 
@@ -182,6 +183,7 @@ We could easily create a second function app and include a function in it that w
     ```json
     {
       "type": "daprTopicTrigger",
+      "pubsubname": "pubsub",
       "topic": "myTopic",
       "name": "daprTrigger"
     }
@@ -196,7 +198,7 @@ module.exports = async function (context) {
 ```
 1. May core tools version may block debugging if no storage account is defined as some Azure Functions triggers depend on them.  Dapr triggers do not, but to get around this validation edit the `local.settings.json` file and add `"none"` as the value for `AzureWebJobsStorage`.  A fix for this workaround is [being tracked here](https://github.com/Azure/azure-functions-core-tools/issues/2065).
 1. Save and run the app.  Note that because we now need to recieve trigger events for the dapr sidecar, we need to define the port the function will listen on for these triggers.  
-    `dapr run --app-id function-app --app-port 3001 --port 3501 -- func start -p 7071` or starting the function debugger and then starting dapr with `dapr run --app-id function-app --app-port 3001 --port 3501`.
+    `dapr run --app-id function-app --app-port 3001 --dapr-http-port 3501 -- func start -p 7071` or starting the function debugger and then starting dapr with `dapr run --app-id function-app --app-port 3001 --dapr-http-port 3501`.
 
 When the app runs you should see the topic trigger fires.  You can continue to trigger the first app using HTTP POSTs and update the state. You should see logs for both the HttpTrigger function and the DaprSubscribeTrigger function now, all powered by Dapr.
 

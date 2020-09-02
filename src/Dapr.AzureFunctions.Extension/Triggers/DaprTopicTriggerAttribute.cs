@@ -16,8 +16,32 @@ namespace Dapr.AzureFunctions.Extension
     public class DaprTopicTriggerAttribute : Attribute
     {
         /// <summary>
-        /// Gets or sets the name of the topic.
+        /// Initializes a new instance of the <see cref="DaprTopicTriggerAttribute"/> class.
+        /// </summary>
+        /// <param name="pubSubName">The pub/sub name.</param>
+        public DaprTopicTriggerAttribute(string pubSubName)
+        {
+            if (pubSubName is null)
+            {
+                throw new ArgumentNullException(nameof(pubSubName));
+            }
+
+            this.PubSubName = pubSubName;
+        }
+
+        /// <summary>
+        /// Gets the pub/sub name.
+        /// </summary>
+        public string PubSubName { get; }
+
+        /// <summary>
+        /// Gets or sets the topic. If unspecified the function name will be used.
         /// </summary>
         public string? Topic { get; set; }
+
+        /// <summary>
+        /// Gets or sets the route for the trigger. If unspecified the topic name will be used.
+        /// </summary>
+        public string? Route { get; set; }
     }
 }

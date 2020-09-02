@@ -3,6 +3,7 @@
   "bindings": [
     {
       "type": "daprTopicTrigger",
+      "pubsubname": "messagebus",
       "topic": "B",
       "name": "subEvent",
       "direction": "in"
