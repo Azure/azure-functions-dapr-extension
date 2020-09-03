@@ -41,12 +41,12 @@ namespace DaprExtensionTests
         {
             int input = 42;
 
-            // The method name is DotNetMethodName
+            // The method name is ExplicitTopicNameInAttribute
             // The function name is FunctionName
             // The topic name is MyRoute
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
-                "http://localhost:3001/MyRoute",
+                "http://localhost:3001/MyTopic",
                 jsonContent: CreateCloudEventMessage(input));
 
             Assert.Equal(0, response.Content.Headers.ContentLength);
@@ -57,13 +57,34 @@ namespace DaprExtensionTests
         }
 
         [Fact]
+        public async Task ExplicitRouteNameInAttribute()
+        {
+            int input = 42;
+
+            // The method name is ExplicitRouteInAttribute
+            // The function name is MyOtherFunctionName
+            // The topic name is MyOtherTopic
+            // The route is MyRoute
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/MyRoute",
+                jsonContent: CreateCloudEventMessage(input));
+
+            Assert.Equal(0, response.Content.Headers.ContentLength);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            IEnumerable<string> functionLogs = this.GetFunctionLogs("MyOtherFunctionName");
+            Assert.Contains(input.ToString(), functionLogs);
+        }
+
+        [Fact]
         public async Task TopicNameInAttributeAsBindingExpression()
         {
             int input = 42;
 
             // The method name is DotNetBindingResolution
             // The function name is DotNetBindingResolution
-            // The topic name is MyTopic
+            // The topic name is MyBoundTopic
             // The route is MyBoundTopic
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -76,28 +97,6 @@ namespace DaprExtensionTests
             IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.DotNetBindingResolution));
             Assert.Contains(input.ToString(), functionLogs);
         }
-
-        [Fact]
-        public async Task TopicNameAndRouteAreDifferent()
-        {
-            int input = 42;
-
-            // The method name is DotNetMethodName
-            // The function name is MyFunctionName
-            // The topic name is MyTopic
-            // The route is MyRoute
-            using HttpResponseMessage response = await this.SendRequestAsync(
-                HttpMethod.Post,
-                "http://localhost:3001/MyRoute",
-                jsonContent: CreateCloudEventMessage(input));
-
-            Assert.Equal(0, response.Content.Headers.ContentLength);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            IEnumerable<string> functionLogs = this.GetFunctionLogs("MyFunctionName");
-            Assert.Contains(input.ToString(), functionLogs);
-        }
-
 
         [Fact]
         public async Task InvokeSubscriptionEndpoint()
@@ -123,6 +122,13 @@ namespace DaprExtensionTests
 
             Assert.Collection(
                 subscriptions,
+                s =>
+                {
+                    // This one has a custom configuration
+                    Assert.Equal("MyOtherPubSub", s.pubSubname);
+                    Assert.Equal("AnotherTopic", s.topic);
+                    Assert.Equal("/MyRoute", s.route);
+                },
                 s => AssertDefaults(s, nameof(Functions.BytesTopic)),
                 s => AssertDefaults(s, nameof(Functions.CloudEventTopic)),
                 s => AssertDefaults(s, nameof(Functions.CustomTypeTopic)),
@@ -140,12 +146,12 @@ namespace DaprExtensionTests
                     // This one has a custom configuration
                     Assert.Equal("MyOtherPubSub", s.pubSubname);
                     Assert.Equal("MyTopic", s.topic);
-                    Assert.Equal("/MyRoute", s.route);
+                    Assert.Equal("/MyTopic", s.route);
                 },
                 s => AssertDefaults(s, nameof(Functions.StreamTopic)),
                 s => AssertDefaults(s, nameof(Functions.StringTopic)));
 
-            Assert.DoesNotContain(nameof(Functions.DotNetMethodName), subscriptions.Select(s => s.topic));
+            Assert.DoesNotContain(nameof(Functions.ExplicitTopicNameInAttribute), subscriptions.Select(s => s.topic));
             Assert.DoesNotContain("MyFunctionName", subscriptions.Select(s => s.topic));
 
             void AssertDefaults((string pubSubname, string topic, string route) s, string methodName)
@@ -236,8 +242,13 @@ namespace DaprExtensionTests
                 ILogger log) => log.LogInformation(JsonConvert.SerializeObject(input));
 
             [FunctionName("MyFunctionName")]
-            public static void DotNetMethodName(
-                [DaprTopicTrigger("MyOtherPubSub", Topic = "MyTopic", Route = "MyRoute")] int input,
+            public static void ExplicitTopicNameInAttribute(
+                [DaprTopicTrigger("MyOtherPubSub", Topic = "MyTopic")] int input,
+                ILogger log) => log.LogInformation(input.ToString());
+
+            [FunctionName("MyOtherFunctionName")]
+            public static void ExplicitRouteInAttribute(
+                [DaprTopicTrigger("MyOtherPubSub", Topic = "AnotherTopic", Route = "MyRoute")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
 
             public static void DotNetBindingResolution(
