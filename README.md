@@ -77,7 +77,7 @@ You can run through a quickstart of developing some JavaScript Azure Functions t
 While this extension is in preview it is not included in the default extension bundle for functions.  You can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
 
 1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
-1. Run `func extensions install -p Dapr.AzureFunctions.Extension -v 0.8.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension).  You must have the .NET Core SDK installed in order for this command to work.
+1. Run `func extensions install -p Dapr.AzureFunctions.Extension -v 0.10.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension).  You must have the .NET Core SDK installed in order for this command to work.
 
 This also means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where you could include in your app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
 
