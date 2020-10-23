@@ -9,7 +9,7 @@ namespace Dapr.AzureFunctions.Extension
 
     /// <summary>
     /// Dapr Topic Subscription returned when Dapr discover the topic subscriptions.
-    /// https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-a-route-for-dapr-to-discover-topic-subscriptions.
+    /// https://docs.dapr.io/reference/api/pubsub_api/#provide-a-route-for-dapr-to-discover-topic-subscriptions.
     /// </summary>
     internal class DaprTopicSubscription
     {

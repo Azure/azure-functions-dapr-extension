@@ -44,25 +44,25 @@ namespace DaprExtensionTests
                     var routes = new RouteBuilder(app);
 
                     // State APIs
-                    // https://github.com/dapr/docs/blob/master/reference/api/state_api.md
+                    // https://docs.dapr.io/reference/api/state_api/
                     routes.MapPost("v1.0/state/{storeName}", this.OnSaveState);
                     routes.MapGet("v1.0/state/{storeName}", this.OnGetState);
                     routes.MapGet("v1.0/state/{storeName}/{key}", this.OnGetState);
 
                     // Service invocation APIs
-                    // https://github.com/dapr/docs/blob/master/reference/api/service_invocation_api.md
+                    // https://docs.dapr.io/reference/api/service_invocation_api/
                     routes.MapRoute("v1.0/invoke/{appId}/method/{methodName}", this.OnInvoke);
 
                     // PubSub APIs
-                    // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md
+                    // https://docs.dapr.io/reference/api/pubsub_api/
                     routes.MapPost("v1.0/publish/{name}/{topic}", this.OnPublish);
 
                     // Secrets API
-                    // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md
+                    // https://docs.dapr.io/reference/api/secrets_api/
                     routes.MapGet("v1.0/secrets/{storeName}/{name}", this.OnGetSecret);
 
                     // Output binding API
-                    // https://github.com/dapr/docs/blob/master/reference/api/bindings_api.md
+                    // https://docs.dapr.io/reference/api/bindings_api/
                     routes.MapPost("v1.0/bindings/{name}", this.OnSendMessage);
 
                     app.UseRouter(routes.Build());
@@ -175,7 +175,7 @@ namespace DaprExtensionTests
 
         async Task OnGetSecret(HttpContext context)
         {
-            // https://github.com/dapr/docs/blob/master/reference/api/secrets_api.md
+            // https://docs.dapr.io/reference/api/secrets_api/
             // This is an example that supports multiple kyes in one secret.
             // Depending on the secret store provider, the binding should return a dictionary of multiple or just one key-value pair
             string secretName = (string)context.GetRouteValue("name");

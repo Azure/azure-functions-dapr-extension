@@ -133,7 +133,7 @@ namespace Dapr.AzureFunctions.Extension
                 {
                     // Example: POST /orders
                     // { "pubsubname": "pubsub", "topic": "newOrder", "route": "/orders"}
-                    // https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-routes-for-dapr-to-deliver-topic-events
+                    // https://docs.dapr.io/reference/api/pubsub_api/#provide-routes-for-dapr-to-deliver-topic-events
                     routeBuilder.MapPost(this.topic.Route, this.DispatchAsync);
                 }
 

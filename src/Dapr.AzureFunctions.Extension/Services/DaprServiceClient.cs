@@ -79,7 +79,7 @@ namespace Dapr.AzureFunctions.Extension
                 }
 
                 // avoid potential overrides: specific 404 error messages can be returned from Dapr
-                // ex: https://github.com/dapr/docs/blob/master/reference/api/actors_api.md#get-actor-state
+                // ex: https://docs.dapr.io/reference/api/actors_api/#get-actor-state
                 if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     throw new DaprException(
