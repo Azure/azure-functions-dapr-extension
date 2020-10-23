@@ -2,13 +2,13 @@
 
 This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
-1) Invoked by [Dapr Service Invocation](https://github.com/dapr/docs/tree/master/concepts/service-invocation) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
+1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
 3) Interact with [Dapr Bindings](https://github.com/dapr/components-contrib/tree/master/bindings) using `DaprBinding`
 
 ## Prerequisites
 This sample requires you to have the following installed on your machine:
-- [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md#environment-setup) to download and install the Dapr CLI and initialize Dapr.
+- [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
 
@@ -268,7 +268,7 @@ Since we have both functions deployed in the same app, you should also see we ha
 ```
 
 ## 4. Dapr Secret: 
-Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://github.com/dapr/docs/tree/master/howto/setup-secret-store) to set up other supported secret stores.
+Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/secret-stores-overview/) to set up other supported secret stores.
 
 ```csharp
 [FunctionName("RetrieveSecret")]
@@ -289,7 +289,7 @@ public static void Run(
 
 `DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Kubernetes Secret supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
 
-Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://github.com/dapr/docs/blob/master/howto/setup-secret-store/hashicorp-vault.md) example. 
+Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example. 
 ```csharp
 [DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
@@ -312,11 +312,11 @@ Next step, we will show steps to get your Dapr function app running in a Kuberne
 Since our sample does cover multiple Dapr components, here we have a long list of requirements. Please skip any step that is not required for your own function app.  
 - Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - Install [helm](https://helm.sh/docs/intro/install/) (you can skip this if your function app does not use Kafka bindings)
-- A Kubernetes cluster, such as [Minikube](https://github.com/dapr/docs/blob/master/getting-started/cluster/setup-minikube.md), [AKS](https://github.com/dapr/docs/blob/master/getting-started/cluster/setup-aks.md) or [GKE](https://cloud.google.com/kubernetes-engine/)
-- A State Store, such as [Redis Store](https://github.com/dapr/docs/blob/master/howto/configure-redis/README.md) for Dapr state store and pub/sub message delivery (you can skip this if your function does not use the aforementioned components)
+- A Kubernetes cluster, such as [Minikube](https://docs.dapr.io/operations/hosting/kubernetes/cluster/setup-minikube/), [AKS](https://docs.dapr.io/operations/hosting/kubernetes/cluster/setup-aks/) or [GKE](https://cloud.google.com/kubernetes-engine/)
+- A State Store, such as [Redis Store](https://docs.dapr.io/getting-started/configure-redis/) for Dapr state store and pub/sub message delivery (you can skip this if your function does not use the aforementioned components)
 
 ## Setup Dapr on your Kubernetes Cluster
-Once you have a cluster, run `dapr init --kubernetes` to deploy Dapr to it. Please follow this( guide on [how to install Dapr on your kubrtnetes](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md#installing-dapr-on-a-kubernetes-cluster) via Dapr CLI or Helm. Dapr CLI does not support non-default namespaces and only is recommended for testing purposes.
+Once you have a cluster, run `dapr init --kubernetes` to deploy Dapr to it. Please follow this( guide on [how to install Dapr on your Kubernetes](https://docs.dapr.io/getting-started/install-dapr/#install-dapr-on-a-kubernetes-cluster) via Dapr CLI or Helm. Dapr CLI does not support non-default namespaces and only is recommended for testing purposes.
 If you need a non-default namespace or in production environment, Helm has to be used.
 
 ```
@@ -331,7 +331,7 @@ If you need a non-default namespace or in production environment, Helm has to be
     ```
     component.dapr.io/statestore configured
     ```
-   - Follow [secret management](https://github.com/dapr/docs/tree/master/concepts/secrets) instructions to securely manage your secrets in a production-grade application.
+   - Follow [secret management](https://docs.dapr.io/developing-applications/building-blocks/secrets/) instructions to securely manage your secrets in a production-grade application.
    - More detail can be found in Dapr sample repo [2.hello-kubernetes](https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store)
 
 
@@ -355,7 +355,7 @@ If you need a non-default namespace or in production environment, Helm has to be
    ```
    component.dapr.io/sample-topic created
    ```
-- Follow [secret management](https://github.com/dapr/docs/tree/master/concepts/secrets) instructions to securely manage your secrets in a production-grade application.
+- Follow [secret management](https://docs.dapr.io/developing-applications/building-blocks/secrets/) instructions to securely manage your secrets in a production-grade application.
 
 #### [Optional] Setting up the Pub/Sub in Kubernetes
   - In this demo, we use Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store

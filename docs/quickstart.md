@@ -4,7 +4,7 @@ The following will get you started with a Function app that leverages the Dapr e
 
 ## Prerequisites
 
-* [Dapr configured locally (and optionally in Kubernetes)](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md)
+* [Dapr configured locally (and optionally in Kubernetes)](https://docs.dapr.io/getting-started/install-dapr/)
 * [Azure Functions Core Tools - v3](https://github.com/azure/azure-functions-core-tools#installing)
 * [Docker](https://docs.docker.com/get-docker/)
 * [.NET Core SDK](https://dotnet.microsoft.com/download) - enables building of the extension locally in the project

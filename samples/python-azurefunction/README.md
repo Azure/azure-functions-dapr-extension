@@ -2,13 +2,13 @@
 
 This tutorial will demonstrate how to use Azure Functions Python programming model to integrate with multiple Dapr components.  Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-python) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
-1) Invoked by [Dapr Service Invocation](https://github.com/dapr/docs/tree/master/concepts/service-invocation) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
+1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
 3) Interact with [Dapr Bindings](https://github.com/dapr/components-contrib/tree/master/bindings) using `DaprBinding`
 
 ## Prerequisites
 This sample requires you to have the following installed on your machine:
-- [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://github.com/dapr/docs/blob/master/getting-started/environment-setup.md#environment-setup) to download and install the Dapr CLI and initialize Dapr.
+- [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - Install Python on your machine
     - This sample uses Python 3.7.6. Some nuance or issue is expected if using other version
@@ -384,7 +384,7 @@ Since we have both functions deployed in the same app, you should also see we ha
 == APP == [TIMESTAMP] Executed 'ConsumeMessageFromKafka' (Succeeded, Id=<ExecutionId>)
 ```
 ## 4. Dapr Secret: 
-Next we will show how `daprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://github.com/dapr/docs/tree/master/howto/setup-secret-store) to set up other supported secret stores.
+Next we will show how `daprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
 
 ```python
 def main (payload, secret) -> None:
@@ -417,7 +417,7 @@ def main (payload, secret) -> None:
 
 `DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a json string. In the code, we load the json string and converts into a dict. Since Kubernetes Secret supports multiple keys in a secret, we the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
 
-Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://github.com/dapr/docs/blob/master/howto/setup-secret-store/hashicorp-vault.md) example. 
+Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example. 
 ```json
 "metadata": "metadata.version_id=15&metadata.version_stage=AAA"
 ```
