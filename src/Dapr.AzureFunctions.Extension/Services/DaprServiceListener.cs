@@ -66,7 +66,7 @@ namespace Dapr.AzureFunctions.Extension
                             listener.AddRoute(routes);
                         }
 
-                        // See https://github.com/dapr/docs/blob/master/reference/api/pubsub_api.md#provide-a-route-for-dapr-to-discover-topic-subscriptions
+                        // See https://docs.dapr.io/reference/api/pubsub_api/#provide-a-route-for-dapr-to-discover-topic-subscriptions
                         routes.MapGet("dapr/subscribe", this.GetTopicsAsync);
 
                         app.UseRouter(routes.Build());
