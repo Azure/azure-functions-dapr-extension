@@ -51,8 +51,14 @@ spec:
 
 Run function host with Dapr: 
 
+Windows
 ```
 dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- func host start
+```
+
+Linux/Mac OS
+```
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ../components/ -- func host start
 ```
 
 The command should output the dapr logs that look like the following:
@@ -216,7 +222,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/samples/tree/master/5.bindings) to spin up your the Kafka locally. In the example below, we use `DaprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
+Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, we use `DaprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
 
 ```csharp
 [FunctionName("ConsumeMessageFromKafka")]
@@ -274,7 +280,7 @@ Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret
 [FunctionName("RetrieveSecret")]
 public static void Run(
     [DaprServiceInvocationTrigger] object args,
-    [DaprSecret("kubernetes", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
+    [DaprSecret("localsecretstore", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
     ILogger log)
 {
     log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");
