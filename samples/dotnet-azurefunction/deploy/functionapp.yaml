@@ -15,12 +15,12 @@ spec:
         app: functionapp
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "functionapp"
-        dapr.io/port: "3001"
+        dapr.io/app-id: "functionapp"
+        dapr.io/app-port: "3001"
     spec:
       containers:
       - name: functionapp
-        image: dapriosamples/dotnet-azurefunction
+        image: dapriosamples/dotnet-azurefunction:edge
         ports:
         - containerPort: 3001
         imagePullPolicy: Always
@@ -29,3 +29,5 @@ spec:
           value: statestore
         - name: KafkaBindingName
           value: sample-topic
+        - name: PubSubName
+          value: pubsub
