@@ -1,6 +1,6 @@
 # .NET Azure Function Sample
 
-This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
+This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [samples](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
 1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
@@ -20,7 +20,7 @@ Now that we've locally set up Dapr, clone the repo, then navigate to the dotnet-
 git clone https://github.com/dapr/azure-functions-extension.git
 cd samples/dotnet-azurefunction
 ```
-In this folder, you will find `local.settings.json`, which lists a few app settings we used in our trigger/binding attributes. 
+In this folder, you will find `local.settings.json`, which lists a few app settings by the trigger/binding attributes.
 
 ```json
 "StateStoreName": "statestore"
@@ -91,9 +91,9 @@ public static void Run(
 }
 ```
 
-Here we use `DaprServiceInvocationTrigger` to receive and handle `CreateNewOrder` request. We first log that this function is successfully triggered. Then we binds the content to the `order` object. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
+Here the `DaprServiceInvocationTrigger` is used to receive and handle `CreateNewOrder` request and it first logs that this function is successfully triggered. Then it binds the content to the `order` object. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
 
-Now we can invoke this function by using the Dapr cli in a new command line terminal.  
+Now you can invoke this function by using the Dapr cli in a new command line terminal.  
 
 Windows Command Prompt
 ```sh
@@ -110,7 +110,7 @@ Linux or MacOS
 dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
 ```
 
-We can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 
 ```http
 POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
@@ -122,7 +122,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 }
 ```
 
-**Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
+**Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
 
 ```powershell
 dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
@@ -136,7 +136,7 @@ In your terminal window, you should see logs indicating that the message was rec
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
-In order to confirm the state is now persisted. We now can move to our next function:
+In order to confirm the state is now persisted. You can now move to the next function:
 
 ```csharp
 [FunctionName("RetrieveOrder")]
@@ -152,7 +152,7 @@ public static void Run(
 }
 ```
 
-Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. Here we use `DaprState` *input binding* to fetch the latest value of the key `order` and bind the value to string object `data`' before we start exectuing the function block.
+Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. Here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data`' before exectuing the function block.
 
 In your terminal window, you should see logs to confirm the expected result:
 
@@ -180,18 +180,18 @@ public static void Run(
 }
 ```
 
-Here we use `DaprTopicTrigger` to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `CloudEvent` `subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details. 
+Here, `DaprTopicTrigger` is used to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `CloudEvent` `subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details. 
 
 
 > **Note**: Alternatively, any other JSON-serializable datatype binds directly to the data field of the cloud event. For example, int, double, and custom “POCO” types can be used as the trigger type and will be deserialized from the event’s data field. 
 
-Then we use `DaprPublish` *output binding* to publish a new event to topic `B` using the strongly-typed `DaprPubSubEvent` class, or it can be written using the attribute `[DaprPublish(Topic = "B")] out object pubEvent`:
+Then, `DaprPublish` *output binding* is used to publish a new event to topic `B` using the strongly-typed `DaprPubSubEvent` class, or it can be written using the attribute `[DaprPublish(Topic = "B")] out object pubEvent`:
 
 ```csharp
     pubEvent = "Transfer from Topic A:" + subEvent.Data;
 ```
 
-At the same time, we also have a function that subscribes to topic `B`, and it will simply just print the message content when an event arrives. 
+The function below subscribes to topic `B`, and it simply prints the message content when an event arrives.
 
 ```csharp
 [FunctionName("PrintTopicMessage")]
@@ -204,7 +204,7 @@ public static void Run(
 }
 ```
 
-Then let's see what will happen if we publish a message to topic A using the Dapr cli:
+You can publish a message to topic A using the Dapr cli:
 
 ```powershell
 dapr publish --pubsub messagebus --publish-app-id functionapp --topic A --data 'This is a test'
@@ -222,7 +222,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, we use `DaprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
+This section demonstrates the integration of this extension with Dapr Binding component. A Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```csharp
 [FunctionName("ConsumeMessageFromKafka")]
@@ -252,7 +252,7 @@ public static async void Run(
 ```
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. `IAsyncCollector<object>` allows you to send multiple message by calling `AddAsync` with different payloads. 
 
-Now we can use service invocation to invoke this function:
+You can use service invocation to invoke this function:
 
 Windows
 ```powershell
@@ -271,7 +271,7 @@ The Dapr function logs should show the following:
 == APP == [TIMESTAMP] Executed 'SendMessageToDaprBinding' (Succeeded, Id=<ExecutionId>)
 ```
 
-Since we have both functions deployed in the same app, you should also see we have consumed the message by see the folowing:
+Since both functions have been deployed in the same app, you can see the logs below which indicate that the message has been consumed.
 ```
 == APP == [TIMESTAMP] Executing 'ConsumeMessageFromKafka' (Reason='', Id=<ExecutionId>)
 == APP == [TIMESTAMP] Hello from Kafka!
@@ -279,8 +279,10 @@ Since we have both functions deployed in the same app, you should also see we ha
 == APP == [TIMESTAMP] Executed 'ConsumeMessageFromKafka' (Succeeded, Id=<ExecutionId>)
 ```
 
-## 4. Dapr Secret: 
-Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret component. Here we use Local file Secret Store and follow the setup instructions at [Local file secret store](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to configure a secret named "my-secret". Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to set up other supported secret stores.
+## 4. Dapr Secret:
+This section demonstrates how `DaprSecret` **input binding** integrates with Dapr Secret component. Here, Local file Secret Store is used and you can follow the setup instructions at [Local file secret store](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to configure a secret named "my-secret".
+
+Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to set up other supported secret stores.
 
 ```csharp
 [FunctionName("RetrieveSecretLocal")]
@@ -299,15 +301,16 @@ public static void Run(
 }
 ```
 
-`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code  
+`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
 
-Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example. 
-```csharp
-[DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
-```
 You can retrieve the secret by invoking the RetrieveSecretLocal function using the command:-
 ```
 dapr invoke --app-id functionapp --method RetrieveSecretLocal my-secret
+```
+
+Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example.
+```csharp
+[DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
 
 # Step 4 - Cleanup
@@ -320,11 +323,11 @@ dapr stop --app-id functionapp
 
 
 # Deploy Dapr Function App into Kubernetes
-Next step, we will show steps to get your Dapr function app running in a Kubernetes cluster.
+This section describes the steps to get the Dapr function app running in a Kubernetes cluster.
 (To generate your custom container image please see these [instructions](./BuildContainerImage.md))
 
 ## Prerequisites
-Since our sample does cover multiple Dapr components, here we have a long list of requirements. Please skip any step that is not required for your own function app.  
+Below are the requirements for this sample which covers multiple Dapr components. Please skip any step that is not required for your own function app.  
 - Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - Install [helm](https://helm.sh/docs/intro/install/) (you can skip this if your function app does not use Kafka bindings)
 - A Kubernetes cluster, such as [Minikube](https://docs.dapr.io/operations/hosting/kubernetes/cluster/setup-minikube/), [AKS](https://docs.dapr.io/operations/hosting/kubernetes/cluster/setup-aks/) or [GKE](https://cloud.google.com/kubernetes-engine/)
@@ -373,7 +376,7 @@ If you need a non-default namespace or in production environment, Helm has to be
 - Follow [secret management](https://docs.dapr.io/developing-applications/building-blocks/secrets/) instructions to securely manage your secrets in a production-grade application.
 
 #### [Optional] Setting up the Pub/Sub in Kubernetes
-  - In this demo, we use Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/quickstarts/tree/master/hello-kubernetes#step-2---create-and-configure-a-state-store
+  - This sample uses Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/quickstarts/tree/master/hello-kubernetes#step-2---create-and-configure-a-state-store
   - Run `kubectl apply -f .\deploy\redis.yaml` and observe that your state store was successfully configured!
     ```
     component.dapr.io/messagebus configured
@@ -402,7 +405,7 @@ kind: Secret
 ...
 ```
 
-Now you should have all Dapr components up and running in your kubernetes cluster. Next we will show how to deploy your function app into your kubernetes cluster with the Dapr Side Car.
+Now you should have all Dapr components up and running in your kubernetes cluster. Next step is to deploy the function app into a kubernetes cluster with the Dapr Side Car.
 
 ## Deploy your Dapr Function App
 You can find your function app deployment file `deploy/functionapp.yaml`.
@@ -473,8 +476,8 @@ In order to hit your function app endpoint, you can use port forwarding. Use the
 ```
 kubectl port-forward functionapp-6d4cc6b7f7-2p9n9 {port-of-your-choice}:3001
 ```
-Now similar to what we have done when testing locally, use any of your preferred tool to send HTTP request. Here we use the Rest Client Plugin.
 
+You can use the Rest Client Plugin as below. You can use any of your preferred tools to send HTTP request.
 ``` http
 POST  http://localhost:{port-of-your-choice}/CreateNewOrder  
 

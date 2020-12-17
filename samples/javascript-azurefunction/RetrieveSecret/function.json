@@ -10,7 +10,7 @@
       "direction": "in",
       "name": "secret",
       "key": "my-secret",
-      "secretStoreName": "kubernetes",
+      "secretStoreName": "localsecretstore",
       "metadata": "metadata.namespace=default"
     }
   ]

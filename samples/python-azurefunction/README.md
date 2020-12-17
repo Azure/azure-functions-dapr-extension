@@ -24,7 +24,7 @@ Now that we've locally set up Dapr, clone the repo, then navigate to the python-
 git clone https://github.com/dapr/azure-functions-extension.git
 cd samples/python-azurefunction
 ```
-In this folder, you will find `local.settings.json`, which lists a few app settings we used in our trigger/binding attributes. 
+In this folder, you will find `local.settings.json`, which lists a few app settings used in the trigger/binding attributes.
 
 ```json
 "StateStoreName": "statestore"
@@ -104,7 +104,7 @@ You're up and running! Both Dapr and your app logs will appear here.
     ```powershell
     The binding type(s) 'daprServiceInvocationTrigger, daprState' are not registered. Please ensure the type is correct and the binding extension is installed.
     ```
-    Please check `host.json` file under this project and make sure it **DOES NOT** use `extensionBundle`. **REMOVE the following entry.** This extension bundle overwrites the manual extension installation step specified in the `extension.proj`. Dapr extension is not included in the bundle, so we have to import the Dapr Extension ourselves into this project. 
+    Please check `host.json` file under this project and make sure it **DOES NOT** use `extensionBundle`. **REMOVE the following entry.** This extension bundle overwrites the manual extension installation step specified in the `extension.proj`. Dapr extension is not included in the bundle, and needs to be imported separately into this project.
 
     ```json
     "extensionBundle": {
@@ -118,14 +118,14 @@ You're up and running! Both Dapr and your app logs will appear here.
     ```
     Project Dapr.AzureFunctions.Extension is not compatible with netcore31 (.NETCore,Version=v3.1). Project Dapr.AzureFunctions.Extension supports: netstandard2.0 (.NETStandard,Version=v2.0)
     ```
-    Make sure the target framework for `extension.proj` is netstandard 2.0. Since we have a project reference for our Dapr Extension, build step tries to restore `Dapr.AzureFunctions.Extension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you swtich to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
+    Make sure the target framework for `extension.proj` is netstandard 2.0. Since a project reference for the Dapr Extension exists, build step tries to restore `Dapr.AzureFunctions.Extension.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you switch to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
 
 
 # Step 3 - Understand the Sample
 
 ## 1. Service Invocation and State Management: Create New Order and Retrieve Order
 
-Please read this [Azure Functions Python programming guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings) for basic knowledge on triggers/bindings, logging, file structure and so on. Here we assume you are already familiar with `function.json` and `__init__.py` files. 
+Please read [Azure Functions Python programming guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings) for basic knowledge on triggers/bindings, logging, file structure and so on. Also, familiarize yourself with `function.json` and `__init__.py` files.
 
 ```python
 import logging
@@ -160,9 +160,9 @@ def main(payload,
 }
 
 ```
-Data from triggers and bindings is bound to the function via method attributes using the name property defined in the function.json file. The function.json file describes we will use a `daprServiceInvocationTrigger` trigger named as `payload` and a `daprState` output binding named as `order`.  This function will be invoke when the function host receive a `CreateNewOrder` request from Dapr runtime. The actual payload content will be bound to this `payload` parameter when passing into the function. In the function, we use [azure.functions.Out](https://docs.microsoft.com/en-us/python/api/azure-functions/azure.functions.out?view=azure-python) interface to explicitly declare the attribute types of `order`. Then we binds the content of `data` property to `order` binding by calling `set()`. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
+Data from triggers and bindings is bound to the function via method attributes using the name property defined in the function.json file. The function.json file describes uses a `daprServiceInvocationTrigger` trigger named as `payload` and a `daprState` output binding named as `order`.  This function will be invoke when the function host receive a `CreateNewOrder` request from Dapr runtime. The actual payload content will be bound to this `payload` parameter when passing into the function. In the function, [azure.functions.Out](https://docs.microsoft.com/en-us/python/api/azure-functions/azure.functions.out?view=azure-python) interface is used to explicitly declare the attribute types of `order`. Then the content of `data` property is bound to the `order` binding by calling `set()`. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
 
-Now we can invoke this function by using the Dapr cli in a new command line terminal.  
+You can invoke this function by using the Dapr cli in a new command line terminal.  
 
 Windows Command Prompt
 ```sh
@@ -179,7 +179,7 @@ Linux or MacOS
 dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
 ```
 
-We can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 
 ```http
 POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
@@ -191,7 +191,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 }
 ```
 
-**Note**: in this sample, `daprServiceInvocationTrigger` binding in the function.json does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `methodName` field to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
+**Note**: in this sample, `daprServiceInvocationTrigger` binding in the function.json does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `methodName` field to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
 
 ```json
 // function.json
@@ -216,7 +216,7 @@ In your terminal window, you should see logs indicating that the message was rec
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
-In order to confirm the state is now persisted. We now can move to our next function:
+In order to confirm the state is now persisted.], you can move to the next function:
 
 ```python
 def main(payload, data: str) -> None:
@@ -244,7 +244,12 @@ def main(payload, data: str) -> None:
 }
 ```
 
-Similarly, the function will be triggered by any `RetrieveOrder` service invocation request.Here we use `DaprState` *input binding* to fetch the latest value of the key `order` and bind the value to string object `data` before we start exectuing the function block.
+Similarly, the function will be triggered by any `RetrieveOrder` service invocation request such as:
+```
+dapr invoke --app-id functionapp --method RetrieveOrder --data {}
+```
+
+.Here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data` before exectuing the function block.
 
 In your terminal window, you should see logs to confirm the expected result:
 
@@ -291,17 +296,16 @@ def main(subEvent,
 }
 ```
 
-Here we use `daprTopicTrigger` to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details. 
+Here, `daprTopicTrigger` is used to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details.
+
+> **Note**: Alternatively, any other JSON-serializable datatype binds directly to the data field of the cloud event. For example, int, double, and custom “POCO” types can be used as the trigger type and will be deserialized from the event’s data field.
+
+Then, `daprPublish` *output binding* is used to publish a new event to topic `B`.
 
 
-> **Note**: Alternatively, any other JSON-serializable datatype binds directly to the data field of the cloud event. For example, int, double, and custom “POCO” types can be used as the trigger type and will be deserialized from the event’s data field. 
+Also, the function below subscribes to topic `B`, and it will simply just print the message content when an event arrives. 
 
-Then we use `daprPublish` *output binding* to publish a new event to topic `B`.
-
-
-At the same time, we also have a function that subscribes to topic `B`, and it will simply just print the message content when an event arrives. 
-
-Then let's see what will happen if we publish a message to topic A using the Dapr cli:
+You can publish a message to topic A using the Dapr cli:
 
 ```powershell
 dapr publish  --publish-app-id functionapp --pubsub messagebus --topic A --data 'This is a test'
@@ -319,7 +323,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, we use `daprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
+This sections describes how this extension integrates with Dapr Binding component. Here Kafka binding is used as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `daprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```python
 def main(triggerData: str) -> None:
@@ -369,7 +373,7 @@ def main(args, messages: func.Out[bytes]) -> None:
 
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding.
 
-Now we can use service invocation to invoke this function:
+You can use service invocation to invoke this function:
 
 Windows
 ```powershell
@@ -388,7 +392,7 @@ The Dapr'd function logs should show the following:
 == APP == [TIMESTAMP] Executed 'SendMessageToKafka' (Succeeded, Id=<ExecutionId>)
 ```
 
-Since we have both functions deployed in the same app, you should also see we have consumed the message by see the folowing:
+Since both functions have been deployed in the same app, you can see the logs below which indicate that the message has been consumed:
 ```
 == APP == [TIMESTAMP] Executing 'ConsumeMessageFromKafka' (Reason='', Id=<ExecutionId>)
 == APP == [TIMESTAMP] Hello from Kafka!
@@ -396,7 +400,9 @@ Since we have both functions deployed in the same app, you should also see we ha
 == APP == [TIMESTAMP] Executed 'ConsumeMessageFromKafka' (Succeeded, Id=<ExecutionId>)
 ```
 ## 4. Dapr Secret: 
-Next we will show how `daprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
+This section demonstrates how `DaprSecret` **input binding** integrates with Dapr Secret component. Here, Local file Secret Store is used and you can follow the setup instructions at [Local file secret store](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to configure a secret named "my-secret".
+
+Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
 
 ```python
 def main (payload, secret) -> None:
@@ -420,20 +426,24 @@ def main (payload, secret) -> None:
       "direction": "in",
       "name": "secret",
       "key": "my-secret",
-      "secretStoreName": "kubernetes",
+      "secretStoreName": "localsecretstore",
       "metadata": "metadata.namespace=default"
     }
   ]
 }
 ```
 
-`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a json string. In the code, we load the json string and converts into a dict. Since Kubernetes Secret supports multiple keys in a secret, we the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
+`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
 
-Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example. 
+You can retrieve the secret by invoking the RetrieveSecret function using the command:-
+```
+dapr invoke --app-id functionapp --method RetrieveSecret --data {}
+```
+
+Some secret stores need a metadata string to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example.
 ```json
 "metadata": "metadata.version_id=15&metadata.version_stage=AAA"
 ```
-However, secrets for this example are only availble in the cluster and currently Dapr does not have a local secret store development experience, so we cannot verify this locally as the other samples. 
 
 
 # Step 4 - Cleanup
