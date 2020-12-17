@@ -10,15 +10,15 @@ namespace dotnet_azurefunction
     using Dapr.AzureFunctions.Extension;
     using System.Collections.Generic;
 
-    public static class RetrieveSecret
+    public static class RetrieveSecretLocal
     {
         /// <summary>
         /// Example to use Dapr Service Invocation Trigger and Dapr Secret input binding to retrieve a saved state from statestore
         /// </summary>
-        [FunctionName("RetrieveSecret")]
+        [FunctionName("RetrieveSecretLocal")]
         public static void Run(
             [DaprServiceInvocationTrigger] object args,
-            [DaprSecret("kubernetes", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
+            [DaprSecret("localsecretstore", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
             ILogger log)
         {
             log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");

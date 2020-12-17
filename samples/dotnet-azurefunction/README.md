@@ -8,9 +8,9 @@ We'll be running a Darp'd function app locally:
 
 ## Prerequisites
 This sample requires you to have the following installed on your machine:
-- [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
+- [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
-- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
+- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
 
 # Step 1 - Understand the Settings 
 
@@ -97,17 +97,17 @@ Now we can invoke this function by using the Dapr cli in a new command line term
 
 Windows Command Prompt
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 Windows PowerShell
 ```powershell
-dapr invoke --app-id functionapp --method CreateNewOrder --payload '{\"data\": { \"orderId\": \"41\" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{\"data\": { \"orderId\": \"41\" } }'
 ```
 
 Linux or MacOS
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --payload '{"data": { "orderId": "41" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
 ```
 
 We can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
@@ -125,7 +125,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 **Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
 
 ```powershell
-dapr invoke --app-id functionapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
@@ -207,7 +207,7 @@ public static void Run(
 Then let's see what will happen if we publish a message to topic A using the Dapr cli:
 
 ```powershell
-dapr publish --pubsub messagebus --topic A --data 'This is a test'
+dapr publish --pubsub messagebus --publish-app-id functionapp --topic A --data 'This is a test'
 ```
 
 The Dapr logs should show the following:
@@ -254,8 +254,14 @@ public static async void Run(
 
 Now we can use service invocation to invoke this function:
 
+Windows
 ```powershell
-dapr invoke --app-id functionapp --method SendMessageToKafka --payload '{\"message\": \"hello!\" }'
+dapr invoke --app-id functionapp --method SendMessageToKafka --data '{\"message\": \"hello!\" }'
+```
+
+Linux/MacOS
+```shell
+dapr invoke --app-id functionapp --method SendMessageToKafka --data '{"message": "hello!" }'
 ```
 
 The Dapr function logs should show the following:
@@ -274,10 +280,10 @@ Since we have both functions deployed in the same app, you should also see we ha
 ```
 
 ## 4. Dapr Secret: 
-Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/secret-stores-overview/) to set up other supported secret stores.
+Next we will show how `DaprSecret` **input binding** integrates with Dapr Secret component. Here we use Local file Secret Store and follow the setup instructions at [Local file secret store](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to configure a secret named "my-secret". Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to set up other supported secret stores.
 
 ```csharp
-[FunctionName("RetrieveSecret")]
+[FunctionName("RetrieveSecretLocal")]
 public static void Run(
     [DaprServiceInvocationTrigger] object args,
     [DaprSecret("localsecretstore", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
@@ -293,13 +299,16 @@ public static void Run(
 }
 ```
 
-`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Kubernetes Secret supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
+`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code  
 
 Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example. 
 ```csharp
 [DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
-However, secrets for this example are only availble in the cluster and currently Dapr does not have a local secret store development experience, so we cannot verify this locally as the other samples. 
+You can retrieve the secret by invoking the RetrieveSecretLocal function using the command:-
+```
+dapr invoke --app-id functionapp --method RetrieveSecretLocal my-secret
+```
 
 # Step 4 - Cleanup
 
@@ -332,13 +341,13 @@ If you need a non-default namespace or in production environment, Helm has to be
 ``` 
 ## Deploy Dapr components
 #### [Optional] Configure the State Store
-  - Replace the hostname and password in `deploy/redis.yaml`. https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store
+  - Replace the hostname and password in `deploy/redis.yaml`. https://github.com/dapr/quickstarts/tree/master/hello-kubernetes#step-2---create-and-configure-a-state-store
   - Run `kubectl apply -f ./deploy/redis.yaml` and observe that your state store was successfully configured!
     ```
     component.dapr.io/statestore configured
     ```
    - Follow [secret management](https://docs.dapr.io/developing-applications/building-blocks/secrets/) instructions to securely manage your secrets in a production-grade application.
-   - More detail can be found in Dapr sample repo [2.hello-kubernetes](https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store)
+   - More detail can be found in Dapr sample repo [2.hello-kubernetes](https://github.com/dapr/quickstarts/tree/master/hello-kubernetes#step-2---create-and-configure-a-state-store)
 
 
 #### [Optional] Setting up a Kafka in Kubernetes
@@ -364,12 +373,12 @@ If you need a non-default namespace or in production environment, Helm has to be
 - Follow [secret management](https://docs.dapr.io/developing-applications/building-blocks/secrets/) instructions to securely manage your secrets in a production-grade application.
 
 #### [Optional] Setting up the Pub/Sub in Kubernetes
-  - In this demo, we use Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/samples/tree/master/2.hello-kubernetes#step-2---create-and-configure-a-state-store
+  - In this demo, we use Redis Stream (Redis Version 5 and above) to enable pub/sub. Replace the hostname and password in `deploy/redis-pubsub.yaml`. https://github.com/dapr/quickstarts/tree/master/hello-kubernetes#step-2---create-and-configure-a-state-store
   - Run `kubectl apply -f .\deploy\redis.yaml` and observe that your state store was successfully configured!
     ```
     component.dapr.io/messagebus configured
     ```
-   - See Dapr sample repo [4.pub-sub](https://github.com/dapr/samples/tree/master/4.pub-sub) for more instructions.
+   - See Dapr sample repo [pub-sub](https://github.com/dapr/quickstarts/tree/master/pub-sub) for more instructions.
 
 
 

@@ -8,13 +8,13 @@ We'll be running a Darp'd function app locally:
 
 ## Prerequisites
 This sample requires you to have the following installed on your machine:
-- [Setup Dapr](https://github.com/dapr/samples/tree/master/1.hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
+- [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - Install Python on your machine
     - This sample uses Python 3.7.6. Some nuance or issue is expected if using other version
 - [Set up Python Environment in Visual Studio Code](https://code.visualstudio.com/docs/python/python-tutorial)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download), used for install Dapr Extension for non .NET language
-- [Run Kafka Docker Container Locally](https://github.com/dapr/samples/tree/master/5.bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
+- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
 
 # Step 1 - Understand the Settings 
 
@@ -74,8 +74,14 @@ func extensions install -p Dapr.AzureFunctions.Extension -v <version>
 
 Run function host with Dapr. `--components-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
 
+Windows
 ```
 dapr run --app-id functionapp --app-port 3001  --components-path ..\components\ -- func host start 
+```
+
+Linux/MacOS
+```
+dapr run --app-id functionapp --app-port 3001  --components-path ../components/ -- func host start 
 ```
 
 The command should output the dapr logs that look like the following:
@@ -160,17 +166,17 @@ Now we can invoke this function by using the Dapr cli in a new command line term
 
 Windows Command Prompt
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 Windows PowerShell
 ```powershell
-dapr invoke --app-id functionapp --method CreateNewOrder --payload '{\"data\": { \"orderId\": \"41\" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{\"data\": { \"orderId\": \"41\" } }'
 ```
 
 Linux or MacOS
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --payload '{"data": { "orderId": "41" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
 ```
 
 We can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
@@ -199,7 +205,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 ```
 
 ```powershell
-dapr invoke --app-id functionapp --method newOrder --payload "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
 ```
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
@@ -298,7 +304,7 @@ At the same time, we also have a function that subscribes to topic `B`, and it w
 Then let's see what will happen if we publish a message to topic A using the Dapr cli:
 
 ```powershell
-dapr publish --topic A --data 'This is a test'
+dapr publish  --publish-app-id functionapp --pubsub messagebus --topic A --data 'This is a test'
 ```
 
 The Dapr logs should show the following:
@@ -313,7 +319,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/samples/tree/master/5.bindings) to spin up your the Kafka locally. In the example below, we use `daprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
+Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, we use `daprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
 
 ```python
 def main(triggerData: str) -> None:
@@ -365,8 +371,14 @@ def main(args, messages: func.Out[bytes]) -> None:
 
 Now we can use service invocation to invoke this function:
 
+Windows
 ```powershell
-dapr invoke --app-id functionapp --method SendMessageToKafka --payload '{\"message\": \"hello!\" }'
+dapr invoke --app-id functionapp --method SendMessageToKafka --data '{\"message\": \"hello!\" }'
+```
+
+Linux/MacOS
+```shell
+dapr invoke --app-id functionapp --method SendMessageToKafka --data '{"message": "hello!" }'
 ```
 
 The Dapr'd function logs should show the following:
