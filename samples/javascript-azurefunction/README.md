@@ -21,7 +21,7 @@ Now that we've locally set up Dapr, clone the repo, then navigate to the javascr
 git clone https://github.com/dapr/azure-functions-extension.git
 cd samples/javascript-azurefunction
 ```
-In this folder, you will find `local.settings.json`, which lists a few app settings we used in our trigger/binding attributes. 
+In this folder, you will find `local.settings.json`, which lists a few app settings used in the trigger/binding attributes.
 
 ```json
 "StateStoreName": "statestore"
@@ -81,6 +81,11 @@ Linux/MacOS
 dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --components-path ../components/ -- func host start --no-build
 ```
 
+Linux/MacOS
+```
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --components-path ../components/ -- func host start --no-build
+```
+
 The command should output the dapr logs that look like the following:
 
 ```
@@ -105,9 +110,9 @@ module.exports = async function (context) {
 };
 ```
 
-Here we use `DaprServiceInvocationTrigger` to receive and handle `CreateNewOrder` request. We first log that this function is successfully triggered. Then we binds the content to the `order` object. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
+Here `DaprServiceInvocationTrigger` is used to receive and handle `CreateNewOrder` request which first logs that this function is successfully triggered. Then it binds the content to the `order` object. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
 
-Now we can invoke this function by using the Dapr cli in a new command line terminal.  
+Now you can invoke this function by using the Dapr cli in a new command line terminal.  
 
 Windows Command Prompt
 ```sh
@@ -124,7 +129,7 @@ Linux or MacOS
 dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
 ```
 
-We can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 
 ```http
 POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
@@ -136,7 +141,7 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 }
 ```
 
-**Note**: in this sample, `daprServiceInvocationTrigger` binding in the function.json does not specify the method name, so it defaults to use the FunctionName. Alternatively, we can use `methodName` field to specify the service invocation method name that your function should respond. In this case, then we need to use the following command:
+**Note**: in this sample, `daprServiceInvocationTrigger` binding in the function.json does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `methodName` field to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
 
 ```powershell
 dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
@@ -150,7 +155,7 @@ In your terminal window, you should see logs indicating that the message was rec
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
-In order to confirm the state is now persisted. We now can move to our next function:
+In order to confirm the state is now persisted, you can move to the next function:
 
 ```javascript
 module.exports = async function (context) {
@@ -161,7 +166,7 @@ module.exports = async function (context) {
 };
 ```
 
-Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. However, here we use `DaprState` *input binding* to fetch the latest value of the key `order` and bind the value to string object `data`' before we start exectuing the function block.
+Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. However, here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data`' before executing the function block.
 
 In your terminal window, you should see logs to confirm the expected result:
 
@@ -183,15 +188,15 @@ module.exports = async function (context) {
 }
 ```
 
-Here we use `DaprTopicTrigger` to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `context.bindings.subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details. 
+Here `DaprTopicTrigger` is used to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `context.bindings.subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details.
 
 
 > **Note**: Alternatively, any other JSON-serializable datatype binds directly to the data field of the cloud event. For example, int, double, and custom “POCO” types can be used as the trigger type and will be deserialized from the event’s data field. 
 
-Then we use `DaprPublish` *output binding* to publish a new event to topic `B`.
+Then, `DaprPublish` *output binding* is used to publish a new event to topic `B`.
 
 
-At the same time, we also have a function that subscribes to topic `B`, and it will simply just print the message content when an event arrives. 
+Also, the function below subscribes to topic `B` which simply prints the message content when an event arrives.
 
 ```javascript
 module.exports = async function (context) {
@@ -200,7 +205,7 @@ module.exports = async function (context) {
 };
 ```
 
-Then let's see what will happen if we publish a message to topic A using the Dapr cli:
+You can publish a message to topic A using the Dapr cli:
 
 ```powershell
 dapr publish --pubsub messagebus --publish-app-id functionapp --topic A --data 'This is a test'
@@ -218,7 +223,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-Next we will show how this extension integrates with Dapr Binding component. Here we uses Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, we use `DaprBindingTrigger` to have our function triggerred when a new message arrives at Kafka.
+This section describes how this extension integrates with the Dapr Binding component. Here Kafka binding is used as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```javascript
 module.exports = async function (context) {
@@ -237,7 +242,7 @@ module.exports = async function (context) {
 ```
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding.
 
-Now we can use service invocation to invoke this function:
+Now you can use service invocation to invoke this function:
 
 ```powershell
 dapr invoke --app-id functionapp --method SendMessageToKafka --data '{\"message\": \"hello!\" }'
@@ -255,7 +260,7 @@ The Dapr'd function logs should show the following:
 == APP == [TIMESTAMP] Executed 'SendMessageToKafka' (Succeeded, Id=<ExecutionId>)
 ```
 
-Since we have both functions deployed in the same app, you should also see we have consumed the message by see the folowing:
+Since both functions have been deployed in the same app, you should see the logs below which indicate that the message has been consumed:
 ```
 == APP == [TIMESTAMP] Executing 'ConsumeMessageFromKafka' (Reason='', Id=<ExecutionId>)
 == APP == [TIMESTAMP] Hello from Kafka!
@@ -264,7 +269,9 @@ Since we have both functions deployed in the same app, you should also see we ha
 ```
 
 ## 4. Dapr Secret: 
-Next we will show how `daprSecret` **input binding** integrates with Dapr Secret component. Here we use Kubernetes Secret Store which does not require special configuration. This requires a Kubernetes cluster. Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
+This section demonstrates how `DaprSecret` **input binding** integrates with Dapr Secret component. Here, Local file Secret Store is used and you can follow the setup instructions at [Local file secret store](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to configure a secret named "my-secret".
+
+Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
 
 ```js
 module.exports = async function (context) {
@@ -291,24 +298,28 @@ module.exports = async function (context) {
       "direction": "in",
       "name": "secret",
       "key": "my-secret",
-      "secretStoreName": "kubernetes",
+      "secretStoreName": "localsecretstore",
       "metadata": "metadata.namespace=default"
     }
   ]
 }
 ```
 
-`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret`. Since Kubernetes Secret supports multiple keys in a secret, we the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the propoerty value. This sample just simply print out all secrets, but please do not log any real secret in your production code  
+`DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
 
-Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example. 
+You can retrieve the secret by invoking the RetrieveSecretLocal function using the command:-
+```
+dapr invoke --app-id functionapp --method RetrieveSecret my-secret
+```
+
+Some secret stores need a metadata string to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example.
 ```json
 "metadata": "metadata.version_id=15&metadata.version_stage=AAA"
 ```
-However, secrets for this example are only availble in the cluster and currently Dapr does not have a local secret store development experience, so we cannot verify this locally as the other samples. 
 
 # Step 4 - Cleanup
 
-To stop your services from running, simply stop the "dapr run" process. Alternatively, you can spin down each of your services with the Dapr CLI "stop" command. For example, to spin down both services, run these commands in a new command line terminal: 
+To stop your services from running, simply stop the "dapr run" process. Alternatively, you can spin down each of your services with the Dapr CLI "stop" command. For example, to spin down both services, run these commands in a new command line terminal:
 
 ```bash
 dapr stop --app-id functionapp
