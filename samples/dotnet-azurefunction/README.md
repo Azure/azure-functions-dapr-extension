@@ -354,13 +354,14 @@ If you need a non-default namespace or in production environment, Helm has to be
 
 
 #### [Optional] Setting up a Kafka in Kubernetes
-  - Install Kafka via incubator/kafka helm 
-    ```
-    helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+  - Install Kafka via bitnami/kafka
+```
+    helm repo add bitnami https://charts.bitnami.com/bitnami
     helm repo update
     kubectl create ns kafka
-    helm install dapr-kafka incubator/kafka --namespace kafka -f ./kafka-non-persistence.yaml
-    ```
+    helm install dapr-kafka bitnami/kafka --wait --namespace kafka -f ./kafka-non-persistence.yaml
+```
+
  - Run `kubectl -n kafka get pods -w` to see Kafka pods are running. This might take a few minute, but you should see.
    ```
     NAME                     READY   STATUS    RESTARTS   AGE
