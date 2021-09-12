@@ -117,6 +117,34 @@ namespace DaprExtensionTests
         }
 
         [Fact]
+        public async Task SaveState_BatchMultipleCallsSameKey()
+        {
+            var inputs = new KeyValuePair<string, int>[]
+            {
+                new KeyValuePair<string, int>( "key1", 1 ),
+                new KeyValuePair<string, int>( "key1", 2 ),
+            };
+
+            await this.CallFunctionAsync(nameof(Functions.SaveState_BatchMultipleCallsSameKey), "inputs", inputs);
+            SavedHttpRequest req = this.GetSingleSaveStateRequest();
+
+            Assert.Equal($"/v1.0/state/store1", req.Path);
+
+            // Sort the elements since the order may change.
+            // This is preferred over DeepEquals because we get more debug info from xunit when comparing collections
+            JToken[] expected = JArray.Parse(@"[{""key"":""key1"",""value"":2}]").ToArray();
+            JToken[] actual = JArray.Parse(req.ContentAsString).ToArray();
+            var comparer = new Comparison<JToken>((t1, t2) => t1.ToString(Formatting.None).CompareTo(t2.ToString(Formatting.None)));
+            Array.Sort(expected, comparer);
+            Array.Sort(actual, comparer);
+
+            Assert.Equal(expected, actual);
+
+            var kvp = inputs.Last();
+            this.ValidatePersistedState(kvp.Value, "store1", kvp.Key);
+        }
+
+        [Fact]
         public async Task GetState_BindToKeyName()
         {
             string keyName = "myStateKey";
@@ -201,6 +229,17 @@ namespace DaprExtensionTests
             public static async Task SaveState_BatchMultipleCalls(
                 Dictionary<string, int> inputs,
                 [DaprState("store1")] IAsyncCollector<DaprStateRecord> records)
+            {
+                foreach ((string key, int value) in inputs)
+                {
+                    await records.AddAsync(new DaprStateRecord(key, value));
+                }
+            }
+
+            [NoAutomaticTrigger]
+            public static async Task SaveState_BatchMultipleCallsSameKey(
+               KeyValuePair<string, int>[] inputs,
+               [DaprState("store1")] IAsyncCollector<DaprStateRecord> records)
             {
                 foreach ((string key, int value) in inputs)
                 {
