@@ -7,6 +7,7 @@ namespace Dapr.AzureFunctions.Extension
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Dapr.AzureFunctions.Extension
 
     class DaprSaveStateAsyncCollector : IAsyncCollector<DaprStateRecord>
     {
-        readonly ConcurrentBag<DaprStateRecord> requests = new ConcurrentBag<DaprStateRecord>();
+        readonly ConcurrentQueue<DaprStateRecord> requests = new ConcurrentQueue<DaprStateRecord>();
 
         readonly DaprServiceClient daprClient;
         readonly DaprStateAttribute attr;
@@ -32,17 +33,23 @@ namespace Dapr.AzureFunctions.Extension
                 item.Key = this.attr.Key ?? throw new ArgumentException("No key information was found. Make sure it is configured either in the binding properties or in the data payload.", nameof(item));
             }
 
-            this.requests.Add(item);
+            this.requests.Enqueue(item);
 
             return Task.CompletedTask;
         }
 
         public Task FlushAsync(CancellationToken cancellationToken = default)
         {
+            Dictionary<string, DaprStateRecord> requests = new Dictionary<string, DaprStateRecord>();
+            while (this.requests.TryDequeue(out DaprStateRecord item))
+            {
+                requests[item.Key!] = item;
+            }
+
             return this.daprClient.SaveStateAsync(
                 this.attr.DaprAddress,
                 this.attr.StateStore,
-                this.requests.Take(this.requests.Count),
+                requests.Values,
                 cancellationToken);
         }
     }
