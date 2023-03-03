@@ -10,19 +10,19 @@
     <Description>This extension adds bindings for Dapr</Description>
   </PropertyGroup>
 
-  <!-- Use C# 8.0 features -->
+  <!-- Use C# 9.0 features -->
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.2" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.32" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.14" />
+    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.36" />
   </ItemGroup>
 
   <!-- 3rd party dependencies -->
@@ -32,8 +32,7 @@
 
   <!-- Meta packages and development tools -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.*" PrivateAssets="All" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.*" PrivateAssets="All" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- StyleCop configuration -->

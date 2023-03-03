@@ -15,6 +15,7 @@ on:
       - release-*
     paths-ignore: 
       - '**.md'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,9 +29,9 @@ jobs:
     - name: Parse release version
       run: python ./.github/scripts/get_release_version.py
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: 6.0
     - name: Build solution - release 
       run: dotnet build --configuration release
     - name: Run Unit Tests Tests - release

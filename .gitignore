@@ -262,3 +262,6 @@ __pycache__/
 .DS_Store
 
 .ionide
+
+# Visual Studio Code
+.vscode/

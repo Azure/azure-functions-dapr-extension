@@ -124,7 +124,7 @@
             {
                 log.LogInformation("C# processed a method request from the Dapr runtime");
 
-                double result = (double)args["arg1"] + (double)args["arg2"];
+                double result = (double)args["arg1"]! + (double)args["arg2"]!;
                 return result.ToString();
             }
         }

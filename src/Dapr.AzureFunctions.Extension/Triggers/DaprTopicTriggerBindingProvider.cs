@@ -97,7 +97,7 @@ namespace Dapr.AzureFunctions.Extension
                     {
                         return CloudEventFormatter.DecodeJObject(jsonObject);
                     }
-                    else if (jsonObject.TryGetValue("data", StringComparison.Ordinal, out JToken eventData))
+                    else if (jsonObject.TryGetValue("data", StringComparison.Ordinal, out JToken? eventData))
                     {
                         // Do the generic conversion from the "data" payload
                         return base.ConvertFromJson(eventData, destinationType);

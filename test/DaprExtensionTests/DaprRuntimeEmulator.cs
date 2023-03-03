@@ -90,7 +90,7 @@ namespace DaprExtensionTests
             JArray entries = JArray.Parse(jsonPayload);
             foreach (JObject entry in entries)
             {
-                string key = (string)entry["key"];
+                string key = (string)entry["key"]!;
                 JToken? value = entry["value"];
 
                 if (value == null)

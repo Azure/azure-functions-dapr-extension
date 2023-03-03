@@ -116,7 +116,7 @@ namespace DaprExtensionTests
 
             var subscriptions = array
                 .Cast<JObject>()
-                .Select(obj => (pubSubname: (string)obj.GetValue("pubsubname"), topic: (string)obj.GetValue("topic"), route: (string)obj.GetValue("route")))
+                .Select(obj => (pubSubname: (string)obj.GetValue("pubsubname")!, topic: (string)obj.GetValue("topic")!, route: (string)obj.GetValue("route")!))
                 .OrderBy(t => t.topic)
                 .ToArray();
 

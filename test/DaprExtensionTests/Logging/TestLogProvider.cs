@@ -66,8 +66,8 @@ namespace DaprExtensionTests.Logging
                 LogLevel level,
                 EventId eventId,
                 TState state,
-                Exception exception,
-                Func<TState, Exception, string> formatter)
+                Exception? exception,
+                Func<TState, Exception?, string> formatter)
             {
                 var entry = new LogEntry(level, formatter(state, exception));
                 this.entries.Add(entry);
