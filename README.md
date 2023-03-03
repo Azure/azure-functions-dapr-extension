@@ -1,4 +1,4 @@
-# Azure Functions dapr extensions
+# Azure Functions Extension for Dapr
 
 ![Build and Test](https://github.com/dapr/azure-functions-extension/workflows/Build%20and%20Test/badge.svg)
 [![Gitter](https://badges.gitter.im/Dapr/community.svg)](https://gitter.im/Dapr/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
