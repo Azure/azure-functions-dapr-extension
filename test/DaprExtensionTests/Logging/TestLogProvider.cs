@@ -58,7 +58,7 @@ namespace DaprExtensionTests.Logging
 
             public IReadOnlyCollection<LogEntry> GetLogs() => this.entries.AsReadOnly();
 
-            IDisposable? ILogger.BeginScope<TState>(TState state) => null;
+            IDisposable ILogger.BeginScope<TState>(TState state) => NullScope.Instance;
 
             bool ILogger.IsEnabled(LogLevel logLevel) => true;
 
@@ -66,12 +66,22 @@ namespace DaprExtensionTests.Logging
                 LogLevel level,
                 EventId eventId,
                 TState state,
-                Exception exception,
-                Func<TState, Exception, string> formatter)
+                Exception? exception,
+                Func<TState, Exception?, string> formatter)
             {
                 var entry = new LogEntry(level, formatter(state, exception));
                 this.entries.Add(entry);
                 this.output.WriteLine(entry.ToString());
+            }
+
+            private class NullScope : IDisposable
+            {
+                public static NullScope Instance { get; } = new NullScope();
+
+                public void Dispose()
+                {
+                    // Do nothing
+                }
             }
         }
     }

@@ -41,7 +41,7 @@ namespace Dapr.AzureFunctions.Extension
             // Per Yaron, Dapr only supports JSON payloads over HTTP.
             // By default we assume that the payload is a JSON-serialized base64 string of bytes
             JToken json = JToken.Parse(content);
-            byte[] bytes;
+            byte[]? bytes;
 
             try
             {
@@ -53,7 +53,7 @@ namespace Dapr.AzureFunctions.Extension
                 bytes = Encoding.UTF8.GetBytes(json.ToString());
             }
 
-            return bytes;
+            return bytes ?? Array.Empty<byte>();
         }
 
         Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(

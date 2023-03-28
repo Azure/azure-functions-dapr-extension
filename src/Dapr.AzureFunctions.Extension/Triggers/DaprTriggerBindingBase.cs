@@ -123,7 +123,13 @@ namespace Dapr.AzureFunctions.Extension
         protected virtual object ConvertFromJson(JToken jsonValue, Type destinationType)
         {
             // Do a direct conversion by default
-            return jsonValue.ToObject(destinationType);
+            var obj = jsonValue.ToObject(destinationType);
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Unable to convert {jsonValue} to {destinationType.Name}.");
+            }
+
+            return obj;
         }
 
         Task<IListener> ITriggerBinding.CreateListenerAsync(ListenerFactoryContext context)

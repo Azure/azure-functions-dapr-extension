@@ -38,7 +38,8 @@ namespace Dapr.AzureFunctions.Extension
             CancellationToken cancellationToken)
         {
             JObject result = await this.GetSecretsAsync(input, cancellationToken);
-            return result.ToObject<Dictionary<string, string>>();
+            var obj = result.ToObject<Dictionary<string, string>>();
+            return obj ?? new Dictionary<string, string>();
         }
 
         async Task<byte[]> IAsyncConverter<DaprSecretAttribute, byte[]>.ConvertAsync(

@@ -21,7 +21,7 @@ namespace DaprExtensionTests
     sealed class DaprRuntimeEmulator : IDisposable
     {
         readonly ConcurrentQueue<SavedHttpRequest> requestBin = new ConcurrentQueue<SavedHttpRequest>();
-        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> stateStore = 
+        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> stateStore =
             new ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>>();
 
         readonly IWebHost host;
@@ -90,7 +90,7 @@ namespace DaprExtensionTests
             JArray entries = JArray.Parse(jsonPayload);
             foreach (JObject entry in entries)
             {
-                string key = (string)entry["key"];
+                string key = (string)entry["key"]!;
                 JToken? value = entry["value"];
 
                 if (value == null)
@@ -148,7 +148,7 @@ namespace DaprExtensionTests
             catch
             {
                 throw new XunitException($"The state with key ({key}) was not found in state store ({stateStore}).");
-            }      
+            }
         }
 
         /// <summary>

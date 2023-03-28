@@ -50,7 +50,7 @@ namespace DaprExtensionTests
                 jsonContent: CreateCloudEventMessage(input));
 
             Assert.Equal(0, response.Content.Headers.ContentLength);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode); 
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs("MyFunctionName");
             Assert.Contains(input.ToString(), functionLogs);
@@ -116,7 +116,7 @@ namespace DaprExtensionTests
 
             var subscriptions = array
                 .Cast<JObject>()
-                .Select(obj => (pubSubname: (string)obj.GetValue("pubsubname"), topic: (string)obj.GetValue("topic"), route: (string)obj.GetValue("route")))
+                .Select(obj => (pubSubname: (string)obj.GetValue("pubsubname")!, topic: (string)obj.GetValue("topic")!, route: (string)obj.GetValue("route")!))
                 .OrderBy(t => t.topic)
                 .ToArray();
 
