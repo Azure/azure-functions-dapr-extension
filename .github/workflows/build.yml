@@ -54,7 +54,7 @@ jobs:
           # Get the list of files
           RELEASE_ARTIFACT=(${{ env.NUPKG_OUTDIR }}/*)
 
-          export GITHUB_TOKEN=${{ secrets.DAPR_BOT_TOKEN }}
+          export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           echo "Uploading Nuget packages to GitHub Release"
           github-release upload \
             --owner $OWNER_NAME \
@@ -62,12 +62,20 @@ jobs:
             --body "Release dapr azure functions extension v${REL_VERSION}" \
             --tag "v${REL_VERSION}" \
             --name "Dapr Azure Functions Extension v${REL_VERSION}" \
-            --prerelease true \
             ${RELEASE_ARTIFACT[*]}
       - name: Publish nuget packages to nuget.org for tags
         if: startswith(github.ref, 'refs/tags/v') && !(endsWith(github.ref, '-rc') || endsWith(github.ref, '-dev') || endsWith(github.ref, '-prerelease'))
         run: |
           dotnet nuget push "${{ env.NUPKG_OUTDIR }}/Dapr*.nupkg" --skip-duplicate --api-key ${{ secrets.NUGETORG_DAPR_API_KEY }} --source https://api.nuget.org/v3/index.json
+      # The docker image is not pushed for pull requests,
+      # but the image is built to ensure that the Dockerfile and the sample app are valid.
+      - name: Set a sample app registry when it is a pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          OWNER_NAME="${OWNER_NAME,,}" # convert to lowercase
+          echo "Setting sample app registry to ghcr.io/${OWNER_NAME}"
+          echo "APP_REGISTRY=ghcr.io/${OWNER_NAME}" >> $GITHUB_ENV
       - name: Build samples docker images
         run: |
           echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}

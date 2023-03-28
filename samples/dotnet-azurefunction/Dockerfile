@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS installer-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS installer-env
 
 # Copy the Dapr.AzureFunctions.Extension, style cop, and dotnet sample into the installer-env to build
 COPY /src/Dapr.AzureFunctions.Extension /src/src/Dapr.AzureFunctions.Extension 
@@ -11,8 +11,8 @@ RUN cd /src/samples/dotnet-function-app && \
     dotnet publish *.csproj --output /home/site/wwwroot
 
 # To enable ssh & remote debugging on app service change the base image to the one below
-# FROM mcr.microsoft.com/azure-functions/dotnet:3.0-appservice
-FROM mcr.microsoft.com/azure-functions/dotnet:3.0
+# FROM mcr.microsoft.com/azure-functions/dotnet:4.0-appservice
+FROM mcr.microsoft.com/azure-functions/dotnet:4.0
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
