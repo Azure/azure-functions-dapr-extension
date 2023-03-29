@@ -117,13 +117,13 @@ namespace Dapr.AzureFunctions.Extension
 
         static DaprPubSubEvent CreatePubSubEvent(JObject json)
         {
-            DaprPubSubEvent? e = json.ToObject<DaprPubSubEvent>();
-            if (e == null || e.Payload == null)
+            DaprPubSubEvent? event_ = json.ToObject<DaprPubSubEvent>();
+            if (event_ == null || event_.Payload == null)
             {
-                throw new ArgumentException($"A '{nameof(e.Payload).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
+                throw new ArgumentException($"A '{nameof(event_.Payload).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
             }
 
-            return e;
+            return event_;
         }
 
         static JObject BytesToJObject(byte[] arg)
