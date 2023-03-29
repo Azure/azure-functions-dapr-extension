@@ -67,12 +67,12 @@ namespace Dapr.AzureFunctions.Extension
                             e);
                     }
 
-                    if (daprError.TryGetValue("message", out JToken errorMessageToken))
+                    if (daprError.TryGetValue("message", out JToken? errorMessageToken))
                     {
                         errorMessage = errorMessageToken.ToString();
                     }
 
-                    if (daprError.TryGetValue("errorCode", out JToken errorCodeToken))
+                    if (daprError.TryGetValue("errorCode", out JToken? errorCodeToken))
                     {
                         errorCode = errorCodeToken.ToString();
                     }

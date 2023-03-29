@@ -41,7 +41,7 @@ namespace DaprExtensionTests
 
         readonly IHost functionsHost;
         readonly DaprRuntimeEmulator daprRuntime;
-
+    
         readonly TestLogProvider logProvider;
         readonly TestFunctionTypeLocator typeLocator;
         readonly TestNameResolver nameResolver;
@@ -138,7 +138,7 @@ namespace DaprExtensionTests
 
         internal Task CallFunctionAsync(string name, IDictionary<string, object?>? args = null)
         {
-            IJobHost jobHost = this.functionsHost.Services.GetService<IJobHost>();
+            IJobHost jobHost = this.functionsHost.Services.GetService<IJobHost>()!;
             return jobHost.CallAsync(name, args);
         }
 

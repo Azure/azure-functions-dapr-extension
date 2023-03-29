@@ -117,13 +117,13 @@ namespace Dapr.AzureFunctions.Extension
 
         static DaprPubSubEvent CreatePubSubEvent(JObject json)
         {
-            DaprPubSubEvent e = json.ToObject<DaprPubSubEvent>();
-            if (e.Payload == null)
+            DaprPubSubEvent? event_ = json.ToObject<DaprPubSubEvent>();
+            if (event_ == null || event_.Payload == null)
             {
-                throw new ArgumentException($"A '{nameof(e.Payload).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
+                throw new ArgumentException($"A '{nameof(event_.Payload).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
             }
 
-            return e;
+            return event_;
         }
 
         static JObject BytesToJObject(byte[] arg)
@@ -231,7 +231,7 @@ namespace Dapr.AzureFunctions.Extension
         static bool TryGetValue<TValue>(JObject messageObject, string propertyName, out TValue? value)
             where TValue : class
         {
-            if (messageObject.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken result))
+            if (messageObject.TryGetValue(propertyName, StringComparison.OrdinalIgnoreCase, out JToken? result))
             {
                 value = result.Value<TValue>();
                 return true;
