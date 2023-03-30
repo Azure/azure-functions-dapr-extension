@@ -2,7 +2,7 @@
   <!-- Nuget package properties when packed using dotnet pack. -->
   <PropertyGroup>
     <Owners>Microsoft,Azure-SDK</Owners>
-    <PackageIcon>images\logo-transparent.png</PackageIcon>
+    <PackageIcon>images\icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageOutputPath>$(RepoRoot)bin\$(Configuration)\nugets</PackageOutputPath>
     <PackageProjectUrl>https://github.com/Azure/azure-functions-dapr-extension</PackageProjectUrl>
