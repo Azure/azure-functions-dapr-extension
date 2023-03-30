@@ -15,6 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Dapr.AzureFunctions.Extension\Dapr.AzureFunctions.Extension.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Azure.WebJobs.Extension.Dapr\Microsoft.Azure.WebJobs.Extension.Dapr.csproj" />
   </ItemGroup> 
 </Project>

@@ -7,7 +7,7 @@ namespace dotnet_azurefunction
 {
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Newtonsoft.Json.Linq;
 
     public static class CreateNewOrder
@@ -17,7 +17,7 @@ namespace dotnet_azurefunction
         /// </summary>
         [FunctionName("CreateNewOrder")]
         public static void Run(
-            [DaprServiceInvocationTrigger] JObject payload, 
+            [DaprServiceInvocationTrigger] JObject payload,
             [DaprState("%StateStoreName%", Key = "order")] out object order,
             ILogger log)
         {

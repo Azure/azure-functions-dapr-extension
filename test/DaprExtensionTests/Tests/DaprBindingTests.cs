@@ -9,7 +9,7 @@ namespace DaprExtensionTests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Azure.WebJobs.Host;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -77,7 +77,7 @@ namespace DaprExtensionTests
         [Theory]
         [MemberData(nameof(GetObjectAsyncCollectorInputs))]
         public async Task SendMessage_OutputParameter(object inputMessage)
-        {          
+        {
             await this.CallFunctionAsync(nameof(Functions.ObjectOutputParameter), "input", inputMessage);
             SavedHttpRequest req = this.GetSingleSendMessgaeRequest();
 
@@ -100,7 +100,7 @@ namespace DaprExtensionTests
             SavedHttpRequest req = this.GetSingleSendMessgaeRequest();
 
             JObject expectedPayload = JObject.Parse($@"{{""data"": ""hello"", ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
-            
+
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
             Assert.Equal(JsonConvert.SerializeObject(expectedPayload), req.ContentAsString);
         }
@@ -109,7 +109,7 @@ namespace DaprExtensionTests
         public async Task SendMessage_NoBindingNameSpecified()
         {
             // No binding name is specified in the attribute or in the message
-            var input = new DaprBindingMessage("Hello, world!", new Dictionary<string, object>{ { "key", "myKey" } }, operation: "create");
+            var input = new DaprBindingMessage("Hello, world!", new Dictionary<string, object> { { "key", "myKey" } }, operation: "create");
             FunctionInvocationException error = await Assert.ThrowsAsync<FunctionInvocationException>(() =>
                 this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input));
 
@@ -188,7 +188,7 @@ namespace DaprExtensionTests
                 object input,
                 [DaprBinding(BindingName = "myBinding", Operation = "create")] IAsyncCollector<DaprBindingMessage> events)
             {
-                return events.AddAsync(new DaprBindingMessage(input,  new Dictionary<string, object> { { "key", "myKey" } }));
+                return events.AddAsync(new DaprBindingMessage(input, new Dictionary<string, object> { { "key", "myKey" } }));
             }
 
             [NoAutomaticTrigger]

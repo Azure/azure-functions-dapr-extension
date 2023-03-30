@@ -12,7 +12,7 @@ namespace DaprExtensionTests
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using DaprExtensionTests.Logging;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +41,7 @@ namespace DaprExtensionTests
 
         readonly IHost functionsHost;
         readonly DaprRuntimeEmulator daprRuntime;
-    
+
         readonly TestLogProvider logProvider;
         readonly TestFunctionTypeLocator typeLocator;
         readonly TestNameResolver nameResolver;
@@ -144,7 +144,7 @@ namespace DaprExtensionTests
 
         internal SavedHttpRequest[] GetDaprRequests() => this.daprRuntime.GetReceivedRequests();
 
-        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key) 
+        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key)
             => this.daprRuntime.FetchSavedStateForUnitTesting(stateStore, key);
 
         internal void SaveStateForUnitTetsing(string storeName, string key, JToken value)
@@ -175,10 +175,10 @@ namespace DaprExtensionTests
 
         public class TestNameResolver : INameResolver
         {
-            readonly Dictionary<string, string> testSettings = 
+            readonly Dictionary<string, string> testSettings =
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            public void AddSetting(string name, string value) => 
+            public void AddSetting(string name, string value) =>
                 this.testSettings.Add(name, value);
 
             string? INameResolver.Resolve(string name)

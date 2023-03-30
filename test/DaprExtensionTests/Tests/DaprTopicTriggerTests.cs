@@ -15,7 +15,7 @@ namespace DaprExtensionTests
     using System.Threading.Tasks;
     using CloudNative.CloudEvents;
     using Microsoft.Azure.WebJobs;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -50,7 +50,7 @@ namespace DaprExtensionTests
                 jsonContent: CreateCloudEventMessage(input));
 
             Assert.Equal(0, response.Content.Headers.ContentLength);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode); 
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs("MyFunctionName");
             Assert.Contains(input.ToString(), functionLogs);
@@ -107,8 +107,8 @@ namespace DaprExtensionTests
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal("application/json", response.Content.Headers.ContentType?.ToString());
-            
-            JToken result =  JToken.Parse(await response.Content.ReadAsStringAsync());
+
+            JToken result = JToken.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(JTokenType.Array, result.Type);
 
             JArray array = Assert.IsType<JArray>(result);
@@ -159,7 +159,7 @@ namespace DaprExtensionTests
                 // by default the method name is the topic and the route
                 Assert.Equal("MyPubSub", s.pubSubname);
                 Assert.Equal(methodName, s.topic);
-                Assert.Equal("/" + methodName, s.route); 
+                Assert.Equal("/" + methodName, s.route);
             }
         }
 
@@ -176,7 +176,7 @@ namespace DaprExtensionTests
             Assert.Equal(0, response.Content.Headers.ContentLength);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            string expectedOutput = expectEnvelope ? 
+            string expectedOutput = expectEnvelope ?
                 JsonConvert.SerializeObject(cloudEventInput) :
                 JsonConvert.SerializeObject(input);
 

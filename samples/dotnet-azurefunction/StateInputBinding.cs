@@ -9,7 +9,7 @@ namespace dotnet_azurefunction
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.AspNetCore.Http;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
 
     public static class StateInputBinding

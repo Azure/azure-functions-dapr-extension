@@ -9,7 +9,7 @@ namespace DaprExtensionTests
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -20,7 +20,7 @@ namespace DaprExtensionTests
     public class DaprSecretBindingTests : DaprTestBase
     {
         static readonly string ExpectedSecret = JObject.Parse(@$"{{""key1"":""secret!"", ""key2"":""another secret!""}}").ToString(Formatting.None);
-        
+
         public DaprSecretBindingTests(ITestOutputHelper output)
             : base(output)
         {

@@ -40,7 +40,7 @@
   -->
   
   <PropertyGroup>
-    <Product>Microsoft Dapr</Product>
+    <Product>Azure Functions Dapr Extension</Product>
     <Copyright>Copyright (c) Microsoft Corporation.  All rights reserved.</Copyright>
     <Company>Microsoft</Company>
     <Authors>Microsoft</Authors>

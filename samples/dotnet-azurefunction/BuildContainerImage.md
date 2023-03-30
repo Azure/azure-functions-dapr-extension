@@ -4,7 +4,7 @@ If you have updated the sample code to fit your scenario, you need to create new
 
 1. Update function app as you see fit!
 2. Build Docker image.
-   The sample project has a **project reference** for the `Dapr.AzureFunctions.Extension`, instead of a **nuget package reference**.    
+   The sample project has a **project reference** for the `Microsoft.Azure.WebJobs.Extension.Dapr`, instead of a **nuget package reference**.    
    Run docker build command from repo root and specify your image name:
      ```
     docker build -f samples/dotnet-azurefunction/Dockerfile -t mydocker-image .

@@ -7,8 +7,8 @@ namespace dotnet_azurefunction
 {
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Dapr.AzureFunctions.Extension;
- 
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
+
     public static class RetrieveOrder
     {
         /// <summary>

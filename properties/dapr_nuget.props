@@ -1,20 +1,20 @@
 <Project>
   <!-- Nuget package properties when packed using dotnet pack. -->
   <PropertyGroup>
-    <Authors>dapr.io</Authors>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://dapr.io</PackageProjectUrl>
+    <Owners>Microsoft,Azure-SDK</Owners>
     <PackageIcon>images\logo-transparent.png</PackageIcon>
-    <PackageTags>Dapr</PackageTags>
-    <RepositoryUrl>https://github.com/dapr/azure-functions-extension</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageOutputPath>$(RepoRoot)bin\$(Configuration)\nugets</PackageOutputPath>
+    <PackageProjectUrl>https://github.com/Azure/azure-functions-dapr-extension</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageTags>Azure-Functions, Dapr</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Azure/azure-functions-dapr-extension</RepositoryUrl>
   </PropertyGroup>
 
   <!-- Icon for nuget packages -->
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\properties\logo-transparent.png" Pack="true" Visible="false" PackagePath="images" />
+    <None Include="$(MSBuildThisFileDirectory)..\images\webjobs\icon.png" Pack="true" Visible="false" PackagePath="images" />
   </ItemGroup>
 
   <!-- Enable symbols package generation. https://docs.microsoft.com/nuget/create-packages/symbol-packages-snupkg -->

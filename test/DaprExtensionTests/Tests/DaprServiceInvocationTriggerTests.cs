@@ -11,7 +11,7 @@ namespace DaprExtensionTests
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
@@ -57,7 +57,7 @@ namespace DaprExtensionTests
 
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
-            
+
             string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
             Assert.Equal(serializedInput, result);
         }
@@ -92,7 +92,7 @@ namespace DaprExtensionTests
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
                 "http://localhost:3001/getstate2",
-                new { stateKey = "key1"});
+                new { stateKey = "key1" });
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);

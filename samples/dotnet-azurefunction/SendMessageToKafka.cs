@@ -7,7 +7,7 @@ namespace dotnet_azurefunction
 {
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Newtonsoft.Json.Linq;
     using System.Threading.Tasks;
 
