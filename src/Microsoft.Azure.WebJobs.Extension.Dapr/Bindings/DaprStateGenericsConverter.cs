@@ -12,7 +12,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs;
     using Newtonsoft.Json.Linq;
 
-    /// <typeparam name="T">A user-defined POCO.</typeparam>
+    /// <typeparam name="T">A custom type.</typeparam>
     internal class DaprStateGenericsConverter<T> : IAsyncConverter<DaprStateAttribute, T>
     {
         readonly DaprServiceClient daprClient;
@@ -23,13 +23,13 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         }
 
         /// <summary>
-        /// Converts state store data to user-defined type.
+        /// Converts state store data to custom type.
         /// </summary>
         /// <param name="attribute">
         /// Contains the information about dapr state store.
         /// </param>
         /// <param name="cancellationToken">The cancellationToken is not used in this method.</param>
-        /// <returns>User-defined POCO.</returns>
+        /// <returns>Custom type.</returns>
         async Task<T> IAsyncConverter<DaprStateAttribute, T>.ConvertAsync(DaprStateAttribute attribute, CancellationToken cancellationToken)
         {
             string content = await this.GetStringContentAsync(attribute, cancellationToken);
