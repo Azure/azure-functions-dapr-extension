@@ -7,7 +7,7 @@ namespace dotnet_azurefunction
 {
     using CloudNative.CloudEvents;
     using Microsoft.Azure.WebJobs;
-    using Dapr.AzureFunctions.Extension;
+    using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
 

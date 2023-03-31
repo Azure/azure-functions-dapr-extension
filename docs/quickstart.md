@@ -27,7 +27,7 @@ The following will get you started with a Function app that leverages the Dapr e
 While this extension is in preview it is not included in the default extension bundle for functions.  We can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
 
 1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
-1. Run `func extensions install -p Dapr.AzureFunctions.Extension -v 0.10.0-preview01`. Be sure to use the latest version as published on [NuGet](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension).
+1. Run `func extensions install -p Microsoft.Azure.WebJobs.Extension.Dapr -v 1.0.0`. Be sure to use the latest version as published on [NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extension.Dapr).
 
 You can validate the extension installed successfully by running the function.  Run `func start` and validate the app loads and the startup contains the logs
 

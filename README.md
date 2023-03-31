@@ -93,7 +93,7 @@ You can use a development build of the extension for any function by:
 Example for non-.NET function:
 
 ```sh
-dotnet publish <path-to...>/Dapr.AzureFunctions.Extension -o bin/
+dotnet publish /path/to/Dapr.AzureFunctions.Extension -o bin/
 ```
 
 ## Dapr ports and listeners
