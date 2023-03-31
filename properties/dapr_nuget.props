@@ -1,7 +1,7 @@
 <Project>
   <!-- Nuget package properties when packed using dotnet pack. -->
   <PropertyGroup>
-    <Owners>Microsoft,Azure-SDK</Owners>
+    <Owners>Microsoft, Azure-SDK</Owners>
     <PackageIcon>images\icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageOutputPath>$(RepoRoot)bin\$(Configuration)\nugets</PackageOutputPath>
