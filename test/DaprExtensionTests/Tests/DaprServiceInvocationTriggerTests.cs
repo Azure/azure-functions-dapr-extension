@@ -104,6 +104,31 @@ namespace DaprExtensionTests
         }
 
         [Fact]
+        public async Task BindingTests_DaprState_GenericType()
+        {
+            var savedValue = new CustomType
+            {
+                P1 = "Value1",
+                P2 = 1,
+                P3 = DateTime.Now
+            };
+            
+            this.SaveStateForUnitTetsing("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/RetrieveCustomType",
+                new { stateKey = "key1" });
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            Assert.Equal(serializedValue, resultJson);
+        }
+
+        [Fact]
         public async Task ExplicitMethodNameInAttribute()
         {
             string input = "hello";
@@ -199,6 +224,14 @@ namespace DaprExtensionTests
                 [DaprState("store1", Key = "{input.stateKey}")] string existingState)
             {
                 return existingState;
+            }
+
+            [FunctionName(nameof(RetrieveCustomType))]
+            public static CustomType RetrieveCustomType(
+                [DaprServiceInvocationTrigger] JObject input,
+                [DaprState("store1", Key = "{input.stateKey}")] CustomType data)
+            {
+                return data;
             }
         }
 
