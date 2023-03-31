@@ -11,6 +11,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Text;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
+    using Microsoft.Azure.WebJobs.Host.Bindings;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.Logging;
@@ -67,9 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             stateRule.BindToInput<JObject>(daprStateConverter);
             stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToInput<byte[]>(daprStateConverter);
-
-            // TODO: This does not work for nulls and value types. Need a better way of doing this conversion.
-            stateRule.BindToInput<object?>(daprStateConverter);
+            stateRule.BindToInput<OpenType>(typeof(DaprStateGenericsConverter<>), this.daprClient);
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
             invokeRule.AddConverter<byte[], InvokeMethodParameters>(CreateInvokeMethodParameters);

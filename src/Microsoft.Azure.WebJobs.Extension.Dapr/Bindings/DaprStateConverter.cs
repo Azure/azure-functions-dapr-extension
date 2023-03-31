@@ -20,8 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         IAsyncConverter<DaprStateAttribute, string>,
         IAsyncConverter<DaprStateAttribute, Stream>,
         IAsyncConverter<DaprStateAttribute, JToken>,
-        IAsyncConverter<DaprStateAttribute, JObject>,
-        IAsyncConverter<DaprStateAttribute, object?>
+        IAsyncConverter<DaprStateAttribute, JObject>
     {
         readonly DaprServiceClient daprClient;
 
@@ -85,21 +84,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         {
             string content = await this.GetStringContentAsync(input, cancellationToken);
             return JObject.Parse(content);
-        }
-
-        async Task<object?> IAsyncConverter<DaprStateAttribute, object?>.ConvertAsync(
-            DaprStateAttribute input,
-            CancellationToken cancellationToken)
-        {
-            string content = await this.GetStringContentAsync(input, cancellationToken);
-            if (string.IsNullOrEmpty(content))
-            {
-                return null; // TODO: This will cause a null-ref for value types!
-            }
-            else
-            {
-                return JToken.Parse(content);
-            }
         }
 
         async Task<DaprStateRecord> IAsyncConverter<DaprStateAttribute, DaprStateRecord>.ConvertAsync(
