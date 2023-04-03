@@ -129,6 +129,106 @@ namespace DaprExtensionTests
         }
 
         [Fact]
+        public async Task BindingTests_DaprState_JObjectType()
+        {
+            var savedValue = new CustomType
+            {
+                P1 = "Value1",
+                P2 = 1,
+                P3 = DateTime.Now
+            };
+
+            this.SaveStateForUnitTesting("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/RetrieveJObjectType",
+                new { stateKey = "key1" });
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            Assert.Equal(serializedValue, resultJson);
+        }
+
+        [Fact]
+        public async Task BindingTests_DaprState_JTokenType()
+        {
+            var savedValue = new CustomType
+            {
+                P1 = "Value1",
+                P2 = 1,
+                P3 = DateTime.Now
+            };
+
+            this.SaveStateForUnitTesting("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/RetrieveJTokenType",
+                new { stateKey = "key1" });
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            Assert.Equal(serializedValue, resultJson);
+        }
+
+        [Fact]
+        public async Task BindingTests_DaprState_ByteArray()
+        {
+            var savedValue = new CustomType
+            {
+                P1 = "Value1",
+                P2 = 1,
+                P3 = DateTime.Now
+            };
+
+            this.SaveStateForUnitTesting("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/RetrieveByteArrayType",
+                new { stateKey = "key1" });
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            Assert.Equal(serializedValue, resultJson);
+        }
+
+        [Fact]
+        public async Task BindingTests_DaprState_Stream()
+        {
+            var savedValue = new CustomType
+            {
+                P1 = "Value1",
+                P2 = 1,
+                P3 = DateTime.Now
+            };
+
+            this.SaveStateForUnitTesting("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/RetrieveStreamType",
+                new { stateKey = "key1" });
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
+            Assert.Equal(serializedValue, resultJson);
+        }
+
+        [Fact]
         public async Task BindingTests_DaprState_ValueType()
         {
             var savedValue = 1;
@@ -250,6 +350,38 @@ namespace DaprExtensionTests
             public static CustomType RetrieveCustomType(
                 [DaprServiceInvocationTrigger] JObject input,
                 [DaprState("store1", Key = "{input.stateKey}")] CustomType data)
+            {
+                return data;
+            }
+
+            [FunctionName(nameof(RetrieveJObjectType))]
+            public static JObject RetrieveJObjectType(
+                [DaprServiceInvocationTrigger] JObject input,
+                [DaprState("store1", Key = "{input.stateKey}")] JObject data)
+            {
+                return data;
+            }
+
+            [FunctionName(nameof(RetrieveJTokenType))]
+            public static JToken RetrieveJTokenType(
+                [DaprServiceInvocationTrigger] JToken input,
+                [DaprState("store1", Key = "{input.stateKey}")] JToken data)
+            {
+                return data;
+            }
+
+            [FunctionName(nameof(RetrieveByteArrayType))]
+            public static byte[] RetrieveByteArrayType(
+                [DaprServiceInvocationTrigger] JToken input,
+                [DaprState("store1", Key = "{input.stateKey}")] byte[] data)
+            {
+                return data;
+            }
+
+            [FunctionName(nameof(RetrieveStreamType))]
+            public static Stream RetrieveStreamType(
+                [DaprServiceInvocationTrigger] JToken input,
+                [DaprState("store1", Key = "{input.stateKey}")] Stream data)
             {
                 return data;
             }
