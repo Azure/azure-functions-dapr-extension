@@ -5,8 +5,9 @@
 
 namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using System;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 
     /// <summary>
     /// Payload for outbound Dapr pub/sub events.
@@ -19,9 +20,26 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <param name="payload">The payload of the outbound pub/sub event.</param>
         /// <param name="pubSubName">The pub/sub name of the outbound pub/sub event.</param>
         /// <param name="topic">The topic of the outbound pub/sub event.</param>
-        public DaprPubSubEvent(JToken payload, string? pubSubName = null, string? topic = null)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="payload"/> is not serializable to JSON.</exception>
+        public DaprPubSubEvent(object payload, string? pubSubName = null, string? topic = null)
         {
-            this.Payload = payload;
+            if (payload == null)
+            {
+                throw new ArgumentNullException(nameof(payload));
+            }
+
+            string serializedData = string.Empty;
+            try
+            {
+                serializedData = JsonSerializer.Serialize(payload);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("The payload object must be serializable to JSON.", nameof(payload), e);
+            }
+
+            this.Payload = JsonDocument.Parse(serializedData).RootElement;
             this.PubSubName = pubSubName;
             this.Topic = topic;
         }
@@ -33,7 +51,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// If the pub/sub name is not specified, it is inferred from the
         /// <see cref="DaprPublishAttribute"/> binding attribute.
         /// </remarks>
-        [JsonProperty("pubsubname")]
+        [JsonPropertyName("pubsubname")]
         public string? PubSubName { get; internal set; }
 
         /// <summary>
@@ -43,7 +61,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// If the topic name is not specified, it is inferred from the
         /// <see cref="DaprPublishAttribute"/> binding attribute.
         /// </remarks>
-        [JsonProperty("topic")]
+        [JsonPropertyName("topic")]
         public string? Topic { get; internal set; }
 
         /// <summary>
@@ -52,7 +70,8 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <remarks>
         /// The subscribers will receive this payload as the body of a Cloud Event envelope.
         /// </remarks>
-        [JsonProperty("payload")]
-        public JToken Payload { get; }
+        [JsonPropertyName("payload")]
+        [JsonConverter(typeof(JsonElementConverter))]
+        public JsonElement Payload { get; }
     }
 }

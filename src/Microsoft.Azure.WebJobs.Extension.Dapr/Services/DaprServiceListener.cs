@@ -7,6 +7,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
@@ -17,7 +18,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
 
     sealed class DaprServiceListener : IDisposable
     {
@@ -113,7 +113,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
         Task GetTopicsAsync(HttpContext context)
         {
-            string topicListJson = JsonConvert.SerializeObject(this.topics);
+            string topicListJson = JsonSerializer.Serialize(this.topics);
             context.Response.ContentType = "application/json";
             return context.Response.WriteAsync(topicListJson);
         }

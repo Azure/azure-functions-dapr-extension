@@ -7,15 +7,16 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
     using System;
     using System.Reflection;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using CloudNative.CloudEvents;
+    using CloudNative.CloudEvents.SystemTextJson;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
-    using Newtonsoft.Json.Linq;
 
     class DaprTopicTriggerBindingProvider : ITriggerBindingProvider
     {
@@ -87,24 +88,25 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                 return new DaprTopicListener(this.serviceListener, executor, new DaprTopicSubscription(this.pubSubName, this.topic, this.route));
             }
 
-            protected override object ConvertFromJson(JToken jsonValue, Type destinationType)
+            protected override object ConvertFromJson(JsonElement jsonElement, Type destinationType)
             {
                 // The input is always expected to be an object in the Cloud Events schema
                 // https://github.com/cloudevents/spec/blob/v1.0/spec.md#example
-                if (jsonValue is JObject jsonObject)
+                if (jsonElement.ValueKind == JsonValueKind.Object)
                 {
                     if (destinationType == typeof(CloudEvent))
                     {
-                        return CloudEventFormatter.DecodeJObject(jsonObject);
+                        return CloudEventFormatter.ConvertFromJsonElement(jsonElement, null);
                     }
-                    else if (jsonObject.TryGetValue("data", StringComparison.Ordinal, out JToken? eventData))
+                    else if (jsonElement.TryGetProperty("data", out JsonElement eventData))
                     {
                         // Do the generic conversion from the "data" payload
-                        return base.ConvertFromJson(eventData, destinationType);
+                        return JsonSerializer.Deserialize(eventData.GetRawText(), destinationType)
+                            ?? throw new InvalidOperationException("Failed to deserialize event data");
                     }
                 }
 
-                return base.ConvertFromJson(jsonValue, destinationType);
+                return base.ConvertFromJson(jsonElement, destinationType);
             }
 
             sealed class DaprTopicListener : DaprListenerBase

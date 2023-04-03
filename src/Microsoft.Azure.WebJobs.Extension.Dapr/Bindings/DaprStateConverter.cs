@@ -8,19 +8,17 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System;
     using System.IO;
     using System.Text;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     class DaprStateConverter :
         IAsyncConverter<DaprStateAttribute, DaprStateRecord>,
         IAsyncConverter<DaprStateAttribute, byte[]>,
         IAsyncConverter<DaprStateAttribute, string>,
         IAsyncConverter<DaprStateAttribute, Stream>,
-        IAsyncConverter<DaprStateAttribute, JToken>,
-        IAsyncConverter<DaprStateAttribute, JObject>,
+        IAsyncConverter<DaprStateAttribute, JsonElement>,
         IAsyncConverter<DaprStateAttribute, object?>
     {
         readonly DaprServiceClient daprClient;
@@ -40,17 +38,17 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
             // Per Yaron, Dapr only supports JSON payloads over HTTP.
             // By default we assume that the payload is a JSON-serialized base64 string of bytes
-            JToken json = JToken.Parse(content);
+            JsonElement json = JsonDocument.Parse(content).RootElement;
             byte[]? bytes;
 
             try
             {
-                bytes = json.ToObject<byte[]>();
+                bytes = JsonSerializer.Deserialize<byte[]>(json);
             }
             catch (JsonException)
             {
                 // Looks like it's not actually JSON - just return the raw bytes
-                bytes = Encoding.UTF8.GetBytes(json.ToString());
+                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json));
             }
 
             return bytes ?? Array.Empty<byte>();
@@ -71,20 +69,12 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             return record.ContentStream;
         }
 
-        async Task<JToken> IAsyncConverter<DaprStateAttribute, JToken>.ConvertAsync(
+        async Task<JsonElement> IAsyncConverter<DaprStateAttribute, JsonElement>.ConvertAsync(
             DaprStateAttribute input,
             CancellationToken cancellationToken)
         {
             string content = await this.GetStringContentAsync(input, cancellationToken);
-            return JToken.Parse(content);
-        }
-
-        async Task<JObject> IAsyncConverter<DaprStateAttribute, JObject>.ConvertAsync(
-            DaprStateAttribute input,
-            CancellationToken cancellationToken)
-        {
-            string content = await this.GetStringContentAsync(input, cancellationToken);
-            return JObject.Parse(content);
+            return JsonDocument.Parse(content).RootElement;
         }
 
         async Task<object?> IAsyncConverter<DaprStateAttribute, object?>.ConvertAsync(
@@ -98,7 +88,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             }
             else
             {
-                return JToken.Parse(content);
+                return JsonDocument.Parse(content).RootElement;
             }
         }
 
@@ -111,7 +101,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string content = await reader.ReadToEndAsync();
             if (!string.IsNullOrEmpty(content))
             {
-                record.Value = JToken.Parse(content);
+                record.Value = JsonDocument.Parse(content).RootElement;
             }
 
             return record;

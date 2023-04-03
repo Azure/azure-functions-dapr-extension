@@ -5,8 +5,6 @@
 
 namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
-    using Newtonsoft.Json.Linq;
-
     /// <summary>
     /// Parameters for Dapr invoke-method operations.
     /// </summary>
@@ -30,6 +28,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <summary>
         /// Gets or sets the body of the invoke-method operation.
         /// </summary>
-        public JToken? Body { get; set; }
+        public object? Body { get; set; }
     }
 }

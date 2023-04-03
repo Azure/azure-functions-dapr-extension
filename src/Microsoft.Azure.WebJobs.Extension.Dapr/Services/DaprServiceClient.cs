@@ -15,8 +15,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     class DaprServiceClient
     {
@@ -52,12 +50,12 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
                 if (response.Content != null && response.Content.Headers.ContentLength != 0)
                 {
-                    JObject daprError;
+                    JsonElement daprError;
 
                     try
                     {
                         string content = await response.Content.ReadAsStringAsync();
-                        daprError = JObject.Parse(content);
+                        daprError = JsonDocument.Parse(content).RootElement;
                     }
                     catch (Exception e)
                     {
@@ -68,14 +66,14 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                             e);
                     }
 
-                    if (daprError.TryGetValue("message", out JToken? errorMessageToken))
+                    if (daprError.TryGetProperty("message", out JsonElement errorMessageToken))
                     {
-                        errorMessage = errorMessageToken.ToString();
+                        errorMessage = errorMessageToken.GetRawText();
                     }
 
-                    if (daprError.TryGetValue("errorCode", out JToken? errorCodeToken))
+                    if (daprError.TryGetProperty("errorCode", out JsonElement errorCodeToken))
                     {
-                        errorCode = errorCodeToken.ToString();
+                        errorCode = errorCodeToken.GetRawText();
                     }
                 }
 
@@ -143,7 +141,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string appId,
             string methodName,
             string httpVerb,
-            JToken? body,
+            JsonElement? body,
             CancellationToken cancellationToken)
         {
             this.EnsureDaprAddress(ref daprAddress);
@@ -151,7 +149,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             var req = new HttpRequestMessage(new HttpMethod(httpVerb), $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}");
             if (body != null)
             {
-                req.Content = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
+                req.Content = new StringContent(body?.GetRawText(), Encoding.UTF8, "application/json");
             }
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
@@ -182,7 +180,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string? daprAddress,
             string name,
             string topicName,
-            JToken? payload,
+            JsonElement? payload,
             CancellationToken cancellationToken)
         {
             this.EnsureDaprAddress(ref daprAddress);
@@ -190,7 +188,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             var req = new HttpRequestMessage(HttpMethod.Post, $"{daprAddress}/v1.0/publish/{name}/{topicName}");
             if (payload != null)
             {
-                req.Content = new StringContent(payload.ToString(Formatting.None), Encoding.UTF8, "application/json");
+                req.Content = new StringContent(payload?.GetRawText(), Encoding.UTF8, "application/json");
             }
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
@@ -198,7 +196,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             await ThrowIfDaprFailure(response);
         }
 
-        internal async Task<JObject> GetSecretAsync(
+        internal async Task<JsonElement> GetSecretAsync(
             string? daprAddress,
             string secretStoreName,
             string? key,
@@ -232,7 +230,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string secretPayload = await response.Content.ReadAsStringAsync();
 
             // The response is always expected to be a JSON object
-            return JObject.Parse(secretPayload);
+            return JsonDocument.Parse(secretPayload).RootElement;
         }
 
         void EnsureDaprAddress(ref string? daprAddress)

@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
@@ -17,8 +18,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs.Host.Listeners;
     using Microsoft.Azure.WebJobs.Host.Protocols;
     using Microsoft.Azure.WebJobs.Host.Triggers;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     abstract class DaprTriggerBindingBase : ITriggerBinding
     {
@@ -85,28 +84,28 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             }
             else
             {
-                // Binding to JToken or some derivative like JObject or JArray.
+                // Binding to JsonElement.
                 // This also works for primitives like int, bool, and string.
-                JToken jsonValue;
-                using (var reader = new JsonTextReader(new StreamReader(inputStream)))
+                JsonElement jsonElement;
+                using (var stream = new StreamReader(inputStream))
                 {
-                    jsonValue = await JToken.ReadFromAsync(reader, context.CancellationToken);
+                    jsonElement = await JsonSerializer.DeserializeAsync<JsonElement>(stream.BaseStream, cancellationToken: context.CancellationToken);
                 }
 
-                if (destinationType.IsAssignableFrom(jsonValue.GetType()))
+                if (destinationType.IsAssignableFrom(jsonElement.GetType()))
                 {
-                    convertedValue = jsonValue;
+                    convertedValue = jsonElement;
                 }
-                else if (destinationType == typeof(string) && jsonValue.Type != JTokenType.String)
+                else if (destinationType == typeof(string) && jsonElement.ValueKind != JsonValueKind.String)
                 {
                     // Special case for out-of-proc workers (like nodejs). The binding type
                     // appears to always be "string" so we need to do a special conversion.
-                    convertedValue = jsonValue.ToString(Formatting.None);
+                    convertedValue = jsonElement.GetRawText();
                 }
                 else
                 {
                     // At this point, we're probably dealing with a POCO
-                    convertedValue = this.ConvertFromJson(jsonValue, destinationType);
+                    convertedValue = this.ConvertFromJson(jsonElement, destinationType);
                 }
             }
 
@@ -120,13 +119,13 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             };
         }
 
-        protected virtual object ConvertFromJson(JToken jsonValue, Type destinationType)
+        protected virtual object ConvertFromJson(JsonElement jsonElement, Type destinationType)
         {
             // Do a direct conversion by default
-            var obj = jsonValue.ToObject(destinationType);
+            var obj = JsonSerializer.Deserialize(jsonElement.GetRawText(), destinationType);
             if (obj == null)
             {
-                throw new InvalidOperationException($"Unable to convert {jsonValue} to {destinationType.Name}.");
+                throw new InvalidOperationException($"Unable to convert {jsonElement} to {destinationType.Name}.");
             }
 
             return obj;
@@ -211,7 +210,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                 }
                 else
                 {
-                    string jsonResult = JsonConvert.SerializeObject(value, Formatting.None);
+                    string jsonResult = JsonSerializer.Serialize(value);
                     await this.context.Response.WriteAsync(jsonResult, cancellationToken);
                 }
             }
@@ -225,7 +224,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
                 try
                 {
-                    return JsonConvert.SerializeObject(this.outputValue);
+                    return JsonSerializer.Serialize(this.outputValue);
                 }
                 catch (JsonException)
                 {

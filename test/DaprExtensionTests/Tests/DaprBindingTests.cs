@@ -12,19 +12,11 @@ namespace DaprExtensionTests
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Azure.WebJobs.Host;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
 
     public class DaprBindingTests : DaprTestBase
     {
-
-        private static readonly JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
-        {
-            WriteIndented = true,
-        };
-
         public DaprBindingTests(ITestOutputHelper output)
             : base(output)
         {
@@ -40,7 +32,7 @@ namespace DaprExtensionTests
 
             JsonDocument expectedPayload = JsonDocument.Parse(
                 $@"{{
-                        ""data"": {System.Text.Json.JsonSerializer.Serialize(input)},
+                        ""data"": {JsonSerializer.Serialize(input)},
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
@@ -48,37 +40,37 @@ namespace DaprExtensionTests
                    }}");
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(System.Text.Json.JsonSerializer.Serialize(expectedPayload), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload), req.ContentAsString);
         }
 
         [Theory]
         [MemberData(nameof(GetObjectAsyncCollectorInputs))]
-        public async Task SendMessage_JObjectAsyncCollector(object message)
+        public async Task SendMessage_JsonElementAsyncCollector(object message)
         {
-            JObject input = JObject.Parse(
+            JsonDocument input = JsonDocument.Parse(
                 $@"{{
-                        ""data"": {JsonConvert.SerializeObject(message)},
+                        ""data"": {JsonSerializer.Serialize(message)},
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
                         }},
-                        ""bindingName"": ""myBinding"",
+                        ""bindingName"": ""myBinding""
                    }}");
 
-            JObject expectedPayload = JObject.Parse(
+            JsonDocument expectedPayload = JsonDocument.Parse(
                 $@"{{
-                        ""data"": {JsonConvert.SerializeObject(message)},
+                        ""data"": {JsonSerializer.Serialize(message)},
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
                         }}
                    }}");
 
-            await this.CallFunctionAsync(nameof(Functions.JObjectAsyncCollector), "input", input);
+            await this.CallFunctionAsync(nameof(Functions.JsonElementAsyncCollector), "input", input.RootElement);
             SavedHttpRequest req = this.GetSingleSendMessageRequest();
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(JsonConvert.SerializeObject(expectedPayload), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload), req.ContentAsString);
         }
 
         [Theory]
@@ -88,14 +80,14 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.ObjectOutputParameter), "input", inputMessage);
             SavedHttpRequest req = this.GetSingleSendMessageRequest();
 
-            JObject expectedPayload = JObject.Parse(
+            JsonDocument expectedPayload = JsonDocument.Parse(
                 $@"{{
-                       ""data"": {JsonConvert.SerializeObject(inputMessage)},
+                       ""data"": {JsonSerializer.Serialize(inputMessage)},
                        ""operation"": ""create""
                    }}");
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(JsonConvert.SerializeObject(expectedPayload), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload), req.ContentAsString);
         }
 
         [Fact]
@@ -106,10 +98,10 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.DaprConnectorReturnValueAnyMessage), "input", input);
             SavedHttpRequest req = this.GetSingleSendMessageRequest();
 
-            JObject expectedPayload = JObject.Parse($@"{{""data"": ""hello"", ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
+            JsonDocument expectedPayload = JsonDocument.Parse($@"{{""data"": ""hello"", ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(JsonConvert.SerializeObject(expectedPayload), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload), req.ContentAsString);
         }
 
         [Fact]
@@ -155,15 +147,15 @@ namespace DaprExtensionTests
             Assert.All(requests, req => Assert.Equal("POST", req.Method));
             Assert.All(requests, req => Assert.StartsWith("application/json", req.ContentType));
 
-            JObject expectedPayload1 = JObject.Parse($@"{{""data"": 1, ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
-            JObject expectedPayload2 = JObject.Parse($@"{{""data"": 2, ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
+            JsonDocument expectedPayload1 = JsonDocument.Parse($@"{{""data"": 1, ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
+            JsonDocument expectedPayload2 = JsonDocument.Parse($@"{{""data"": 2, ""operation"": ""create"", ""metadata"": {{""key"": ""myKey""}}}}");
 
             // The order of the requests is not guaranteed
             SavedHttpRequest req1 = Assert.Single(requests, req => req.Path == "/v1.0/bindings/myBinding1");
-            Assert.Equal(JsonConvert.SerializeObject(expectedPayload1), req1.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload1), req1.ContentAsString);
 
             SavedHttpRequest req2 = Assert.Single(requests, req => req.Path == "/v1.0/bindings/myBinding2");
-            Assert.Equal(JsonConvert.SerializeObject(expectedPayload2), req2.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload2), req2.ContentAsString);
         }
 
         public static IEnumerable<object[]> GetObjectAsyncCollectorInputs() => new List<object[]>
@@ -199,9 +191,9 @@ namespace DaprExtensionTests
             }
 
             [NoAutomaticTrigger]
-            public static Task JObjectAsyncCollector(
-                JObject input,
-                [DaprBinding] IAsyncCollector<JObject> events) => events.AddAsync(input);
+            public static Task JsonElementAsyncCollector(
+                JsonElement input,
+                [DaprBinding] IAsyncCollector<JsonElement> events) => events.AddAsync(input);
 
             [NoAutomaticTrigger]
             public static void ObjectOutputParameter(

@@ -5,7 +5,7 @@
 
 namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
-    using Newtonsoft.Json;
+    using System.Text.Json.Serialization;
 
     /// <summary>
     /// Dapr Topic Subscription returned when Dapr discover the topic subscriptions.
@@ -29,19 +29,19 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <summary>
         /// Gets the pub/sub name.
         /// </summary>
-        [JsonProperty("pubsubname")]
+        [JsonPropertyName("pubsubname")]
         public string PubSubName { get; }
 
         /// <summary>
         /// Gets topic name.
         /// </summary>
-        [JsonProperty("topic")]
+        [JsonPropertyName("topic")]
         public string Topic { get; }
 
         /// <summary>
         /// Gets topic route.
         /// </summary>
-        [JsonProperty("route")]
+        [JsonPropertyName("route")]
         public string Route { get; }
     }
 }

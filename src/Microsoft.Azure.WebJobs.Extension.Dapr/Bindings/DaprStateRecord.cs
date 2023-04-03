@@ -7,8 +7,8 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
     using System;
     using System.IO;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 
     /// <summary>
     /// The parameters for a Dapr save-state operation.
@@ -21,17 +21,17 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <param name="key">The key of the state record.</param>
         /// <param name="value">The value of the state record.</param>
         /// <param name="eTag">The state record eTag (optional).</param>
-        public DaprStateRecord(string key, JToken? value, string? eTag = null)
+        public DaprStateRecord(string key, object value, string? eTag = null)
         {
             this.Key = key ?? throw new ArgumentNullException(nameof(key));
-            this.Value = value;
+            this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value)).RootElement;
             this.ETag = eTag;
         }
 
         // Internal constructor used only by the binding code.
-        internal DaprStateRecord(JToken? value)
+        internal DaprStateRecord(object value)
         {
-            this.Value = value;
+            this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value)).RootElement;
         }
 
         internal DaprStateRecord(string key, Stream valueStream, string? eTag)
@@ -44,19 +44,21 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <summary>
         /// Gets the key of the state record.
         /// </summary>
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string? Key { get; internal set; }
 
         /// <summary>
         /// Gets the value of the state record.
         /// </summary>
-        [JsonProperty("value")]
-        public JToken? Value { get; internal set; }
+        [JsonPropertyName("value")]
+        [JsonConverter(typeof(JsonElementConverter))]
+        public JsonElement? Value { get; internal set; }
 
         /// <summary>
         /// Gets the etag value of the state record.
         /// </summary>
-        [JsonProperty("etag", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("etag")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? ETag { get; }
 
         // Populated when reading state from the dapr state store.

@@ -7,6 +7,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -53,7 +54,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                     item.AppId!,
                     item.MethodName!,
                     item.HttpVerb,
-                    item.Body,
+                    JsonDocument.Parse(JsonSerializer.Serialize(item.Body)).RootElement,
                     cancellationToken);
             }
         }
