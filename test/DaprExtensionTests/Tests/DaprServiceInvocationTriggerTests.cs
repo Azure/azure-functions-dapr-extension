@@ -66,7 +66,7 @@ namespace DaprExtensionTests
         public async Task BindingTests_DaprState_SimpleValue()
         {
             string savedValue = Guid.NewGuid().ToString();
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -87,7 +87,7 @@ namespace DaprExtensionTests
         public async Task BindingTests_DaprState_ComplexValue()
         {
             string savedValue = Guid.NewGuid().ToString();
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -112,8 +112,8 @@ namespace DaprExtensionTests
                 P2 = 1,
                 P3 = DateTime.Now
             };
-            
-            this.SaveStateForUnitTetsing("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
+
+            this.SaveStateForUnitTesting("store1", "key1", JToken.Parse(JsonConvert.SerializeObject(savedValue)));
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -133,7 +133,7 @@ namespace DaprExtensionTests
         {
             var savedValue = 1;
 
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
