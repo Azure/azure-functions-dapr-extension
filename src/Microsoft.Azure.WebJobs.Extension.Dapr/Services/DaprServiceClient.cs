@@ -11,6 +11,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Net;
     using System.Net.Http;
     using System.Text;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -164,9 +165,14 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            HttpResponseMessage response = await this.httpClient.PostAsJsonAsync(
+            var stringContent = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(message),
+                System.Text.Encoding.UTF8,
+                "application/json");
+
+            HttpResponseMessage response = await this.httpClient.PostAsync(
                 $"{daprAddress}/v1.0/bindings/{message.BindingName}",
-                message,
+                stringContent,
                 cancellationToken);
 
             await ThrowIfDaprFailure(response);

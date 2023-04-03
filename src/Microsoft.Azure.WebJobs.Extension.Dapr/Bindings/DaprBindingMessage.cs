@@ -7,8 +7,8 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
     using System;
     using System.Collections.Generic;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 
     /// <summary>
     /// Parameters for invoking a Dapr binding.
@@ -22,9 +22,27 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <param name="metadata">The bag of key value pairs for binding-specific metadata.</param>
         /// <param name="binding">The name of binding.</param>
         /// <param name="operation">The operation to do with the Dapr binding.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="data"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="data"/> is not serializable to JSON.</exception>
         public DaprBindingMessage(object data, Dictionary<string, object>? metadata = null, string? binding = null, string? operation = null)
         {
-            this.Data = JToken.FromObject(data ?? throw new ArgumentNullException(nameof(data)));
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            string serializedData = string.Empty;
+
+            try
+            {
+                serializedData = JsonSerializer.Serialize(data);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("The data object must be serializable to JSON.", nameof(data), e);
+            }
+
+            this.Data = JsonDocument.Parse(serializedData).RootElement;
             this.Metadata = metadata;
             this.BindingName = binding;
             this.Operation = operation;
@@ -33,19 +51,22 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <summary>
         /// Gets or sets the data .
         /// </summary>
-        [JsonProperty("data")]
-        public JToken Data { get; set; }
+        [JsonPropertyName("data")]
+        [JsonConverter(typeof(JsonElementConverter))]
+        public JsonElement Data { get; set; }
 
         /// <summary>
         /// Gets or sets the operation.
         /// </summary>
-        [JsonProperty("operation", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("operation")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Operation { get; set; }
 
         /// <summary>
         /// Gets or sets the metadata required for this operation.
         /// </summary>
-        [JsonProperty("metadata", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("metadata")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Dictionary<string, object>? Metadata { get; set; }
 
         /// <summary>

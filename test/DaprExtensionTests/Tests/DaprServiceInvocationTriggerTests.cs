@@ -66,7 +66,7 @@ namespace DaprExtensionTests
         public async Task BindingTests_DaprState_SimpleValue()
         {
             string savedValue = Guid.NewGuid().ToString();
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -87,7 +87,7 @@ namespace DaprExtensionTests
         public async Task BindingTests_DaprState_ComplexValue()
         {
             string savedValue = Guid.NewGuid().ToString();
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,

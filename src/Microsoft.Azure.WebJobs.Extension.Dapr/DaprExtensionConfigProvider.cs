@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Text.Json;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Host.Config;
@@ -83,7 +84,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             publishRule.BindToCollector(attr => new DaprPublishAsyncCollector(attr, this.daprClient));
 
             var daprBindingRule = context.AddBindingRule<DaprBindingAttribute>();
-            daprBindingRule.AddConverter<JObject, DaprBindingMessage>(CreateBindingMessage);
+            daprBindingRule.AddConverter<JsonElement, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<byte[], DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<object, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.BindToCollector(attr => new DaprBindingAsyncCollector(attr, this.daprClient));
@@ -139,31 +140,32 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
         static DaprBindingMessage CreateBindingMessage(byte[] paramValues)
         {
-            return CreateBindingMessage(JObject.Parse(System.Text.Encoding.UTF8.GetString(paramValues)));
+            var jsonDocument = JsonDocument.Parse(Encoding.UTF8.GetString(paramValues));
+            return CreateBindingMessage(jsonDocument.RootElement);
         }
 
-        static DaprBindingMessage CreateBindingMessage(JObject json)
+        static DaprBindingMessage CreateBindingMessage(JsonElement jsonElement)
         {
-            if (!TryGetValue(json, "data", out object? data))
+            if (!jsonElement.TryGetProperty("data", out JsonElement data))
             {
-                throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(json));
+                throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(jsonElement));
             }
 
             DaprBindingMessage message = new DaprBindingMessage(data!);
 
-            if (TryGetValue(json, "operation", out string? operation))
+            if (jsonElement.TryGetProperty("operation", out JsonElement operation))
             {
-                message.Operation = operation;
+                message.Operation = operation.GetRawText();
             }
 
-            if (TryGetValue(json, "metadata", out JObject? metadata))
+            if (jsonElement.TryGetProperty("metadata", out JsonElement metadata))
             {
-                message.Metadata = metadata?.ToObject<Dictionary<string, object>>();
+                message.Metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(metadata);
             }
 
-            if (TryGetValue(json, "bindingName", out string? binding))
+            if (jsonElement.TryGetProperty("bindingName", out JsonElement binding))
             {
-                message.BindingName = binding;
+                message.BindingName = binding.GetRawText();
             }
 
             return message;
