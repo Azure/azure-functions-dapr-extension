@@ -43,7 +43,7 @@ namespace DaprExtensionTests
             new object[] { nameof(Functions.ReturnBytes), Guid.NewGuid() }, // Any data works for bytes
             new object[] { nameof(Functions.ReturnJsonElement), new { arg1 = 2, arg2 = 3 } },
             new object[] { nameof(Functions.ReturnCustomType), new CustomType { P1 = "Hello, world", P2 = 3, P3 = DateTime.UtcNow } },
-            new object[] { nameof(Functions.ReturnJsonElement), new { arg1 = 2, arg2 = 3 } },
+            new object[] { nameof(Functions.ReturnUnknownType), new { arg1 = 2, arg2 = 3 } },
         };
 
         [Theory]

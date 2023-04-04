@@ -26,6 +26,20 @@
             this.AddFunctions(typeof(Functions));
         }
 
+        public static IEnumerable<object[]> GetTheoryDataInputs() => new List<object[]>
+        {
+            new object[] { nameof(Functions.ReturnInt), 42 },
+            new object[] { nameof(Functions.ReturnBoolean), true },
+            new object[] { nameof(Functions.ReturnDouble), Math.PI },
+            new object[] { nameof(Functions.ReturnString), Guid.NewGuid().ToString() },
+            new object[] { nameof(Functions.ReturnDateTime), DateTime.Now },
+            new object[] { nameof(Functions.ReturnStream), Guid.NewGuid() }, // Any data works for Stream
+            new object[] { nameof(Functions.ReturnBytes), Guid.NewGuid() }, // Any data works for bytes
+            new object[] { nameof(Functions.ReturnJsonElement), new { arg1 = 2, arg2 = 3 } },
+            new object[] { nameof(Functions.ReturnCustomType), new CustomType { P1 = "Hello, world", P2 = 3, P3 = DateTime.UtcNow } },
+            new object[] { nameof(Functions.ReturnUnknownType), new { arg1 = 2, arg2 = 3 } },
+        };
+
         [Theory]
         [MemberData(nameof(GetTheoryDataInputs))]
         public async Task BindingTests_HttpClient(string methodName, object input)
@@ -74,9 +88,6 @@
             Assert.Equal(serializedInput, result);
         }
 
-        // The Binding trigger handles the same data as the Service Invocation trigger does
-        public static IEnumerable<object[]> GetTheoryDataInputs() => DaprServiceInvocationTriggerTests.GetTheoryDataInputs();
-
         private readonly static string TriggerDataInput = JsonSerializer.Serialize(new
         {
             Metadata = new Dictionary<string, string>()
@@ -108,7 +119,7 @@
 
             public static byte[] ReturnBytes([DaprBindingTrigger] byte[] input) => input;
 
-            public static JsonElement ReturnElement([DaprBindingTrigger] JsonElement input) => input;
+            public static JsonElement ReturnJsonElement([DaprBindingTrigger] JsonElement input) => input;
 
             public static CustomType ReturnCustomType([DaprBindingTrigger] CustomType input) => input;
 
