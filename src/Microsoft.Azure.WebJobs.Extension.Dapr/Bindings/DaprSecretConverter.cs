@@ -13,16 +13,26 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs;
 
     class DaprSecretConverter :
+
+        // The order of these interfaces is important!
         IAsyncConverter<DaprSecretAttribute, byte[]>,
         IAsyncConverter<DaprSecretAttribute, string?>,
-        IAsyncConverter<DaprSecretAttribute, object?>,
-        IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>
+        IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>,
+        IAsyncConverter<DaprSecretAttribute, JsonElement>,
+        IAsyncConverter<DaprSecretAttribute, object?>
     {
         readonly DaprServiceClient daprClient;
 
         public DaprSecretConverter(DaprServiceClient daprClient)
         {
             this.daprClient = daprClient;
+        }
+
+        async Task<JsonElement> IAsyncConverter<DaprSecretAttribute, JsonElement>.ConvertAsync(
+            DaprSecretAttribute input,
+            CancellationToken cancellationToken)
+        {
+            return (await this.GetSecretsAsync(input, cancellationToken)).RootElement;
         }
 
         async Task<object?> IAsyncConverter<DaprSecretAttribute, object?>.ConvertAsync(
