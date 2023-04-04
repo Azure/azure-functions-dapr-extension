@@ -13,6 +13,7 @@ namespace DaprExtensionTests
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -74,8 +75,24 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(
                 nameof(Functions.SaveState_BindToJObject_AllFields),
                 "saveStateParameters",
-                JsonDocument.Parse(JsonSerializer.Serialize(parameters)).RootElement);
+                JObject.FromObject(parameters));
 
+            SavedHttpRequest req = this.GetSingleSaveStateRequest();
+
+            Assert.Equal($"/v1.0/state/{parameters.stateStore}", req.Path);
+            Assert.Equal(@$"[{{""key"":""{parameters.key}"",""value"":""{parameters.value}""}}]", req.ContentAsString);
+
+            this.ValidatePersistedState(parameters.value, parameters.stateStore, parameters.key);
+        }
+
+        [Fact]
+        public async Task SaveState_BindToJsonElement()
+        {
+            var parameters = new { stateStore = "store1", key = "key1", value = "value1" };
+            await this.CallFunctionAsync(
+                nameof(Functions.SaveState_BindToJsonElement),
+                "jsonElement",
+                JsonDocument.Parse(JsonSerializer.Serialize(parameters)).RootElement);
             SavedHttpRequest req = this.GetSingleSaveStateRequest();
 
             Assert.Equal($"/v1.0/state/{parameters.stateStore}", req.Path);
@@ -107,7 +124,7 @@ namespace DaprExtensionTests
             Array.Sort(expected, comparer);
             Array.Sort(actual, comparer);
 
-            Assert.Equal(expected, actual);
+            Assert.Equal(JsonSerializer.Serialize(expected), JsonSerializer.Serialize(actual));
 
             foreach (var kvp in inputs)
             {
@@ -158,7 +175,7 @@ namespace DaprExtensionTests
         {
             object? actualState = this.FetchSavedStateForUnitTesting(targetStateStore, targetKey);
             Assert.NotNull(actualState);
-            Assert.Equal(expectedState, actualState);
+            Assert.Equal(JsonSerializer.Serialize(expectedState), JsonSerializer.Serialize(actualState));
         }
 
         static class Functions
@@ -190,10 +207,18 @@ namespace DaprExtensionTests
 
             [NoAutomaticTrigger]
             public static Task SaveState_BindToJObject_AllFields(
-                JsonElement saveStateParameters,
-                [DaprState("{saveStateParameters.stateStore}")] IAsyncCollector<JsonElement> state)
+                JObject saveStateParameters,
+                [DaprState("{saveStateParameters.stateStore}")] IAsyncCollector<JObject> state)
             {
                 return state.AddAsync(saveStateParameters);
+            }
+
+            [NoAutomaticTrigger]
+            public static Task SaveState_BindToJsonElement(
+                JsonElement jsonElement,
+                [DaprState("store1")] IAsyncCollector<JsonElement> state)
+            {
+                return state.AddAsync(jsonElement);
             }
 
             [NoAutomaticTrigger]

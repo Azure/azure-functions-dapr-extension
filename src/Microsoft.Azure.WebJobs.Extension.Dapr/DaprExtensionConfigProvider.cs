@@ -15,6 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Defines the configuration options for the Dapr binding.
@@ -185,15 +186,21 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
             if (parametersJson.TryGetProperty("key", out JsonElement key))
             {
-                parameters.Key = key.GetRawText();
+                parameters.Key = key.GetString();
             }
 
             return parameters;
         }
 
-        internal static DaprStateRecord CreateSaveStateParameters(object parametersValue)
+        internal static DaprStateRecord CreateSaveStateParameters(object value)
         {
-            return new DaprStateRecord(parametersValue);
+            // If object is of type JObject, convert it to JsonElement
+            if (value is JObject jObject)
+            {
+                return CreateSaveStateParameters(JsonDocument.Parse(jObject.ToString()).RootElement);
+            }
+
+            return new DaprStateRecord(value);
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(byte[] arg)

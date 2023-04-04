@@ -8,6 +8,7 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Concurrent;
     using System.IO;
+    using System.Text;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
@@ -84,14 +85,18 @@ namespace DaprExtensionTests
                 storeName,
                 _ => new ConcurrentDictionary<string, object?>(StringComparer.OrdinalIgnoreCase));
 
-            using var reader = new StreamReader(context.Request.Body);
+            using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             string jsonPayload = await reader.ReadToEndAsync();
             JsonDocument entries = JsonDocument.Parse(jsonPayload);
-            foreach (JsonProperty prop in entries.RootElement.EnumerateObject())
+            foreach (JsonElement entry in entries.RootElement.EnumerateArray())
             {
-                string key = prop.Name;
-                JsonElement? value = prop.Value;
+                string? key = entry.GetProperty("key").GetString();
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new InvalidOperationException("State key cannot be null or empty.");
+                }
 
+                object? value = JsonSerializer.Deserialize<object>(entry.GetProperty("value"));
                 if (value == null)
                 {
                     namedStore.TryRemove(key, out object? _);
@@ -189,7 +194,7 @@ namespace DaprExtensionTests
         async Task SaveRequestAsync(HttpRequest request)
         {
             request.EnableBuffering();
-            using var reader = new StreamReader(request.Body, leaveOpen: true);
+            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
             string content = await reader.ReadToEndAsync();
 
             // Add a copy of the request because the original object will be

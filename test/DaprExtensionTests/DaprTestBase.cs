@@ -18,8 +18,6 @@ namespace DaprExtensionTests
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
     using System.Text.Json;
@@ -120,7 +118,7 @@ namespace DaprExtensionTests
 
             if (jsonContent != null)
             {
-                string json = JsonConvert.SerializeObject(jsonContent);
+                string json = JsonSerializer.Serialize(jsonContent);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
