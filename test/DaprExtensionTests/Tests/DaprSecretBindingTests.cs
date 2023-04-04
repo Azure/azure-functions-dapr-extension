@@ -11,15 +11,15 @@ namespace DaprExtensionTests
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
     using System.Linq;
+    using System.Text.Json;
+    using Newtonsoft.Json.Linq;
 
     public class DaprSecretBindingTests : DaprTestBase
     {
-        static readonly string ExpectedSecret = JObject.Parse(@$"{{""key1"":""secret!"", ""key2"":""another secret!""}}").ToString(Formatting.None);
+        static readonly string ExpectedSecret = JsonSerializer.Serialize(JsonDocument.Parse(@$"{{""key1"":""secret!"", ""key2"":""another secret!""}}"));
 
         public DaprSecretBindingTests(ITestOutputHelper output)
             : base(output)
@@ -90,6 +90,7 @@ namespace DaprExtensionTests
                     version_id = 3,
                     version_stage = 4,
                 });
+
             await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToMetadata), "metadata", metadata);
 
             SavedHttpRequest req = this.GetSingleGetSecretRequest();
@@ -101,15 +102,15 @@ namespace DaprExtensionTests
         }
 
         [Fact]
-        public async Task GetSecret_BindToJObject()
+        public async Task GetSecret_BindToJsonElement()
         {
-            await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToJObject));
+            await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToJsonElement));
 
             SavedHttpRequest req = this.GetSingleGetSecretRequest();
             Assert.Equal("/v1.0/secrets/store1/key", req.Path);
             Assert.Equal(QueryString.Empty, req.Query);
 
-            IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.GetSecret_BindToJObject));
+            IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.GetSecret_BindToJsonElement));
             Assert.Contains(ExpectedSecret, functionLogs);
         }
 
@@ -160,9 +161,9 @@ namespace DaprExtensionTests
                 [DaprSecret("store1", "key", Metadata = "metadata.version_id={metadata.version_id}&metadata.version_stage={metadata.version_stage}")] string secret,
                 ILogger log) => log.LogInformation(secret);
 
-            public static void GetSecret_BindToJObject(
-                [DaprSecret("store1", "key")] JObject secret,
-                ILogger log) => log.LogInformation(secret.ToString(Formatting.None));
+            public static void GetSecret_BindToJsonElement(
+                [DaprSecret("store1", "key")] JsonElement secret,
+                ILogger log) => log.LogInformation(JsonSerializer.Serialize(secret));
 
             public static void GetSecret_BindToByteArray(
                 [DaprSecret("store1", "key")] byte[] secret,

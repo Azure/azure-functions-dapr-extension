@@ -100,7 +100,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                 {
                     // Special case for out-of-proc workers (like nodejs). The binding type
                     // appears to always be "string" so we need to do a special conversion.
-                    convertedValue = jsonElement.GetRawText();
+                    convertedValue = JsonSerializer.Serialize(jsonElement);
                 }
                 else
                 {

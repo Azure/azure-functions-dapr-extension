@@ -141,7 +141,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string appId,
             string methodName,
             string httpVerb,
-            JsonElement? body,
+            object? body,
             CancellationToken cancellationToken)
         {
             this.EnsureDaprAddress(ref daprAddress);
@@ -149,7 +149,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             var req = new HttpRequestMessage(new HttpMethod(httpVerb), $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}");
             if (body != null)
             {
-                req.Content = new StringContent(body?.GetRawText(), Encoding.UTF8, "application/json");
+                req.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
             }
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
@@ -196,7 +196,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             await ThrowIfDaprFailure(response);
         }
 
-        internal async Task<JsonElement> GetSecretAsync(
+        internal async Task<JsonDocument> GetSecretAsync(
             string? daprAddress,
             string secretStoreName,
             string? key,
@@ -230,7 +230,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string secretPayload = await response.Content.ReadAsStringAsync();
 
             // The response is always expected to be a JSON object
-            return JsonDocument.Parse(secretPayload).RootElement;
+            return JsonDocument.Parse(secretPayload);
         }
 
         void EnsureDaprAddress(ref string? daprAddress)

@@ -22,6 +22,7 @@ namespace DaprExtensionTests
     using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
+    using System.Text.Json;
 
     // TODO: Instead of making all tests run sequentially, configure a different port number for each collection
     [Collection("Sequential")]
@@ -144,10 +145,10 @@ namespace DaprExtensionTests
 
         internal SavedHttpRequest[] GetDaprRequests() => this.daprRuntime.GetReceivedRequests();
 
-        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key)
+        internal object? FetchSavedStateForUnitTesting(string stateStore, string key)
             => this.daprRuntime.FetchSavedStateForUnitTesting(stateStore, key);
 
-        internal void SaveStateForUnitTesting(string storeName, string key, JToken value)
+        internal void SaveStateForUnitTesting(string storeName, string key, object value)
             => this.daprRuntime.SaveStateForUnitTesting(storeName, key, value);
 
         Task IAsyncLifetime.InitializeAsync()

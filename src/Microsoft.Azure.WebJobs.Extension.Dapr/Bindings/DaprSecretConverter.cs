@@ -15,7 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     class DaprSecretConverter :
         IAsyncConverter<DaprSecretAttribute, byte[]>,
         IAsyncConverter<DaprSecretAttribute, string?>,
-        IAsyncConverter<DaprSecretAttribute, JsonElement>,
+        IAsyncConverter<DaprSecretAttribute, object?>,
         IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>
     {
         readonly DaprServiceClient daprClient;
@@ -25,18 +25,19 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             this.daprClient = daprClient;
         }
 
-        Task<JsonElement> IAsyncConverter<DaprSecretAttribute, JsonElement>.ConvertAsync(
+        async Task<object?> IAsyncConverter<DaprSecretAttribute, object?>.ConvertAsync(
             DaprSecretAttribute input,
             CancellationToken cancellationToken)
         {
-            return this.GetSecretsAsync(input, cancellationToken);
+            JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
+            return JsonSerializer.Deserialize<object>(result);
         }
 
         async Task<IDictionary<string, string>> IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>.ConvertAsync(
             DaprSecretAttribute input,
             CancellationToken cancellationToken)
         {
-            JsonElement result = await this.GetSecretsAsync(input, cancellationToken);
+            JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
             var obj = JsonSerializer.Deserialize<Dictionary<string, string>>(result);
             return obj ?? new Dictionary<string, string>();
         }
@@ -45,19 +46,19 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             DaprSecretAttribute input,
             CancellationToken cancellationToken)
         {
-            JsonElement result = await this.GetSecretsAsync(input, cancellationToken);
-            return Encoding.UTF8.GetBytes(result.GetRawText());
+            JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
+            return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(result));
         }
 
         async Task<string?> IAsyncConverter<DaprSecretAttribute, string?>.ConvertAsync(
             DaprSecretAttribute input,
             CancellationToken cancellationToken)
         {
-            JsonElement result = await this.GetSecretsAsync(input, cancellationToken);
-            return result.GetRawText();
+            JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
+            return JsonSerializer.Serialize(result);
         }
 
-        Task<JsonElement> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)
+        Task<JsonDocument> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)
         {
             return this.daprClient.GetSecretAsync(
                 input.DaprAddress,

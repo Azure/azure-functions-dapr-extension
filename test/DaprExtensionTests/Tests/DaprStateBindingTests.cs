@@ -8,16 +8,15 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extension.Dapr;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
 
-    // TODO: Need to test variations of JObject where stateStore and key are defined in the binding attribute
+    // TODO: Need to test variations of JsonElement where stateStore and key are defined in the binding attribute
     public class DaprStateBindingTests : DaprTestBase
     {
         public DaprStateBindingTests(ITestOutputHelper output)
@@ -33,7 +32,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.SaveState_ObjectAsyncCollector), "input", input);
             SavedHttpRequest req = this.GetSingleSaveStateRequest();
 
-            string expectedValue = JsonConvert.SerializeObject(input);
+            string expectedValue = JsonSerializer.Serialize(input);
             Assert.Equal("/v1.0/state/store1", req.Path);
             Assert.Equal(@$"[{{""key"":""key1"",""value"":{expectedValue}}}]", req.ContentAsString);
         }
@@ -75,7 +74,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(
                 nameof(Functions.SaveState_BindToJObject_AllFields),
                 "saveStateParameters",
-                JObject.FromObject(parameters));
+                JsonDocument.Parse(JsonSerializer.Serialize(parameters)).RootElement);
 
             SavedHttpRequest req = this.GetSingleSaveStateRequest();
 
@@ -102,9 +101,9 @@ namespace DaprExtensionTests
 
             // Sort the elements since the order may change.
             // This is preferred over DeepEquals because we get more debug info from xunit when comparing collections
-            JToken[] expected = JArray.Parse(@"[{""key"":""key1"",""value"":1},{""key"":""key2"",""value"":2},{""key"":""key3"",""value"":3}]").ToArray();
-            JToken[] actual = JArray.Parse(req.ContentAsString).ToArray();
-            var comparer = new Comparison<JToken>((t1, t2) => t1.ToString(Formatting.None).CompareTo(t2.ToString(Formatting.None)));
+            JsonElement[] expected = JsonDocument.Parse(@"[{""key"":""key1"",""value"":1},{""key"":""key2"",""value"":2},{""key"":""key3"",""value"":3}]").RootElement.EnumerateArray().ToArray();
+            JsonElement[] actual = JsonDocument.Parse(req.ContentAsString).RootElement.EnumerateArray().ToArray();
+            var comparer = new Comparison<JsonElement>((t1, t2) => JsonSerializer.Serialize(t1).CompareTo(JsonSerializer.Serialize(t2)));
             Array.Sort(expected, comparer);
             Array.Sort(actual, comparer);
 
@@ -157,9 +156,9 @@ namespace DaprExtensionTests
 
         void ValidatePersistedState(object expectedState, string targetStateStore, string targetKey)
         {
-            JToken? actualState = this.FetchSavedStateForUnitTesting(targetStateStore, targetKey);
+            object? actualState = this.FetchSavedStateForUnitTesting(targetStateStore, targetKey);
             Assert.NotNull(actualState);
-            Assert.Equal(JToken.FromObject(expectedState), actualState);
+            Assert.Equal(expectedState, actualState);
         }
 
         static class Functions
@@ -191,8 +190,8 @@ namespace DaprExtensionTests
 
             [NoAutomaticTrigger]
             public static Task SaveState_BindToJObject_AllFields(
-                JObject saveStateParameters,
-                [DaprState("{saveStateParameters.stateStore}")] IAsyncCollector<JObject> state)
+                JsonElement saveStateParameters,
+                [DaprState("{saveStateParameters.stateStore}")] IAsyncCollector<JsonElement> state)
             {
                 return state.AddAsync(saveStateParameters);
             }
