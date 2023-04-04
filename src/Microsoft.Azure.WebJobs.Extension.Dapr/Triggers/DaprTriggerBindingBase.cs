@@ -18,6 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs.Host.Listeners;
     using Microsoft.Azure.WebJobs.Host.Protocols;
     using Microsoft.Azure.WebJobs.Host.Triggers;
+    using Newtonsoft.Json.Linq;
 
     abstract class DaprTriggerBindingBase : ITriggerBinding
     {
@@ -86,26 +87,30 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             {
                 // Binding to JsonElement.
                 // This also works for primitives like int, bool, and string.
-                JsonElement jsonElement;
+                JsonElement jsonValue;
                 using (var stream = new StreamReader(inputStream))
                 {
-                    jsonElement = await JsonSerializer.DeserializeAsync<JsonElement>(stream.BaseStream, cancellationToken: context.CancellationToken);
+                    jsonValue = await JsonSerializer.DeserializeAsync<JsonElement>(stream.BaseStream, cancellationToken: context.CancellationToken);
                 }
 
-                if (destinationType.IsAssignableFrom(jsonElement.GetType()))
+                if (destinationType.IsAssignableFrom(jsonValue.GetType()))
                 {
-                    convertedValue = jsonElement;
+                    convertedValue = jsonValue;
                 }
-                else if (destinationType == typeof(string) && jsonElement.ValueKind != JsonValueKind.String)
+                else if (destinationType == typeof(string) && jsonValue.ValueKind != JsonValueKind.String)
                 {
                     // Special case for out-of-proc workers (like nodejs). The binding type
                     // appears to always be "string" so we need to do a special conversion.
-                    convertedValue = JsonSerializer.Serialize(jsonElement);
+                    convertedValue = JsonSerializer.Serialize(jsonValue);
+                }
+                else if (destinationType == typeof(JObject))
+                {
+                    convertedValue = JObject.Parse(jsonValue.ToString());
                 }
                 else
                 {
                     // At this point, we're probably dealing with a POCO
-                    convertedValue = this.ConvertFromJson(jsonElement, destinationType);
+                    convertedValue = this.ConvertFromJson(jsonValue, destinationType);
                 }
             }
 
@@ -122,7 +127,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         protected virtual object ConvertFromJson(JsonElement jsonElement, Type destinationType)
         {
             // Do a direct conversion by default
-            var obj = JsonSerializer.Deserialize(jsonElement.GetRawText(), destinationType);
+            var obj = JsonSerializer.Deserialize(jsonElement, destinationType);
             if (obj == null)
             {
                 throw new InvalidOperationException($"Unable to convert {jsonElement} to {destinationType.Name}.");

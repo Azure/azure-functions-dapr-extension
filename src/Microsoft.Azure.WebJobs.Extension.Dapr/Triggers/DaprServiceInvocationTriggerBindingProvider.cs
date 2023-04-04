@@ -95,6 +95,10 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                     try
                     {
                         FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
+                        if (result.Succeeded == false)
+                        {
+                            throw result.Exception;
+                        }
                     }
                     catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
                     {

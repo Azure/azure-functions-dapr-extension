@@ -71,8 +71,9 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             stateRule.BindToInput<object?>(daprStateConverter);
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
-            invokeRule.AddConverter<byte[], InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.AddConverter<JsonElement, InvokeMethodParameters>(CreateInvokeMethodParameters);
+            invokeRule.AddConverter<object, InvokeMethodParameters>(CreateInvokeMethodParameters);
+            invokeRule.AddConverter<byte[], InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
 
             var publishRule = context.AddBindingRule<DaprPublishAttribute>();
@@ -197,7 +198,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(byte[] arg)
         {
-            return CreateInvokeMethodParameters(arg);
+            return CreateInvokeMethodParameters(BytesToJsonElement(arg));
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JsonElement parametersJson)
@@ -225,6 +226,11 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             }
 
             return options;
+        }
+
+        internal static InvokeMethodParameters CreateInvokeMethodParameters(object arg)
+        {
+            return new InvokeMethodParameters();
         }
     }
 }

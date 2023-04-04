@@ -17,6 +17,7 @@ namespace DaprExtensionTests
     using Xunit;
     using Xunit.Abstractions;
     using System.Text.Json;
+    using Newtonsoft.Json.Linq;
 
     public class DaprServiceInvocationTriggerTests : DaprTestBase
     {
@@ -203,7 +204,7 @@ namespace DaprExtensionTests
 
             [FunctionName(nameof(GetState2))]
             public static string GetState2(
-                [DaprServiceInvocationTrigger] object input,
+                [DaprServiceInvocationTrigger] JObject input,
                 [DaprState("store1", Key = "{input.stateKey}")] string existingState)
             {
                 return existingState;
