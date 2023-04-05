@@ -16,6 +16,7 @@ namespace DaprExtensionTests
     using System.Linq;
     using System.Text.Json;
     using Newtonsoft.Json.Linq;
+    using System;
 
     public class DaprSecretBindingTests : DaprTestBase
     {
@@ -128,6 +129,19 @@ namespace DaprExtensionTests
         }
 
         [Fact]
+        public async Task GetSecret_BindToCustomType()
+        {
+            await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToCustomType));
+
+            SavedHttpRequest req = this.GetSingleGetSecretRequest();
+            Assert.Equal("/v1.0/secrets/store1/key", req.Path);
+            Assert.Equal(QueryString.Empty, req.Query);
+
+            IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.GetSecret_BindToCustomType));
+            Assert.Contains(ExpectedSecret, functionLogs);
+        }
+
+        [Fact]
         public async Task GetSecret_BindToDictionary()
         {
             await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToDictionary));
@@ -182,6 +196,10 @@ namespace DaprExtensionTests
                 [DaprSecret("store1", "key")] JObject secret,
                 ILogger log) => log.LogInformation(secret.ToString(Newtonsoft.Json.Formatting.None));
 
+            public static void GetSecret_BindToCustomType(
+                [DaprSecret("store1", "key")] CustomType secret,
+                ILogger log) => log.LogInformation(JsonSerializer.Serialize(secret));
+
             public static void GetSecret_BindToByteArray(
                 [DaprSecret("store1", "key")] byte[] secret,
                 ILogger log) => log.LogInformation(Encoding.UTF8.GetString(secret));
@@ -189,6 +207,12 @@ namespace DaprExtensionTests
             public static void GetSecret_BindToDictionary(
                 [DaprSecret("store1", "key")] IDictionary<string, string> secret,
                 ILogger log) => log.LogInformation(string.Join(", ", secret.Select(kvp => @$"{kvp.Key}: {kvp.Value}")));
+        }
+
+        class CustomType
+        {
+            public string? key1 { get; set; }
+            public string? key2 { get; set; }
         }
     }
 }

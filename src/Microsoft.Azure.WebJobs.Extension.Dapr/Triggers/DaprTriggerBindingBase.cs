@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
+    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
@@ -22,6 +23,11 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
     abstract class DaprTriggerBindingBase : ITriggerBinding
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         readonly DaprServiceListener serviceListener;
         readonly ParameterInfo parameter;
 
@@ -215,7 +221,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                 }
                 else
                 {
-                    string jsonResult = JsonSerializer.Serialize(value);
+                    string jsonResult = JsonSerializer.Serialize(value, SerializerOptions);
                     await this.context.Response.WriteAsync(jsonResult, cancellationToken);
                 }
             }

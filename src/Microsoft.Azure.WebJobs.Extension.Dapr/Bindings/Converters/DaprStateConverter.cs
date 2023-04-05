@@ -3,23 +3,31 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extension.Dapr
+namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
 {
     using System;
     using System.IO;
     using System.Text;
+    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Newtonsoft.Json.Linq;
 
     class DaprStateConverter :
         IAsyncConverter<DaprStateAttribute, DaprStateRecord>,
         IAsyncConverter<DaprStateAttribute, byte[]>,
         IAsyncConverter<DaprStateAttribute, string>,
         IAsyncConverter<DaprStateAttribute, Stream>,
-        IAsyncConverter<DaprStateAttribute, object?>
+        IAsyncConverter<DaprStateAttribute, JsonElement>,
+        IAsyncConverter<DaprStateAttribute, JObject>
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         readonly DaprServiceClient daprClient;
 
         public DaprStateConverter(DaprServiceClient daprClient)
@@ -27,7 +35,24 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             this.daprClient = daprClient;
         }
 
-        public async Task<byte[]> ConvertAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        async Task<DaprStateRecord> IAsyncConverter<DaprStateAttribute, DaprStateRecord>.ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
+        {
+            DaprStateRecord record = await this.GetStateRecordAsync(input, cancellationToken);
+            using StreamReader reader = new StreamReader(record.ContentStream);
+            string content = await reader.ReadToEndAsync();
+            if (!string.IsNullOrEmpty(content))
+            {
+                record.Value = JsonDocument.Parse(content).RootElement;
+            }
+
+            return record;
+        }
+
+        public async Task<byte[]> ConvertAsync(
+            DaprStateAttribute input,
+            CancellationToken cancellationToken)
         {
             string content = await this.GetStringContentAsync(input, cancellationToken);
             if (string.IsNullOrEmpty(content))
@@ -47,7 +72,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             catch (JsonException)
             {
                 // Looks like it's not actually JSON - just return the raw bytes
-                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json));
+                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json, SerializerOptions));
             }
 
             return bytes ?? Array.Empty<byte>();
@@ -68,41 +93,37 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             return record.ContentStream;
         }
 
-        async Task<object?> IAsyncConverter<DaprStateAttribute, object?>.ConvertAsync(
+        async Task<JsonElement> IAsyncConverter<DaprStateAttribute, JsonElement>.ConvertAsync(
             DaprStateAttribute input,
             CancellationToken cancellationToken)
         {
             string content = await this.GetStringContentAsync(input, cancellationToken);
             if (string.IsNullOrEmpty(content))
             {
-                return null; // TODO: This will cause a null-ref for value types!
+                return default;
             }
-            else
-            {
-                return JsonDocument.Parse(content).RootElement;
-            }
+
+            return JsonDocument.Parse(content).RootElement;
         }
 
-        async Task<DaprStateRecord> IAsyncConverter<DaprStateAttribute, DaprStateRecord>.ConvertAsync(
+        async Task<JObject> IAsyncConverter<DaprStateAttribute, JObject>.ConvertAsync(
             DaprStateAttribute input,
             CancellationToken cancellationToken)
         {
-            DaprStateRecord record = await this.GetStateRecordAsync(input, cancellationToken);
-            using StreamReader reader = new StreamReader(record.ContentStream);
-            string content = await reader.ReadToEndAsync();
-            if (!string.IsNullOrEmpty(content))
+            string content = await this.GetStringContentAsync(input, cancellationToken);
+            if (string.IsNullOrEmpty(content))
             {
-                record.Value = JsonDocument.Parse(content).RootElement;
+                return default!;
             }
 
-            return record;
+            return JObject.Parse(content);
         }
 
         async Task<string> GetStringContentAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
             DaprStateRecord stateRecord = await this.GetStateRecordAsync(input, cancellationToken);
-            using StreamReader reader = new StreamReader(stateRecord.ContentStream);
-            return await reader.ReadToEndAsync();
+            var contentJson = await JsonDocument.ParseAsync(stateRecord.ContentStream);
+            return JsonSerializer.Serialize(contentJson, SerializerOptions);
         }
 
         async Task<DaprStateRecord> GetStateRecordAsync(DaprStateAttribute input, CancellationToken cancellationToken)

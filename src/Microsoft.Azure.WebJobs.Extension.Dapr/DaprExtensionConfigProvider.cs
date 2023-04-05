@@ -12,6 +12,8 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Text.Json;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters;
+    using Microsoft.Azure.WebJobs.Host.Bindings;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.Logging;
@@ -63,13 +65,13 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             stateRule.AddConverter<JsonElement, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
-            stateRule.BindToInput<string>(daprStateConverter);
-            stateRule.BindToInput<object?>(daprStateConverter);
-            stateRule.BindToInput<Stream>(daprStateConverter);
+            stateRule.BindToInput<DaprStateRecord>(daprStateConverter);
             stateRule.BindToInput<byte[]>(daprStateConverter);
-
-            // TODO: This does not work for nulls and value types. Need a better way of doing this conversion.
-            stateRule.BindToInput<object?>(daprStateConverter);
+            stateRule.BindToInput<string>(daprStateConverter);
+            stateRule.BindToInput<Stream>(daprStateConverter);
+            stateRule.BindToInput<JsonElement>(daprStateConverter);
+            stateRule.BindToInput<JObject>(daprStateConverter);
+            stateRule.BindToInput<OpenType>(typeof(DaprStateGenericsConverter<>), this.daprClient);
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
             invokeRule.AddConverter<byte[], InvokeMethodParameters>(CreateInvokeMethodParameters);
@@ -96,7 +98,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             secretsRule.BindToInput<IDictionary<string, string>>(daprSecretConverter);
             secretsRule.BindToInput<JsonElement>(daprSecretConverter);
             secretsRule.BindToInput<JObject>(daprSecretConverter);
-            secretsRule.BindToInput<object?>(daprSecretConverter);
+            secretsRule.BindToInput<OpenType>(typeof(DaprSecretsGenericsConverter<>), this.daprClient);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
                 .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener, this.nameResolver));

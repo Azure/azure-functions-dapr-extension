@@ -7,7 +7,10 @@ namespace DaprExtensionTests
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -36,6 +39,31 @@ namespace DaprExtensionTests
             string expectedValue = JsonSerializer.Serialize(input);
             Assert.Equal("/v1.0/state/store1", req.Path);
             Assert.Equal(@$"[{{""key"":""key1"",""value"":{expectedValue}}}]", req.ContentAsString);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetDaprStateConverterInputs))]
+        public async Task SaveState_UserDefinedType_DaprStateConverter(string methodName)
+        {
+            var savedValue = new UserDefinedType
+            {
+                P1 = "Value1",
+                P2 = 1,
+                P3 = DateTime.Now
+            };
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
+
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                $"http://localhost:3001/{methodName}",
+                "key1");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string resultJson = await response.Content.ReadAsStringAsync();
+
+            string serializedValue = JsonSerializer.Serialize(savedValue);
+            Assert.Equal(serializedValue, resultJson);
         }
 
         [Theory]
@@ -162,6 +190,14 @@ namespace DaprExtensionTests
             new object[] { new UserDefinedType { P1 = "Hello, world!", P2 = 3, P3 = DateTime.UtcNow } },
         };
 
+        public static IEnumerable<object[]> GetDaprStateConverterInputs() => new List<object[]>
+        {
+            new object[] { nameof(Functions.RetrieveUserDefinedType) },
+            new object[] { nameof(Functions.RetrieveJsonElement) },
+            new object[] { nameof(Functions.RetrieveByteArrayType) },
+            new object[] { nameof(Functions.RetrieveStreamType) },
+        };
+
         SavedHttpRequest GetSingleSaveStateRequest()
         {
             SavedHttpRequest[] requests = this.GetDaprRequests();
@@ -239,6 +275,34 @@ namespace DaprExtensionTests
                 ILogger log)
             {
                 log.LogInformation(state.Value?.ToString() ?? string.Empty);
+            }
+
+            public static UserDefinedType RetrieveUserDefinedType(
+                [DaprServiceInvocationTrigger] string key,
+                [DaprState("store1", Key = "{key}")] UserDefinedType data)
+            {
+                return data;
+            }
+
+            public static JsonElement RetrieveJsonElement(
+                [DaprServiceInvocationTrigger] string key,
+                [DaprState("store1", Key = "{key}")] JsonElement data)
+            {
+                return data;
+            }
+
+            public static byte[] RetrieveByteArrayType(
+                [DaprServiceInvocationTrigger] string key,
+                [DaprState("store1", Key = "{key}")] byte[] data)
+            {
+                return data;
+            }
+
+            public static Stream RetrieveStreamType(
+                [DaprServiceInvocationTrigger] string key,
+                [DaprState("store1", Key = "{key}")] Stream data)
+            {
+                return data;
             }
         }
 

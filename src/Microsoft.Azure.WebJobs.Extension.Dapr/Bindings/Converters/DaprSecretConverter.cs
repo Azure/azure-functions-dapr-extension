@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extension.Dapr
+namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,8 +18,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         IAsyncConverter<DaprSecretAttribute, string?>,
         IAsyncConverter<DaprSecretAttribute, IDictionary<string, string>>,
         IAsyncConverter<DaprSecretAttribute, JsonElement>,
-        IAsyncConverter<DaprSecretAttribute, JObject>,
-        IAsyncConverter<DaprSecretAttribute, object?>
+        IAsyncConverter<DaprSecretAttribute, JObject>
     {
         readonly DaprServiceClient daprClient;
 
@@ -66,14 +65,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         {
             JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
             return JObject.Parse(JsonSerializer.Serialize(result));
-        }
-
-        async Task<object?> IAsyncConverter<DaprSecretAttribute, object?>.ConvertAsync(
-            DaprSecretAttribute input,
-            CancellationToken cancellationToken)
-        {
-            JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
-            return JsonSerializer.Deserialize<object>(result);
         }
 
         Task<JsonDocument> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)
