@@ -25,14 +25,14 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         public DaprStateRecord(string key, object value, string? eTag = null)
         {
             this.Key = key ?? throw new ArgumentNullException(nameof(key));
-            this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value)).RootElement;
+            this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value, JsonUtils.DefaultSerializerOptions)).RootElement;
             this.ETag = eTag;
         }
 
         // Internal constructor used only by the binding code.
         internal DaprStateRecord(object value)
         {
-            this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value)).RootElement;
+            this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value, JsonUtils.DefaultSerializerOptions)).RootElement;
         }
 
         internal DaprStateRecord(string key, Stream valueStream, string? eTag)

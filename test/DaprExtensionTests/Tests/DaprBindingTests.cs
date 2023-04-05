@@ -7,7 +7,6 @@ namespace DaprExtensionTests
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -18,11 +17,6 @@ namespace DaprExtensionTests
 
     public class DaprBindingTests : DaprTestBase
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-
         public DaprBindingTests(ITestOutputHelper output)
             : base(output)
         {
@@ -46,7 +40,7 @@ namespace DaprExtensionTests
                    }}");
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(JsonSerializer.Serialize(expectedPayload, SerializerOptions), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
         }
 
         [Theory]
@@ -76,7 +70,7 @@ namespace DaprExtensionTests
             SavedHttpRequest req = this.GetSingleSendMessageRequest();
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(JsonSerializer.Serialize(expectedPayload, SerializerOptions), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
         }
 
         [Theory]
@@ -93,7 +87,7 @@ namespace DaprExtensionTests
                    }}");
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
-            Assert.Equal(JsonSerializer.Serialize(expectedPayload, SerializerOptions), req.ContentAsString);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
         }
 
         [Fact]

@@ -33,7 +33,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             string serializedData = string.Empty;
             try
             {
-                serializedData = JsonSerializer.Serialize(payload);
+                serializedData = JsonSerializer.Serialize(payload, JsonUtils.DefaultSerializerOptions);
             }
             catch (Exception e)
             {

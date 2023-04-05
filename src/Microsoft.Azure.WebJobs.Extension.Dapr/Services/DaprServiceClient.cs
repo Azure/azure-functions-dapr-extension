@@ -11,19 +11,14 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Services
     using System.Net;
     using System.Net.Http;
     using System.Text;
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
 
     class DaprServiceClient
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-
         readonly HttpClient httpClient;
         readonly string defaultDaprAddress;
 
@@ -116,7 +111,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Services
             this.EnsureDaprAddress(ref daprAddress);
 
             var stringContent = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(values, SerializerOptions),
+                System.Text.Json.JsonSerializer.Serialize(values, JsonUtils.DefaultSerializerOptions),
                 System.Text.Encoding.UTF8,
                 "application/json");
 
@@ -160,7 +155,10 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Services
             var req = new HttpRequestMessage(new HttpMethod(httpVerb), $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}");
             if (body != null)
             {
-                req.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+                req.Content = new StringContent(
+                    JsonSerializer.Serialize(body, JsonUtils.DefaultSerializerOptions),
+                    Encoding.UTF8,
+                    "application/json");
             }
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
@@ -175,7 +173,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Services
             this.EnsureDaprAddress(ref daprAddress);
 
             var stringContent = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(message, SerializerOptions),
+                System.Text.Json.JsonSerializer.Serialize(message, JsonUtils.DefaultSerializerOptions),
                 System.Text.Encoding.UTF8,
                 "application/json");
 

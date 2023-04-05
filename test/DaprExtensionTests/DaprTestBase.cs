@@ -118,7 +118,7 @@ namespace DaprExtensionTests
 
             if (jsonContent != null)
             {
-                string json = JsonSerializer.Serialize(jsonContent);
+                string json = JsonSerializer.Serialize(jsonContent, Utils.DefaultSerializerOptions);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 

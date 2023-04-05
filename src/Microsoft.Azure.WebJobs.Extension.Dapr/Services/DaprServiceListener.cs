@@ -15,6 +15,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Services
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -113,7 +114,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Services
 
         Task GetTopicsAsync(HttpContext context)
         {
-            string topicListJson = JsonSerializer.Serialize(this.topics);
+            string topicListJson = JsonSerializer.Serialize(this.topics, JsonUtils.DefaultSerializerOptions);
             context.Response.ContentType = "application/json";
             return context.Response.WriteAsync(topicListJson);
         }

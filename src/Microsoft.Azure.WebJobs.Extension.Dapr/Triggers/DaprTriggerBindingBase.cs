@@ -9,12 +9,12 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
     using Microsoft.Azure.WebJobs.Host.Bindings;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Listeners;
@@ -24,11 +24,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
     abstract class DaprTriggerBindingBase : ITriggerBinding
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-
         readonly DaprServiceListener serviceListener;
         readonly ParameterInfo parameter;
 
@@ -108,7 +103,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                 {
                     // Special case for out-of-proc workers (like nodejs). The binding type
                     // appears to always be "string" so we need to do a special conversion.
-                    convertedValue = JsonSerializer.Serialize(jsonValue);
+                    convertedValue = JsonSerializer.Serialize(jsonValue, JsonUtils.DefaultSerializerOptions);
                 }
                 else if (destinationType == typeof(JObject))
                 {
@@ -222,7 +217,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                 }
                 else
                 {
-                    string jsonResult = JsonSerializer.Serialize(value, SerializerOptions);
+                    string jsonResult = JsonSerializer.Serialize(value, JsonUtils.DefaultSerializerOptions);
                     await this.context.Response.WriteAsync(jsonResult, cancellationToken);
                 }
             }
@@ -236,7 +231,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
                 try
                 {
-                    return JsonSerializer.Serialize(this.outputValue);
+                    return JsonSerializer.Serialize(this.outputValue, JsonUtils.DefaultSerializerOptions);
                 }
                 catch (JsonException)
                 {

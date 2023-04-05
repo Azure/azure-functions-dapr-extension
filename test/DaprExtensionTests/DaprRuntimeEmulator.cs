@@ -136,7 +136,7 @@ namespace DaprExtensionTests
             context.Response.Headers.Append("ETag", "\"1\"");
 
             using var writer = new StreamWriter(context.Response.Body);
-            await writer.WriteAsync(JsonSerializer.Serialize(value));
+            await writer.WriteAsync(JsonSerializer.Serialize(value, Utils.DefaultSerializerOptions));
         }
 
         /// <summary>
