@@ -115,6 +115,19 @@ namespace DaprExtensionTests
         }
 
         [Fact]
+        public async Task GetSecret_BindToJObject()
+        {
+            await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToJObject));
+
+            SavedHttpRequest req = this.GetSingleGetSecretRequest();
+            Assert.Equal("/v1.0/secrets/store1/key", req.Path);
+            Assert.Equal(QueryString.Empty, req.Query);
+
+            IEnumerable<string> functionLogs = this.GetFunctionLogs(nameof(Functions.GetSecret_BindToJObject));
+            Assert.Contains(ExpectedSecret, functionLogs);
+        }
+
+        [Fact]
         public async Task GetSecret_BindToDictionary()
         {
             await this.CallFunctionAsync(nameof(Functions.GetSecret_BindToDictionary));
@@ -164,6 +177,10 @@ namespace DaprExtensionTests
             public static void GetSecret_BindToJsonElement(
                 [DaprSecret("store1", "key")] JsonElement secret,
                 ILogger log) => log.LogInformation(JsonSerializer.Serialize(secret));
+
+            public static void GetSecret_BindToJObject(
+                [DaprSecret("store1", "key")] JObject secret,
+                ILogger log) => log.LogInformation(secret.ToString(Newtonsoft.Json.Formatting.None));
 
             public static void GetSecret_BindToByteArray(
                 [DaprSecret("store1", "key")] byte[] secret,

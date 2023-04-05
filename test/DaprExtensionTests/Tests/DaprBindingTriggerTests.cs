@@ -19,7 +19,6 @@
             { "BindingName", "MyBoundBindingName" }
         };
 
-
         public DaprBindingTriggerTests(ITestOutputHelper output)
             : base(output, EnvironmentVariables)
         {

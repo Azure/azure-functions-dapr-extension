@@ -91,10 +91,12 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 
             var daprSecretConverter = new DaprSecretConverter(this.daprClient);
             var secretsRule = context.AddBindingRule<DaprSecretAttribute>();
-            secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<byte[]>(daprSecretConverter);
-            secretsRule.BindToInput<object?>(daprSecretConverter);
+            secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<IDictionary<string, string>>(daprSecretConverter);
+            secretsRule.BindToInput<JsonElement>(daprSecretConverter);
+            secretsRule.BindToInput<JObject>(daprSecretConverter);
+            secretsRule.BindToInput<object?>(daprSecretConverter);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
                 .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener, this.nameResolver));
