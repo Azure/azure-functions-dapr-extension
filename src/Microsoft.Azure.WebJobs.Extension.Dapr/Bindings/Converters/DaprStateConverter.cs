@@ -8,11 +8,12 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
     using System;
     using System.IO;
     using System.Text;
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
     using Newtonsoft.Json.Linq;
 
     class DaprStateConverter :
@@ -23,11 +24,6 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
         IAsyncConverter<DaprStateAttribute, JsonElement>,
         IAsyncConverter<DaprStateAttribute, JObject>
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-
         readonly DaprServiceClient daprClient;
 
         public DaprStateConverter(DaprServiceClient daprClient)
@@ -72,7 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
             catch (JsonException)
             {
                 // Looks like it's not actually JSON - just return the raw bytes
-                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json, SerializerOptions));
+                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json, JsonUtils.DefaultSerializerOptions));
             }
 
             return bytes ?? Array.Empty<byte>();
@@ -123,7 +119,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
         {
             DaprStateRecord stateRecord = await this.GetStateRecordAsync(input, cancellationToken);
             var contentJson = await JsonDocument.ParseAsync(stateRecord.ContentStream);
-            return JsonSerializer.Serialize(contentJson, SerializerOptions);
+            return JsonSerializer.Serialize(contentJson, JsonUtils.DefaultSerializerOptions);
         }
 
         async Task<DaprStateRecord> GetStateRecordAsync(DaprStateAttribute input, CancellationToken cancellationToken)

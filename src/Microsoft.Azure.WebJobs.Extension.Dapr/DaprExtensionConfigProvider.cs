@@ -13,6 +13,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
     using Microsoft.Azure.WebJobs.Host.Bindings;
     using Microsoft.Azure.WebJobs.Host.Config;
     using Microsoft.Azure.WebJobs.Logging;

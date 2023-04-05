@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Collections.Generic;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
 
     /// <summary>
     /// Parameters for invoking a Dapr binding.
@@ -51,7 +52,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// Gets or sets the data .
         /// </summary>
         [JsonPropertyName("data")]
-        [JsonConverter(typeof(JsonElementConverter))]
+        [JsonConverter(typeof(JsonUtils.JsonElementConverter))]
         public JsonElement Data { get; set; }
 
         /// <summary>

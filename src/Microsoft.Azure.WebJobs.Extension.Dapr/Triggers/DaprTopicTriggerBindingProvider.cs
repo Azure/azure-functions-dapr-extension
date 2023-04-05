@@ -14,6 +14,8 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
     using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
@@ -35,7 +37,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
             var attribute = parameter.GetCustomAttribute<DaprTopicTriggerAttribute>(inherit: false);
             if (attribute == null)
             {
-                return Utils.NullTriggerBindingTask;
+                return BindingUtils.NullTriggerBindingTask;
             }
 
             // Resolve names in pub/sub, topic, and route from settings

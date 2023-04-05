@@ -3,20 +3,16 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extension.Dapr
+namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
 {
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
 
     internal class DaprSecretsGenericsConverter<T> : DaprGenericsConverterBase<DaprSecretAttribute, T>
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-
         readonly DaprServiceClient daprClient;
 
         public DaprSecretsGenericsConverter(DaprServiceClient daprClient)
@@ -38,7 +34,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
                     input.Key,
                     input.Metadata,
                     cancellationToken);
-            return JsonSerializer.Serialize(secret, SerializerOptions);
+            return JsonSerializer.Serialize(secret, JsonUtils.DefaultSerializerOptions);
         }
     }
 }

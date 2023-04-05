@@ -11,6 +11,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
     using Newtonsoft.Json.Linq;
 
     class DaprSecretConverter :
@@ -67,7 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr.Bindings.Converters
             return JObject.Parse(JsonSerializer.Serialize(result));
         }
 
-        Task<JsonDocument> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)
+        private Task<JsonDocument> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)
         {
             return this.daprClient.GetSecretAsync(
                 input.DaprAddress,

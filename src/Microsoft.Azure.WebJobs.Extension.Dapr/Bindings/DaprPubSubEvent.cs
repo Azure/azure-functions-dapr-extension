@@ -8,6 +8,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
 
     /// <summary>
     /// Payload for outbound Dapr pub/sub events.
@@ -71,7 +72,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// The subscribers will receive this payload as the body of a Cloud Event envelope.
         /// </remarks>
         [JsonPropertyName("payload")]
-        [JsonConverter(typeof(JsonElementConverter))]
+        [JsonConverter(typeof(JsonUtils.JsonElementConverter))]
         public JsonElement Payload { get; }
     }
 }

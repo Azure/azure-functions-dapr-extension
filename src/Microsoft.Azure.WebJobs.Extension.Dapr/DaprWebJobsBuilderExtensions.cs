@@ -7,6 +7,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
 {
     using System;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>

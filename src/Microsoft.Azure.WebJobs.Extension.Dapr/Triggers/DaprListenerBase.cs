@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
     using Microsoft.Azure.WebJobs.Host.Listeners;
 
     abstract class DaprListenerBase : IListener

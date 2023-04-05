@@ -10,6 +10,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Services;
 
     class DaprBindingAsyncCollector : IAsyncCollector<DaprBindingMessage>
     {

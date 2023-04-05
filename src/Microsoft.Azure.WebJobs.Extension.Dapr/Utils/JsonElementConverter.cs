@@ -3,20 +3,14 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extension.Dapr
+namespace Microsoft.Azure.WebJobs.Extension.Dapr.Utils
 {
     using System;
-    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Text.Json.Serialization;
 
     internal class JsonElementConverter : JsonConverter<JsonElement>
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-
         /// <inheritdoc/>
         public override JsonElement Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -27,7 +21,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// <inheritdoc/>
         public override void Write(Utf8JsonWriter writer, JsonElement value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value, SerializerOptions);
+            JsonSerializer.Serialize(writer, value, JsonUtils.DefaultSerializerOptions);
         }
     }
 }

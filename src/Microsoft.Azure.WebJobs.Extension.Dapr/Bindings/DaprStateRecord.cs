@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
     using System.IO;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.WebJobs.Extension.Dapr.Utils;
 
     /// <summary>
     /// The parameters for a Dapr save-state operation.
@@ -51,7 +52,7 @@ namespace Microsoft.Azure.WebJobs.Extension.Dapr
         /// Gets the value of the state record.
         /// </summary>
         [JsonPropertyName("value")]
-        [JsonConverter(typeof(JsonElementConverter))]
+        [JsonConverter(typeof(JsonUtils.JsonElementConverter))]
         public JsonElement? Value { get; internal set; }
 
         /// <summary>

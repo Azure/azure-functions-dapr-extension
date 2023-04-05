@@ -16,7 +16,6 @@ namespace DaprExtensionTests
     using System.Linq;
     using System.Text.Json;
     using Newtonsoft.Json.Linq;
-    using System;
 
     public class DaprSecretBindingTests : DaprTestBase
     {
