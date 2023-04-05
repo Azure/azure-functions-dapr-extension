@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Http;
+    using System.Text.Encodings.Web;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -14,6 +15,11 @@
 
     public class DaprBindingTriggerTests : DaprTestBase
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         private static readonly IDictionary<string, string> EnvironmentVariables = new Dictionary<string, string>()
         {
             { "BindingName", "MyBoundBindingName" }
@@ -51,7 +57,7 @@
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonSerializer.Serialize(input);
+            string serializedInput = JsonSerializer.Serialize(input, SerializerOptions);
             Assert.Equal(serializedInput, result);
         }
 
@@ -67,7 +73,7 @@
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonSerializer.Serialize(input);
+            string serializedInput = JsonSerializer.Serialize(input, SerializerOptions);
             Assert.Equal(serializedInput, result);
         }
 
@@ -83,7 +89,7 @@
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonSerializer.Serialize(input);
+            string serializedInput = JsonSerializer.Serialize(input, SerializerOptions);
             Assert.Equal(serializedInput, result);
         }
 
@@ -100,7 +106,7 @@
                 P2 = 5,
                 P3 = new DateTime(0)
             }
-        });
+        }, SerializerOptions);
 
         static class Functions
         {
