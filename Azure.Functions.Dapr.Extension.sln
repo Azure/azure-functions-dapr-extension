@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extension.Dapr", "src\Microsoft.Azure.WebJobs.Extension.Dapr\Microsoft.Azure.WebJobs.Extension.Dapr.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Dapr", "src\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprExtensionTests", "test\DaprExtensionTests\DaprExtensionTests.csproj", "{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}"
 EndProject

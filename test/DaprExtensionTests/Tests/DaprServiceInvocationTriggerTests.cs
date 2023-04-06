@@ -11,7 +11,7 @@ namespace DaprExtensionTests
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Xunit;

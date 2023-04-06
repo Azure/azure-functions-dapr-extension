@@ -69,7 +69,7 @@ dotnet build -o bin/ extensions.csproj
 Note that this extensions.csproj file is required in order to reference the exception as a project rather than as an nuget package. To do the equivalent step with a published version of the extension on nuget.org, run the following step:
 
 ```
-func extensions install -p Microsoft.Azure.WebJobs.Extension.Dapr -v <version>
+func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>
 ```
 
 Run function host with Dapr. `--components-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
@@ -116,9 +116,9 @@ You're up and running! Both Dapr and your app logs will appear here.
    
    When running `dotnet build`, if you see the error below:
     ```
-    Project Microsoft.Azure.WebJobs.Extension.Dapr is not compatible with netcore31 (.NETCore,Version=v3.1). Project Microsoft.Azure.WebJobs.Extension.Dapr supports: netstandard2.0 (.NETStandard,Version=v2.0)
+    Project Microsoft.Azure.WebJobs.Extensions.Dapr is not compatible with netcore31 (.NETCore,Version=v3.1). Project Microsoft.Azure.WebJobs.Extensions.Dapr supports: netstandard2.0 (.NETStandard,Version=v2.0)
     ```
-    Make sure the target framework for `extension.proj` is netstandard 2.0. Since a project reference for the Dapr Extension exists, build step tries to restore `Microsoft.Azure.WebJobs.Extension.Dapr.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you switch to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
+    Make sure the target framework for `extension.proj` is netstandard 2.0. Since a project reference for the Dapr Extension exists, build step tries to restore `Microsoft.Azure.WebJobs.Extensions.Dapr.csproj` as other non-compatible framework, but Dapr Extension is using netstandard 2.0 framework. If you switch to a package reference, this should not be a concern since netstandard2.0 is compatible with netcore31.
 
 
 # Step 3 - Understand the Sample

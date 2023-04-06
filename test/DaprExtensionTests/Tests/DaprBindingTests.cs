@@ -10,7 +10,7 @@ namespace DaprExtensionTests
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs.Host;
     using Xunit;
     using Xunit.Abstractions;

@@ -9,7 +9,7 @@ namespace DaprExtensionTests
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Extensions.Logging;
     using Xunit;
     using Xunit.Abstractions;

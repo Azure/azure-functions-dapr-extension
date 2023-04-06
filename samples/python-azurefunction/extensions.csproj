@@ -8,6 +8,6 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Script.ExtensionsMetadataGenerator" Version="1.1.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.Azure.WebJobs.Extension.Dapr\Microsoft.Azure.WebJobs.Extension.Dapr.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj" />
   </ItemGroup>
 </Project>
