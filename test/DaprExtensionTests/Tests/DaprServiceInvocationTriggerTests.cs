@@ -11,13 +11,13 @@ namespace DaprExtensionTests
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
+    using System.Text.Json;
+    using Newtonsoft.Json.Linq;
 
     public class DaprServiceInvocationTriggerTests : DaprTestBase
     {
@@ -41,9 +41,9 @@ namespace DaprExtensionTests
             new object[] { nameof(Functions.ReturnDateTime), DateTime.Now },
             new object[] { nameof(Functions.ReturnStream), Guid.NewGuid() }, // Any data works for Stream
             new object[] { nameof(Functions.ReturnBytes), Guid.NewGuid() }, // Any data works for bytes
-            new object[] { nameof(Functions.ReturnJObject), new { arg1 = 2, arg2 = 3 } },
+            new object[] { nameof(Functions.ReturnJsonElement), new { arg1 = 2, arg2 = 3 } },
             new object[] { nameof(Functions.ReturnCustomType), new CustomType { P1 = "Hello, world", P2 = 3, P3 = DateTime.UtcNow } },
-            new object[] { nameof(Functions.ReturnJObject), new { arg1 = 2, arg2 = 3 } },
+            new object[] { nameof(Functions.ReturnUnknownType), new { arg1 = 2, arg2 = 3 } },
         };
 
         [Theory]
@@ -58,7 +58,7 @@ namespace DaprExtensionTests
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            string serializedInput = JsonSerializer.Serialize(input);
             Assert.Equal(serializedInput, result);
         }
 
@@ -66,7 +66,7 @@ namespace DaprExtensionTests
         public async Task BindingTests_DaprState_SimpleValue()
         {
             string savedValue = Guid.NewGuid().ToString();
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -77,8 +77,8 @@ namespace DaprExtensionTests
             Assert.NotNull(response.Content);
             string resultJson = await response.Content.ReadAsStringAsync();
 
-            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
-            string result = (string)JsonConvert.DeserializeObject(resultJson)!;
+            string serializedValue = JsonSerializer.Serialize(savedValue);
+            string result = JsonSerializer.Deserialize<string>(resultJson)!;
             Assert.Equal(serializedValue, result);
         }
 
@@ -87,7 +87,7 @@ namespace DaprExtensionTests
         public async Task BindingTests_DaprState_ComplexValue()
         {
             string savedValue = Guid.NewGuid().ToString();
-            this.SaveStateForUnitTetsing("store1", "key1", savedValue);
+            this.SaveStateForUnitTesting("store1", "key1", savedValue);
 
             using HttpResponseMessage response = await this.SendRequestAsync(
                 HttpMethod.Post,
@@ -98,8 +98,8 @@ namespace DaprExtensionTests
             Assert.NotNull(response.Content);
             string resultJson = await response.Content.ReadAsStringAsync();
 
-            string serializedValue = JsonConvert.SerializeObject(savedValue, Formatting.None);
-            string result = (string)JsonConvert.DeserializeObject(resultJson)!;
+            string serializedValue = JsonSerializer.Serialize(savedValue);
+            string result = JsonSerializer.Deserialize<string>(resultJson)!;
             Assert.Equal(serializedValue, result);
         }
 
@@ -115,7 +115,7 @@ namespace DaprExtensionTests
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            string serializedInput = JsonSerializer.Serialize(input);
             Assert.Equal(serializedInput, result);
         }
 
@@ -131,7 +131,7 @@ namespace DaprExtensionTests
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            string serializedInput = JsonSerializer.Serialize(input);
             Assert.Equal(serializedInput, result);
         }
 
@@ -166,7 +166,7 @@ namespace DaprExtensionTests
 
             public static byte[] ReturnBytes([DaprServiceInvocationTrigger] byte[] input) => input;
 
-            public static JObject ReturnJObject([DaprServiceInvocationTrigger] JObject input) => input;
+            public static JsonElement ReturnJsonElement([DaprServiceInvocationTrigger] JsonElement input) => input;
 
             public static CustomType ReturnCustomType([DaprServiceInvocationTrigger] CustomType input) => input;
 
@@ -177,11 +177,20 @@ namespace DaprExtensionTests
             public static object DotNetBindingExpression([DaprServiceInvocationTrigger(MethodName = "%DaprMethodName%")] string input) => input;
 
             [FunctionName("Add")]
-            public static string Sample([DaprServiceInvocationTrigger] JObject args, ILogger log)
+            public static string Sample([DaprServiceInvocationTrigger] JsonElement args, ILogger log)
             {
                 log.LogInformation("C# processed a method request from the Dapr runtime");
 
-                double result = (double)args["arg1"]! + (double)args["arg2"]!;
+                if (!args.TryGetProperty("arg1", out JsonElement arg1))
+                {
+                    throw new ArgumentException("Missing arg1");
+                }
+                if (!args.TryGetProperty("arg2", out JsonElement arg2))
+                {
+                    throw new ArgumentException("Missing arg2");
+                }
+
+                double result = arg1.GetDouble() + arg2.GetDouble();
                 return result.ToString();
             }
 

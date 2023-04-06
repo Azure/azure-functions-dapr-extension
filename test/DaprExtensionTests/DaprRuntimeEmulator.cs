@@ -8,21 +8,21 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Concurrent;
     using System.IO;
+    using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit.Sdk;
 
     sealed class DaprRuntimeEmulator : IDisposable
     {
         readonly ConcurrentQueue<SavedHttpRequest> requestBin = new ConcurrentQueue<SavedHttpRequest>();
-        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>> stateStore =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, JToken?>>();
+        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, object?>> stateStore =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, object?>>();
 
         readonly IWebHost host;
 
@@ -81,21 +81,25 @@ namespace DaprExtensionTests
             RouteData routeData = context.GetRouteData();
             string storeName = Uri.UnescapeDataString((string)routeData.Values["storeName"]);
 
-            ConcurrentDictionary<string, JToken?> namedStore = this.stateStore.GetOrAdd(
+            ConcurrentDictionary<string, object?> namedStore = this.stateStore.GetOrAdd(
                 storeName,
-                _ => new ConcurrentDictionary<string, JToken?>(StringComparer.OrdinalIgnoreCase));
+                _ => new ConcurrentDictionary<string, object?>(StringComparer.OrdinalIgnoreCase));
 
-            using var reader = new StreamReader(context.Request.Body);
+            using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             string jsonPayload = await reader.ReadToEndAsync();
-            JArray entries = JArray.Parse(jsonPayload);
-            foreach (JObject entry in entries)
+            JsonDocument entries = JsonDocument.Parse(jsonPayload);
+            foreach (JsonElement entry in entries.RootElement.EnumerateArray())
             {
-                string key = (string)entry["key"]!;
-                JToken? value = entry["value"];
+                string? key = entry.GetProperty("key").GetString();
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new InvalidOperationException("State key cannot be null or empty.");
+                }
 
+                object? value = JsonSerializer.Deserialize<object>(entry.GetProperty("value"));
                 if (value == null)
                 {
-                    namedStore.TryRemove(key, out JToken? _);
+                    namedStore.TryRemove(key, out object? _);
                 }
                 else
                 {
@@ -115,14 +119,14 @@ namespace DaprExtensionTests
                 return;
             }
 
-            ConcurrentDictionary<string, JToken?>? namedStore;
+            ConcurrentDictionary<string, object?>? namedStore;
             if (!this.stateStore.TryGetValue(storeName, out namedStore))
             {
                 context.Response.StatusCode = 204;
                 return;
             }
 
-            if (!namedStore.TryGetValue(key, out JToken? value) || value == null)
+            if (!namedStore.TryGetValue(key, out object? value) || value == null)
             {
                 context.Response.StatusCode = 204;
                 return;
@@ -132,14 +136,14 @@ namespace DaprExtensionTests
             context.Response.Headers.Append("ETag", "\"1\"");
 
             using var writer = new StreamWriter(context.Response.Body);
-            await writer.WriteAsync(value.ToString(Formatting.None));
+            await writer.WriteAsync(JsonSerializer.Serialize(value, Utils.DefaultSerializerOptions));
         }
 
         /// <summary>
         /// Directly retrieve the saved state from mock state store for unit testing
         /// </summary>
         /// <returns></returns>
-        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key)
+        internal object? FetchSavedStateForUnitTesting(string stateStore, string key)
         {
             try
             {
@@ -154,11 +158,11 @@ namespace DaprExtensionTests
         /// <summary>
         /// Directly write to the state store for unit testing.
         /// </summary>
-        internal void SaveStateForUnitTesting(string storeName, string key, JToken value)
+        internal void SaveStateForUnitTesting(string storeName, string key, object value)
         {
-            ConcurrentDictionary<string, JToken?> namedStore = this.stateStore.GetOrAdd(
+            ConcurrentDictionary<string, object?> namedStore = this.stateStore.GetOrAdd(
                 storeName,
-                _ => new ConcurrentDictionary<string, JToken?>(StringComparer.OrdinalIgnoreCase));
+                _ => new ConcurrentDictionary<string, object?>(StringComparer.OrdinalIgnoreCase));
 
             namedStore[key] = value;
         }
@@ -190,7 +194,7 @@ namespace DaprExtensionTests
         async Task SaveRequestAsync(HttpRequest request)
         {
             request.EnableBuffering();
-            using var reader = new StreamReader(request.Body, leaveOpen: true);
+            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
             string content = await reader.ReadToEndAsync();
 
             // Add a copy of the request because the original object will be

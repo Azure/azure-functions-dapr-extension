@@ -7,11 +7,11 @@ namespace DaprExtensionTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs.Host;
-    using Newtonsoft.Json;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -36,7 +36,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.ObjectAsyncCollector), "input", input);
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
-            string expectedValue = JsonConvert.SerializeObject(input);
+            string expectedValue = JsonSerializer.Serialize(input);
             Assert.Equal("/v1.0/publish/MyPubSub/TopicA", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }
@@ -48,7 +48,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.ObjectOutputParameter), "input", input);
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
-            string expectedValue = JsonConvert.SerializeObject(input);
+            string expectedValue = JsonSerializer.Serialize(input);
             Assert.Equal("/v1.0/publish/MyPubSub/TopicA", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }
@@ -61,7 +61,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.DaprPubSubEventReturnValueAnyTopic), "input", input);
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
-            string expectedValue = JsonConvert.SerializeObject(input.Payload);
+            string expectedValue = JsonSerializer.Serialize(input.Payload);
             Assert.Equal($"/v1.0/publish/MyPubSub/{input.Topic}", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }
@@ -74,7 +74,7 @@ namespace DaprExtensionTests
             await this.CallFunctionAsync(nameof(Functions.DaprPubSubEventReturnValueBound), "input", input);
             SavedHttpRequest req = this.GetSinglePublishRequest();
 
-            string expectedValue = JsonConvert.SerializeObject(input.Payload);
+            string expectedValue = JsonSerializer.Serialize(input.Payload);
             Assert.Equal($"/v1.0/publish/MyBoundPubSub/MyBoundTopic", req.Path);
             Assert.Equal(expectedValue, req.ContentAsString);
         }

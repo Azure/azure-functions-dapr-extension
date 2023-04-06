@@ -12,16 +12,15 @@ namespace DaprExtensionTests
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using DaprExtensionTests.Logging;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
+    using System.Text.Json;
 
     // TODO: Instead of making all tests run sequentially, configure a different port number for each collection
     [Collection("Sequential")]
@@ -119,7 +118,7 @@ namespace DaprExtensionTests
 
             if (jsonContent != null)
             {
-                string json = JsonConvert.SerializeObject(jsonContent);
+                string json = JsonSerializer.Serialize(jsonContent, Utils.DefaultSerializerOptions);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
@@ -144,10 +143,10 @@ namespace DaprExtensionTests
 
         internal SavedHttpRequest[] GetDaprRequests() => this.daprRuntime.GetReceivedRequests();
 
-        internal JToken? FetchSavedStateForUnitTesting(string stateStore, string key)
+        internal object? FetchSavedStateForUnitTesting(string stateStore, string key)
             => this.daprRuntime.FetchSavedStateForUnitTesting(stateStore, key);
 
-        internal void SaveStateForUnitTetsing(string storeName, string key, JToken value)
+        internal void SaveStateForUnitTesting(string storeName, string key, object value)
             => this.daprRuntime.SaveStateForUnitTesting(storeName, key, value);
 
         Task IAsyncLifetime.InitializeAsync()

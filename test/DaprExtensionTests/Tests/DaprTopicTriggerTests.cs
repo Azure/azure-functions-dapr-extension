@@ -12,13 +12,12 @@ namespace DaprExtensionTests
     using System.Net;
     using System.Net.Http;
     using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using CloudNative.CloudEvents;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -108,15 +107,17 @@ namespace DaprExtensionTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal("application/json", response.Content.Headers.ContentType?.ToString());
 
-            JToken result = JToken.Parse(await response.Content.ReadAsStringAsync());
-            Assert.Equal(JTokenType.Array, result.Type);
+            JsonElement result = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+            Assert.Equal(JsonValueKind.Array, result.ValueKind);
 
-            JArray array = Assert.IsType<JArray>(result);
+            var array = result.EnumerateArray().ToArray();
             Assert.NotEmpty(array);
 
             var subscriptions = array
-                .Cast<JObject>()
-                .Select(obj => (pubSubname: (string)obj.GetValue("pubsubname")!, topic: (string)obj.GetValue("topic")!, route: (string)obj.GetValue("route")!))
+                .Select(obj => (
+                    pubSubname: obj.GetProperty("pubsubname").GetString() ?? string.Empty,
+                    topic: obj.GetProperty("topic").GetString() ?? string.Empty,
+                    route: obj.GetProperty("route").GetString() ?? string.Empty))
                 .OrderBy(t => t.topic)
                 .ToArray();
 
@@ -133,7 +134,7 @@ namespace DaprExtensionTests
                 s => AssertDefaults(s, nameof(Functions.CloudEventTopic)),
                 s => AssertDefaults(s, nameof(Functions.CustomTypeTopic)),
                 s => AssertDefaults(s, nameof(Functions.IntTopic)),
-                s => AssertDefaults(s, nameof(Functions.JObjectTopic)),
+                s => AssertDefaults(s, nameof(Functions.JsonElementTopic)),
                 s =>
                 {
                     // This one has a custom configuration with env-vars
@@ -177,8 +178,8 @@ namespace DaprExtensionTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             string expectedOutput = expectEnvelope ?
-                JsonConvert.SerializeObject(cloudEventInput) :
-                JsonConvert.SerializeObject(input);
+                JsonSerializer.Serialize(cloudEventInput) :
+                JsonSerializer.Serialize(input);
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs(topicName);
             Assert.Contains(expectedOutput, functionLogs);
@@ -191,7 +192,7 @@ namespace DaprExtensionTests
             new object[] { nameof(Functions.StringTopic), Guid.NewGuid().ToString(), true },
             new object[] { nameof(Functions.StreamTopic), Guid.NewGuid(), true }, // Any data works for Stream
             new object[] { nameof(Functions.BytesTopic), Guid.NewGuid(), true }, // Any data works for bytes
-            new object[] { nameof(Functions.JObjectTopic), new { arg1 = 2, arg2 = 3 }, true },
+            new object[] { nameof(Functions.JsonElementTopic), new { arg1 = 2, arg2 = 3 }, true },
             new object[] { nameof(Functions.CloudEventTopic), "<much wow=\"xml\"/>", false }, // The test just logs the data payload
         };
 
@@ -229,17 +230,17 @@ namespace DaprExtensionTests
                 [DaprTopicTrigger("MyPubSub")] byte[] input,
                 ILogger log) => log.LogInformation(Encoding.UTF8.GetString(input));
 
-            public static void JObjectTopic(
-                [DaprTopicTrigger("MyPubSub")] JObject input,
-                ILogger log) => log.LogInformation(input.ToString(Formatting.None));
+            public static void JsonElementTopic(
+                [DaprTopicTrigger("MyPubSub")] JsonElement input,
+                ILogger log) => log.LogInformation(JsonSerializer.Serialize(input));
 
             public static void CloudEventTopic(
                 [DaprTopicTrigger("MyPubSub")] CloudEvent input,
-                ILogger log) => log.LogInformation(JsonConvert.SerializeObject(input.Data));
+                ILogger log) => log.LogInformation(JsonSerializer.Serialize(input.Data));
 
             public static void CustomTypeTopic(
                 [DaprTopicTrigger("MyPubSub")] CustomType input,
-                ILogger log) => log.LogInformation(JsonConvert.SerializeObject(input));
+                ILogger log) => log.LogInformation(JsonSerializer.Serialize(input));
 
             [FunctionName("MyFunctionName")]
             public static void ExplicitTopicNameInAttribute(

@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Dapr", "src\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprExtensionTests", "test\DaprExtensionTests\DaprExtensionTests.csproj", "{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A41513E0-93E2-4122-9FFD-7B9EFEB23D5E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{B272AB9D-4CB7-43E1-8538-6236DE327C28}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{33E065E0-9CB4-422A-9880-FF71D089BAB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-azurefunction", "samples\dotnet-azurefunction\dotnet-azurefunction.csproj", "{BE820001-1DE7-4565-8650-4880EDFEF7E7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
+		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9} = {33E065E0-9CB4-422A-9880-FF71D089BAB8}
+		{BE820001-1DE7-4565-8650-4880EDFEF7E7} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ACF358FE-D84B-4EF9-95B4-E4F537B6D76F}
+	EndGlobalSection
+EndGlobal

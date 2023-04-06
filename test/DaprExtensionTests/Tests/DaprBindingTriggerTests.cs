@@ -4,12 +4,11 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Http;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extension.Dapr;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -20,12 +19,25 @@
             { "BindingName", "MyBoundBindingName" }
         };
 
-
         public DaprBindingTriggerTests(ITestOutputHelper output)
             : base(output, EnvironmentVariables)
         {
             this.AddFunctions(typeof(Functions));
         }
+
+        public static IEnumerable<object[]> GetTheoryDataInputs() => new List<object[]>
+        {
+            new object[] { nameof(Functions.ReturnInt), 42 },
+            new object[] { nameof(Functions.ReturnBoolean), true },
+            new object[] { nameof(Functions.ReturnDouble), Math.PI },
+            new object[] { nameof(Functions.ReturnString), Guid.NewGuid().ToString() },
+            new object[] { nameof(Functions.ReturnDateTime), DateTime.Now },
+            new object[] { nameof(Functions.ReturnStream), Guid.NewGuid() }, // Any data works for Stream
+            new object[] { nameof(Functions.ReturnBytes), Guid.NewGuid() }, // Any data works for bytes
+            new object[] { nameof(Functions.ReturnJsonElement), new { arg1 = 2, arg2 = 3 } },
+            new object[] { nameof(Functions.ReturnCustomType), new CustomType { P1 = "Hello, world", P2 = 3, P3 = DateTime.UtcNow } },
+            new object[] { nameof(Functions.ReturnUnknownType), new { arg1 = 2, arg2 = 3 } },
+        };
 
         [Theory]
         [MemberData(nameof(GetTheoryDataInputs))]
@@ -39,7 +51,7 @@
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            string serializedInput = JsonSerializer.Serialize(input, Utils.DefaultSerializerOptions);
             Assert.Equal(serializedInput, result);
         }
 
@@ -55,7 +67,7 @@
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            string serializedInput = JsonSerializer.Serialize(input, Utils.DefaultSerializerOptions);
             Assert.Equal(serializedInput, result);
         }
 
@@ -71,14 +83,11 @@
             Assert.NotNull(response.Content);
             string result = await response.Content.ReadAsStringAsync();
 
-            string serializedInput = JsonConvert.SerializeObject(input, Formatting.None);
+            string serializedInput = JsonSerializer.Serialize(input, Utils.DefaultSerializerOptions);
             Assert.Equal(serializedInput, result);
         }
 
-        // The Binding trigger handles the same data as the Service Invocation trigger does
-        public static IEnumerable<object[]> GetTheoryDataInputs() => DaprServiceInvocationTriggerTests.GetTheoryDataInputs();
-
-        private readonly static string TriggerDataInput = JsonConvert.SerializeObject(new
+        private readonly static string TriggerDataInput = JsonSerializer.Serialize(new
         {
             Metadata = new Dictionary<string, string>()
             {
@@ -91,7 +100,7 @@
                 P2 = 5,
                 P3 = new DateTime(0)
             }
-        });
+        }, Utils.DefaultSerializerOptions);
 
         static class Functions
         {
@@ -109,7 +118,7 @@
 
             public static byte[] ReturnBytes([DaprBindingTrigger] byte[] input) => input;
 
-            public static JObject ReturnJObject([DaprBindingTrigger] JObject input) => input;
+            public static JsonElement ReturnJsonElement([DaprBindingTrigger] JsonElement input) => input;
 
             public static CustomType ReturnCustomType([DaprBindingTrigger] CustomType input) => input;
 
@@ -120,11 +129,18 @@
             public static object DotNetBindingExpression([DaprBindingTrigger(BindingName = "%BindingName%")] string input) => input;
 
             [FunctionName("Add")]
-            public static string Sample([DaprServiceInvocationTrigger] JObject args, ILogger log)
+            public static string Sample([DaprServiceInvocationTrigger] JsonElement args, ILogger log)
             {
                 log.LogInformation("C# processed a method request from the Dapr runtime");
-
-                double result = (double)args["arg1"]! + (double)args["arg2"]!;
+                if (!args.TryGetProperty("arg1", out JsonElement arg1))
+                {
+                    throw new ArgumentException("Missing arg1");
+                }
+                if (!args.TryGetProperty("arg2", out JsonElement arg2))
+                {
+                    throw new ArgumentException("Missing arg2");
+                }
+                double result = arg1.GetDouble() + arg2.GetDouble();
                 return result.ToString();
             }
         }
