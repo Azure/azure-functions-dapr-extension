@@ -141,31 +141,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     routeBuilder.MapPost(this.topic.Route, this.DispatchAsync);
                 }
 
-                public override async Task DispatchAsync(HttpContext context)
+                internal override async Task DispatchInternalAsync(HttpContext context)
                 {
                     var input = new TriggeredFunctionData
                     {
                         TriggerValue = context,
                     };
 
-                    try
+                    FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
+                    if (!result.Succeeded)
                     {
-                        FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
-                        if (result.Succeeded == false)
-                        {
-                            throw result.Exception;
-                        }
-                    }
-                    catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
-                    {
-                        // The request was aborted by the client. No-op.
-                        // TODO: Consider moving exception handling into base class
-                    }
-                    catch (Exception)
-                    {
-                        // This means an unhandled exception occurred in the Functions runtime.
-                        // This is often caused by the host shutting down while a function is still executing.
-                        // TODO: Handle failure
+                        throw result.Exception;
                     }
                 }
             }

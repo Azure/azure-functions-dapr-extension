@@ -168,7 +168,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(jsonElement));
             }
 
-            DaprBindingMessage message = new DaprBindingMessage(data.Deserialize<object>() ?? throw new InvalidOperationException());
+            object? dataObj = data.Deserialize<object>();
+            if (dataObj == null)
+            {
+                throw new ArgumentException("Could not deserialize 'data' parameter for Dapr Binding operations.", nameof(jsonElement));
+            }
+
+            DaprBindingMessage message = new DaprBindingMessage(dataObj);
 
             if (jsonElement.TryGetProperty("operation", out JsonElement operation))
             {

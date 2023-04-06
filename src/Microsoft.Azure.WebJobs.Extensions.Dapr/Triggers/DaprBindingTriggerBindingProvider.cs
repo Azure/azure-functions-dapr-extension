@@ -94,25 +94,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     await context.Response.WriteAsync(string.Empty);
                 }
 
-                public override async Task DispatchAsync(HttpContext context)
+                internal override async Task DispatchInternalAsync(HttpContext context)
                 {
                     var input = new TriggeredFunctionData
                     {
                         TriggerValue = context,
                     };
 
-                    try
+                    FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
+                    if (!result.Succeeded)
                     {
-                        FunctionResult result = await this.executor.TryExecuteAsync(input, context.RequestAborted);
-
-                        // TODO: How do we handle failed function calls? We probably shouldn't 500, as they could retry indefinitely
-                    }
-                    catch (Exception)
-                    {
-                        // This means an unhandled exception occurred in the Functions runtime.
-                        // This is often caused by the host shutting down while a function is still executing.
-                        context.Response.StatusCode = 500;
-                        await context.Response.WriteAsync(string.Empty);
+                        throw result.Exception;
                     }
                 }
             }

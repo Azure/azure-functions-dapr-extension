@@ -5,6 +5,7 @@
 
 namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
@@ -38,7 +39,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return this.serviceListener.DeregisterListenerAsync(this, cancellationToken);
         }
 
-        public abstract Task DispatchAsync(HttpContext context);
+        internal abstract Task DispatchInternalAsync(HttpContext context);
+
+        public async Task DispatchAsync(HttpContext context)
+        {
+            try
+            {
+                // TODO: How do we handle failed function calls? We probably shouldn't 500, as they could retry indefinitely
+                await this.DispatchInternalAsync(context);
+            }
+            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+            {
+                // No-op. This is expected when the request is aborted.
+            }
+            catch (Exception)
+            {
+                context.Response.StatusCode = 500;
+                await context.Response.WriteAsync(string.Empty);
+            }
+        }
 
         public abstract void Dispose();
     }
