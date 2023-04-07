@@ -8,12 +8,16 @@
     <Title>Microsoft.Azure.WebJobs.Extensions.Dapr</Title>
     <Description>Dapr extension for Azure functions using the in-proc worker.</Description>
     <Summary>Dapr extension for Azure functions using the in-proc worker.</Summary>
+    <!-- Default Version for dev -->
+    <Version>99.99.99</Version>
   </PropertyGroup>
 
   <!-- Use C# 9.0 features -->
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->

@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-azurefunction", "sam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Functions.Worker.Extensions.Dapr", "src\Microsoft.Azure.Functions.Worker.Extensions.Dapr\Microsoft.Azure.Functions.Worker.Extensions.Dapr.csproj", "{4F535602-5333-4941-8678-5D2AD95A6513}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-isolated-azurefunction", "samples\dotnet-isolated-azurefunction\dotnet-isolated-azurefunction.csproj", "{53AE9999-C6E4-4245-8E19-0BD93AA73117}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{4F535602-5333-4941-8678-5D2AD95A6513}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F535602-5333-4941-8678-5D2AD95A6513}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F535602-5333-4941-8678-5D2AD95A6513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9} = {33E065E0-9CB4-422A-9880-FF71D089BAB8}
 		{BE820001-1DE7-4565-8650-4880EDFEF7E7} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
 		{4F535602-5333-4941-8678-5D2AD95A6513} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACF358FE-D84B-4EF9-95B4-E4F537B6D76F}
