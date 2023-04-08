@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// <summary>
     /// Attribute to specify parameters for the dapr state output binding.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
     public sealed class DaprOutputStateAttribute : DaprOutputBaseAttribute
     {
         /// <summary>
