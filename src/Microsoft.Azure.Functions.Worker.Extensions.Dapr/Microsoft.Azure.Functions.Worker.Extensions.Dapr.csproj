@@ -10,6 +10,7 @@
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <SupportedVersion>0.0.0-preview.0.80</SupportedVersion>
     <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
   </PropertyGroup>
 
@@ -48,7 +49,7 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions.ExtensionInformationAttribute">
-      <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Dapr.*</_Parameter1>
+      <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Dapr</_Parameter1>
       <_Parameter2>$(SupportedVersion)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
