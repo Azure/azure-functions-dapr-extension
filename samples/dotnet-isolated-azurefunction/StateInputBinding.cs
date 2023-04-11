@@ -15,9 +15,9 @@ namespace dotnet_isolated_azurefunction
         [Function("StateInputBinding")]
         public static string Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "state/{key}")] HttpRequestData req,
-            [DaprInputState("statestore", Key = "{key}")] string state,
-            ILogger log)
+            [DaprStateInput("statestore", Key = "{key}")] string state, FunctionContext functionContext)
         {
+            var log = functionContext.GetLogger("CreateNewOrder");
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             return state;

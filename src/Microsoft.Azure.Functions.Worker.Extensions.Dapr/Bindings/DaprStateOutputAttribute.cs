@@ -10,13 +10,13 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// <summary>
     /// Attribute to specify parameters for the dapr state output binding.
     /// </summary>
-    public sealed class DaprOutputStateAttribute : DaprOutputBaseAttribute
+    public sealed class DaprStateOutputAttribute : DaprOutputBaseAttribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DaprOutputStateAttribute"/> class.
+        /// Initializes a new instance of the <see cref="DaprStateOutputAttribute"/> class.
         /// </summary>
         /// <param name="stateStore">The name of the state store.</param>
-        public DaprOutputStateAttribute(string stateStore)
+        public DaprStateOutputAttribute(string stateStore)
         {
             this.StateStore = stateStore ?? throw new ArgumentNullException(nameof(stateStore));
         }

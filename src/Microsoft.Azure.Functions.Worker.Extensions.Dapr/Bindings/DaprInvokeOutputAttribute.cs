@@ -10,7 +10,7 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// <summary>
     /// Attribute to specify parameters for the Dapr invoke output binding.
     /// </summary>
-    public class DaprOutputInvokeAttribute : DaprOutputBaseAttribute
+    public class DaprInvokeOutputAttribute : DaprOutputBaseAttribute
     {
         /// <summary>
         /// Gets or sets the dapr app name to invoke.
