@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// Attribute to specify parameters for the Dapr output bindings.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
-    public class DaprBindingOutputAttribute : DaprOutputBaseAttribute
+    public class DaprBindingOutputAttribute : DaprBaseOutputAttribute
     {
         /// <summary>
         /// Gets or sets the configured name of the binding.

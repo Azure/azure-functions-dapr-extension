@@ -8,9 +8,9 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 
     /// <summary>
-    /// Abstract base class for Dapr input binding attributes.
+    /// Abstract base class for Dapr output binding attributes.
     /// </summary>
-    public abstract class DaprInputBaseAttribute : InputBindingAttribute
+    public abstract class DaprBaseOutputAttribute : OutputBindingAttribute
     {
         /// <summary>
         /// Gets or sets the address of the Dapr runtime endpoint.

@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// Attribute to specify parameters for the dapr state input binding.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
-    public class DaprStateInputAttribute : DaprInputBaseAttribute
+    public class DaprStateInputAttribute : DaprBaseInputAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprStateInputAttribute"/> class.

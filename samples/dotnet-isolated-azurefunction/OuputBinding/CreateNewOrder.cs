@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace dotnet_azurefunction
+namespace dotnet_isolated_azurefunction
 {
     using System.Text.Json;
     using Microsoft.Azure.Functions.Worker;
@@ -18,7 +18,8 @@ namespace dotnet_azurefunction
         [Function("CreateNewOrder")]
         [DaprStateOutput("%StateStoreName%", Key = "order")]
         public static object Run(
-            [DaprServiceInvocationTrigger] object payload, FunctionContext functionContext)
+            [DaprServiceInvocationTrigger] object payload, 
+            FunctionContext functionContext)
         {
             var log = functionContext.GetLogger("CreateNewOrder");
             log.LogInformation("C# function processed a CreateNewOrder request from the Dapr Runtime.");

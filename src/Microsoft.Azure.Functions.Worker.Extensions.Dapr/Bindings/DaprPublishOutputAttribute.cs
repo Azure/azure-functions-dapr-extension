@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// Attribute to specify parameters for the Dapr publish output binding.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
-    public class DaprPublishOutputAttribute : DaprOutputBaseAttribute
+    public class DaprPublishOutputAttribute : DaprBaseOutputAttribute
     {
         /// <summary>
         /// Gets or sets the pub/sub name to publish to.

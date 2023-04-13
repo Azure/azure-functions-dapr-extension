@@ -11,14 +11,14 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// Parameter attribute for the Dapr secret input binding.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public class DaprInputSecretAttribute : DaprInputBaseAttribute
+    public class DaprSecretInputAttribute : DaprBaseInputAttribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DaprInputSecretAttribute"/> class.
+        /// Initializes a new instance of the <see cref="DaprSecretInputAttribute"/> class.
         /// </summary>
         /// <param name="secretStoreName">The name of the secret store to get the secret from.</param>
         /// <param name="key">The key identifying the name of the secret to get.</param>
-        public DaprInputSecretAttribute(string secretStoreName, string key)
+        public DaprSecretInputAttribute(string secretStoreName, string key)
         {
             this.SecretStoreName = secretStoreName ?? throw new ArgumentNullException(nameof(secretStoreName));
             this.Key = key ?? throw new ArgumentNullException(nameof(key));
