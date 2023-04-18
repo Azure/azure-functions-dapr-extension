@@ -34,11 +34,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             this.defaultDaprAddress = GetDefaultDaprAddress(nameResolver);
         }
 
-        static async Task<HttpResponseMessage> HandleHttpCall(Func<Task<HttpResponseMessage>> httpCall)
+        private static async Task<HttpResponseMessage> DaprHttpCall(Func<Task<HttpResponseMessage>> httpCall)
         {
             try
             {
-                HttpResponseMessage response = await httpCall();
+                var response = await httpCall();
                 await ThrowIfDaprFailure(response);
 
                 return response;
@@ -51,6 +51,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 }
 
                 throw new DaprException(HttpStatusCode.InternalServerError, "ERR_DAPR_REQUEST_FAILED", ex.Message, ex);
+            }
+            catch (DaprException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -141,9 +145,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 System.Text.Encoding.UTF8,
                 "application/json");
 
-            await HandleHttpCall(async () =>
+            await DaprHttpCall(async () =>
             {
-                HttpResponseMessage response = await this.httpClient.PostAsync(
+                var response = await this.httpClient.PostAsync(
                  $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}",
                  stringContent,
                  cancellationToken);
@@ -160,17 +164,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            var response = await HandleHttpCall(async () =>
+            var response = await DaprHttpCall(async () =>
             {
-                HttpResponseMessage response = await this.httpClient.GetAsync(
-                $"{daprAddress}/v1.0/state/{stateStore}/{key}",
-                cancellationToken);
+                var response = await this.httpClient.GetAsync(
+                    $"{daprAddress}/v1.0/state/{stateStore}/{key}",
+                    cancellationToken);
 
                 return response;
             });
 
             Stream contentStream = await response.Content.ReadAsStreamAsync();
             string? eTag = response.Headers.ETag?.Tag;
+
             return new DaprStateRecord(key, contentStream, eTag);
         }
 
@@ -193,9 +198,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     "application/json");
             }
 
-            await HandleHttpCall(async () =>
+            await DaprHttpCall(async () =>
             {
-                HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
+                var response = await this.httpClient.SendAsync(req, cancellationToken);
+
                 return response;
             });
         }
@@ -212,14 +218,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 System.Text.Encoding.UTF8,
                 "application/json");
 
-
-
-            await HandleHttpCall(async () =>
+            await DaprHttpCall(async () =>
             {
-                HttpResponseMessage response = await this.httpClient.PostAsync(
-                                                                    $"{daprAddress}/v1.0/bindings/{message.BindingName}",
-                                                                    stringContent,
-                                                                    cancellationToken);
+                var response = await this.httpClient.PostAsync(
+                    $"{daprAddress}/v1.0/bindings/{message.BindingName}",
+                    stringContent,
+                    cancellationToken);
 
                 return response;
             });
@@ -240,7 +244,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 req.Content = new StringContent(payload?.GetRawText(), Encoding.UTF8, "application/json");
             }
 
-            await HandleHttpCall(async () =>
+            await DaprHttpCall(async () =>
             {
                 HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
 
@@ -273,11 +277,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 metadataQuery = "?" + metadata;
             }
 
-            var response = await HandleHttpCall(async () =>
+            var response = await DaprHttpCall(async () =>
             {
-                HttpResponseMessage response = await this.httpClient.GetAsync(
-                $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
-                cancellationToken);
+                var response = await this.httpClient.GetAsync(
+                    $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
+                    cancellationToken);
 
                 return response;
             });
