@@ -10,8 +10,8 @@
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <!--<Version>99.99.99</Version>
-    <SupportedVersion>0.0.0-preview.0.81</SupportedVersion>-->
+    <!--TODO: Need to figure out how to set the version number.-->
+    <SupportedVersion>0.0.0-preview.0.84</SupportedVersion>
     <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
   </PropertyGroup>
 
