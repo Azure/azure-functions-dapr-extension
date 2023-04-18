@@ -28,7 +28,7 @@ In this folder, you will find `local.settings.json`, which lists a few app setti
 
 The `%` denotes an app setting value, for the following binding as an example:
 
-`[DaprState("%StateStoreName%", Key = "order")]`
+`[DaprState("%StateStoreName%", Key = "product")]`
 
  In the runtime, the binding will check the `local.settings.json` file and resolve `%StateStoreName%` into `statestore`. The function will then make a call into the state store named as `statestore`.
 
@@ -79,91 +79,67 @@ You're up and running! Both Dapr and your app logs will appear here.
 ## 1. Service Invocation and State Management: Create New Order and Retrieve Order
 
 ```csharp
-[Function("CreateNewOrder")]
-[DaprStateOutput("%StateStoreName%", Key = "order")]
-public static Order Run(
-    [DaprServiceInvocationTrigger] Order payload, 
+[Function("DaprStateOutputBindingUserDefinedType")]
+[DaprStateOutput("%StateStoreName%", Key = "product")]
+public static Product Run(
+    [DaprServiceInvocationTrigger] Product payload,
     FunctionContext functionContext)
 {
-    var log = functionContext.GetLogger("CreateNewOrder");
-    log.LogInformation("C# function processed a CreateNewOrder request from the Dapr Runtime.");
+    var log = functionContext.GetLogger("DaprStateOutputBindingUserDefinedType");
+    log.LogInformation("C# function processed a DaprStateOutputBindingUserDefinedType request from the Dapr Runtime.");
 
     return payload;
 }
 ```
 
-Here the `DaprServiceInvocationTrigger` is used to receive and handle `CreateNewOrder` request and it first logs that this function is successfully triggered. Then it binds the content to the `order` object. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
+Here the `DaprServiceInvocationTrigger` is used to receive and handle `DaprStateOutputBindingUserDefinedType` request and it first logs that this function is successfully triggered. Then it binds the content to the `product` object. The `DaprState` *output binding* will persist the order into the state store by serializing `product` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
 
 Now you can invoke this function by using the Dapr cli in a new command line terminal.  
 
-Windows Command Prompt
-```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"data\": { \"orderId\": \"41\" } }"
-```
 
 Windows PowerShell
 ```powershell
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{\"data\": { \"orderId\": \"41\" } }'
+dapr invoke --app-id functionapp --method DaprStateOutputBindingUserDefinedType --data '{\"Name\":\"Apple\",\"Description\":\"Fruit\",\"Quantity\":10}'
 ```
 
-Linux or MacOS
-```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
-```
-
-You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
-
-```http
-POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
-
-{
-    "data": {
-        "orderId": "42"
-    } 
-}
-```
-
-**Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
-
-```powershell
-dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
-```
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
 
 ```
-== APP == [TIMESTAMP] Executing 'CreateNewOrder' (Reason='', Id=<ExecutionId>)
-== APP == [TIMESTAMP] C# function processed a CreateNewOrder request from the Dapr Runtime.
-== APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
+== APP == [TIMESTAMP] Executing 'DaprStateOutputBindingUserDefinedType' (Reason='', Id=<ExecutionId>)
+== APP == [TIMESTAMP] C# function processed a DaprStateOutputBindingUserDefinedType request from the Dapr Runtime.
+== APP == [TIMESTAMP] Executed 'DaprStateOutputBindingUserDefinedType' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
 In order to confirm the state is now persisted. You can now move to the next function:
 
 ```csharp
-[Function("RetrieveOrder")]
+[Function("DaprStateInputBindingUserDefinedType")]
 public static void Run(
     [DaprServiceInvocationTrigger] object args,
-    [DaprStateInput("%StateStoreName%", Key = "order")] Order data, FunctionContext functionContext)
+    [DaprStateInput("%StateStoreName%", Key = "product")] Product data, FunctionContext functionContext)
 {
-    var log = functionContext.GetLogger("RetrieveOrder");
-    log.LogInformation("C# function processed a RetrieveOrder request from the Dapr Runtime.");
+    var log = functionContext.GetLogger("DaprStateInputBindingUserDefinedType");
+    log.LogInformation("C# function processed a DaprStateInputBindingUserDefinedType request from the Dapr Runtime.");
 
     //print the fetched state value
     log.LogInformation(JsonSerializer.Serialize(data));
 }
 ```
 
-Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. Here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data`' before exectuing the function block.
+Similarly, the function will be triggered by any `DaprStateInputBindingUserDefinedType` service invocation request. Here `DaprState` *input binding* is used to fetch the latest value of the key `product` and bind the value to string object `data`' before exectuing the function block.
+
+Invoke input binding function with Dapr cli
 
 ```
-dapr invoke --app-id functionapp --method RetrieveOrder
+dapr invoke --app-id functionapp --method DaprStateInputBindingUserDefinedType
 ```
 
 In your terminal window, you should see logs to confirm the expected result:
 
 ```
-== APP == [TIMESTAMP]  Executing 'RetrieveOrder' (Reason='', Id=<ExecutionId>)
-== APP == [TIMESTAMP]  C# function processed a RetrieveOrder request from the Dapr Runtime.
-== APP == [TIMESTAMP]  {"orderId":"41"}
-== APP == [TIMESTAMP]  Executed 'RetrieveOrder' (Succeeded, Id=<ExecutionId>)
+== APP == [TIMESTAMP]  Executing 'DaprStateInputBindingUserDefinedType' (Reason='', Id=<ExecutionId>)
+== APP == [TIMESTAMP]  C# function processed a DaprStateInputBindingUserDefinedType request from the Dapr Runtime.
+== APP == [TIMESTAMP]  {"Name":"Apple","Description":"Fruit","Quantity":10}
+== APP == [TIMESTAMP]  Executed 'DaprStateInputBindingUserDefinedType' (Succeeded, Id=<ExecutionId>)
 ```
