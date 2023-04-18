@@ -10,6 +10,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System.IO;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Sockets;
+    using System.Runtime.Serialization;
     using System.Text;
     using System.Text.Json;
     using System.Threading;
@@ -30,6 +32,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
             // "daprAddress" is an environment variable created by the Dapr process
             this.defaultDaprAddress = GetDefaultDaprAddress(nameResolver);
+        }
+
+        public async Task HandleHttpCall(Func<Task<HttpResponseMessage>> httpCall)
+        {
+            try
+            {
+                HttpResponseMessage response = await httpCall();
+                await ThrowIfDaprFailure(response);
+            }
+            catch (HttpRequestException ex) when (ex.InnerException is SocketException socketException)
+            {
+                if (socketException.SocketErrorCode == SocketError.ConnectionRefused)
+                {
+                    throw new DaprSidecarNotPresentException(HttpStatusCode.ServiceUnavailable, "ERR_DAPR_SIDECAR_DOES_NOT_EXIST", "Dapr sidecar is not present.",  ex);
+                }
+
+                throw new DaprException(HttpStatusCode.InternalServerError, "ERR_DAPR_REQUEST_FAILED", ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                throw new DaprException(HttpStatusCode.InternalServerError, "ERR_DAPR_REQUEST_FAILED", ex.Message, ex);
+            }
         }
 
         static string GetDefaultDaprAddress(INameResolver resolver)
@@ -115,12 +139,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 System.Text.Encoding.UTF8,
                 "application/json");
 
-            HttpResponseMessage response = await this.httpClient.PostAsync(
-                $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}",
-                stringContent,
-                cancellationToken);
+            await this.HandleHttpCall(async () =>
+            {
+                HttpResponseMessage response = await this.httpClient.PostAsync(
+                 $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}",
+                 stringContent,
+                 cancellationToken);
 
-            await ThrowIfDaprFailure(response);
+                return response;
+            });
         }
 
         internal async Task<DaprStateRecord> GetStateAsync(
@@ -284,6 +311,19 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     this.StatusCode,
                     this.ErrorCode,
                     this.Message);
+            }
+        }
+
+        class DaprSidecarNotPresentException : DaprException
+        {
+            public DaprSidecarNotPresentException(HttpStatusCode statusCode, string errorCode, string message)
+                : base(statusCode, errorCode, message)
+            {
+            }
+
+            public DaprSidecarNotPresentException(HttpStatusCode statusCode, string errorCode, string message, Exception innerException)
+                : base(statusCode, errorCode, message, innerException)
+            {
             }
         }
     }
