@@ -17,8 +17,8 @@ namespace dotnet_isolated_azurefunction
         /// </summary>
         [Function("CreateNewOrder")]
         [DaprStateOutput("%StateStoreName%", Key = "order")]
-        public static object Run(
-            [DaprServiceInvocationTrigger] object payload, 
+        public static Order Run(
+            [DaprServiceInvocationTrigger] Order payload, 
             FunctionContext functionContext)
         {
             var log = functionContext.GetLogger("CreateNewOrder");
