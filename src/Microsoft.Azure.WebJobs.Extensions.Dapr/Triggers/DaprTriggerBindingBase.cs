@@ -24,10 +24,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     abstract class DaprTriggerBindingBase : ITriggerBinding
     {
-        readonly DaprServiceListener serviceListener;
+        readonly IDaprServiceListener serviceListener;
         readonly ParameterInfo parameter;
 
-        public DaprTriggerBindingBase(DaprServiceListener serviceListener, ParameterInfo parameter)
+        public DaprTriggerBindingBase(IDaprServiceListener serviceListener, ParameterInfo parameter)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
             this.parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));

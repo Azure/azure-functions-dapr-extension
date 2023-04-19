@@ -24,9 +24,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
         IAsyncConverter<DaprStateAttribute, JsonElement>,
         IAsyncConverter<DaprStateAttribute, JObject>
     {
-        readonly DaprServiceClient daprClient;
+        readonly IDaprServiceClient daprClient;
 
-        public DaprStateConverter(DaprServiceClient daprClient)
+        public DaprStateConverter(IDaprServiceClient daprClient)
         {
             this.daprClient = daprClient;
         }

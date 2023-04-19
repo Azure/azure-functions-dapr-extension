@@ -26,14 +26,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     [Extension("Dapr")]
     class DaprExtensionConfigProvider : IExtensionConfigProvider
     {
-        readonly DaprServiceClient daprClient;     // TODO: Use an interface for mocking
-        readonly DaprServiceListener daprListener; // TODO: Use an interface for mocking
+        readonly IDaprServiceClient daprClient;
+        readonly IDaprServiceListener daprListener;
         readonly INameResolver nameResolver;
         readonly ILogger logger;
 
         public DaprExtensionConfigProvider(
-            DaprServiceClient daprClient,
-            DaprServiceListener daprListener,
+            IDaprServiceClient daprClient,
+            IDaprServiceListener daprListener,
             ILoggerFactory loggerFactory,
             INameResolver nameResolver)
         {

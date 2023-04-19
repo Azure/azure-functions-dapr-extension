@@ -20,7 +20,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
-    sealed class DaprServiceListener : IDisposable
+    sealed class DaprServiceListener : IDisposable, IDaprServiceListener
     {
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
         readonly HashSet<DaprTopicSubscription> topics = new HashSet<DaprTopicSubscription>(new DaprTopicSubscriptionComparer());
@@ -48,7 +48,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return $"http://127.0.0.1:{appPort}";
         }
 
-        internal async Task EnsureStartedAsync(CancellationToken cancellationToken)
+        public async Task EnsureStartedAsync(CancellationToken cancellationToken)
         {
             if (Interlocked.CompareExchange(ref this.serverStarted, 1, 0) == 0)
             {
@@ -80,7 +80,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             }
         }
 
-        internal async Task DeregisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
+        public async Task DeregisterListenerAsync(DaprListenerBase listener, CancellationToken cancellationToken)
         {
             this.listeners.Remove(listener);
 
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             }
         }
 
-        internal void AddFunctionListener(DaprListenerBase daprListener)
+        public void AddFunctionListener(DaprListenerBase daprListener)
         {
             if (this.serverStarted > 0)
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             this.listeners.Add(daprListener);
         }
 
-        internal void RegisterTopic(DaprTopicSubscription topic)
+        public void RegisterTopic(DaprTopicSubscription topic)
         {
             if (this.topics.Add(topic))
             {

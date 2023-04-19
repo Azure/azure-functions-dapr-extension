@@ -19,7 +19,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
 
-    class DaprServiceClient
+    internal class DaprServiceClient : IDaprServiceClient
     {
         readonly HttpClient httpClient;
         readonly string defaultDaprAddress;
@@ -32,6 +32,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
             // "daprAddress" is an environment variable created by the Dapr process
             this.defaultDaprAddress = GetDefaultDaprAddress(nameResolver);
+        }
+
+        private static string GetDefaultDaprAddress(INameResolver resolver)
+        {
+            if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
+            {
+                daprPort = 3500;
+            }
+
+            return $"http://localhost:{daprPort}";
         }
 
         private static async Task<HttpResponseMessage> DaprHttpCall(Func<Task<HttpResponseMessage>> httpCall)
@@ -62,17 +72,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             }
         }
 
-        static string GetDefaultDaprAddress(INameResolver resolver)
-        {
-            if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
-            {
-                daprPort = 3500;
-            }
-
-            return $"http://localhost:{daprPort}";
-        }
-
-        static async Task ThrowIfDaprFailure(HttpResponseMessage response)
+        private static async Task ThrowIfDaprFailure(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {
@@ -127,7 +127,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return;
         }
 
-        internal async Task SaveStateAsync(
+        public async Task SaveStateAsync(
             string? daprAddress,
             string? stateStore,
             IEnumerable<DaprStateRecord> values,
@@ -156,7 +156,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
-        internal async Task<DaprStateRecord> GetStateAsync(
+        public async Task<DaprStateRecord> GetStateAsync(
             string? daprAddress,
             string stateStore,
             string key,
@@ -179,7 +179,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return new DaprStateRecord(key, contentStream, eTag);
         }
 
-        internal async Task InvokeMethodAsync(
+        public async Task InvokeMethodAsync(
             string? daprAddress,
             string appId,
             string methodName,
@@ -206,7 +206,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
-        internal async Task SendToDaprBindingAsync(
+        public async Task SendToDaprBindingAsync(
             string? daprAddress,
             DaprBindingMessage message,
             CancellationToken cancellationToken)
@@ -229,7 +229,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
-        internal async Task PublishEventAsync(
+        public async Task PublishEventAsync(
             string? daprAddress,
             string name,
             string topicName,
@@ -252,7 +252,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
-        internal async Task<JsonDocument> GetSecretAsync(
+        public async Task<JsonDocument> GetSecretAsync(
             string? daprAddress,
             string secretStoreName,
             string? key,
@@ -292,7 +292,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return JsonDocument.Parse(secretPayload);
         }
 
-        void EnsureDaprAddress(ref string? daprAddress)
+        private void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
         }

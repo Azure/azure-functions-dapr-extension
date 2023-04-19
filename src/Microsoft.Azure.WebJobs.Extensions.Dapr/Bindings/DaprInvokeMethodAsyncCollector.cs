@@ -16,9 +16,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly ConcurrentQueue<InvokeMethodParameters> requests = new ConcurrentQueue<InvokeMethodParameters>();
         readonly DaprInvokeAttribute attr;
-        readonly DaprServiceClient daprService;
+        readonly IDaprServiceClient daprService;
 
-        public DaprInvokeMethodAsyncCollector(DaprInvokeAttribute attr, DaprServiceClient daprService)
+        public DaprInvokeMethodAsyncCollector(DaprInvokeAttribute attr, IDaprServiceClient daprService)
         {
             this.attr = attr;
             this.daprService = daprService;

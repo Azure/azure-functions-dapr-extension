@@ -17,10 +17,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly ConcurrentBag<DaprStateRecord> requests = new ConcurrentBag<DaprStateRecord>();
 
-        readonly DaprServiceClient daprClient;
+        readonly IDaprServiceClient daprClient;
         readonly DaprStateAttribute attr;
 
-        public DaprSaveStateAsyncCollector(DaprStateAttribute attr, DaprServiceClient daprClient)
+        public DaprSaveStateAsyncCollector(DaprStateAttribute attr, IDaprServiceClient daprClient)
         {
             this.attr = attr;
             this.daprClient = daprClient;

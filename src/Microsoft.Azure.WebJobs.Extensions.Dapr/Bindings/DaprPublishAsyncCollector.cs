@@ -17,10 +17,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly ConcurrentBag<DaprPubSubEvent> events = new ConcurrentBag<DaprPubSubEvent>();
 
-        readonly DaprServiceClient daprClient;
+        readonly IDaprServiceClient daprClient;
         readonly DaprPublishAttribute attr;
 
-        public DaprPublishAsyncCollector(DaprPublishAttribute attr, DaprServiceClient daprClient)
+        public DaprPublishAsyncCollector(DaprPublishAttribute attr, IDaprServiceClient daprClient)
         {
             this.attr = attr;
             this.daprClient = daprClient;

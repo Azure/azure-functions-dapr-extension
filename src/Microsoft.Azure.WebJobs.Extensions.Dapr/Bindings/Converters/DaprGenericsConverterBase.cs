@@ -19,9 +19,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
     /// <typeparam name="T2">Type of the output data after conversion.</typeparam>
     internal abstract class DaprGenericsConverterBase<T1, T2> : IAsyncConverter<T1, T2>
     {
-        readonly DaprServiceClient daprClient;
+        readonly IDaprServiceClient daprClient;
 
-        public DaprGenericsConverterBase(DaprServiceClient daprClient)
+        public DaprGenericsConverterBase(IDaprServiceClient daprClient)
         {
             this.daprClient = daprClient;
         }
