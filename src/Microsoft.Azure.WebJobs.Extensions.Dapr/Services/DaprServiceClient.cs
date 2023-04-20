@@ -17,13 +17,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
 
-    internal class DaprServiceClient : IDaprServiceClient
+    /// <summary>
+    /// Dapr service client.
+    /// </summary>
+    public partial class DaprServiceClient : IDaprServiceClient
     {
         readonly HttpClient httpClient;
         readonly string defaultDaprAddress;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DaprServiceClient"/> class.
+        /// </summary>
+        /// <param name="clientFactory">Client factory.</param>
+        /// <param name="nameResolver">Name resolver.</param>
         public DaprServiceClient(
             IHttpClientFactory clientFactory,
             INameResolver nameResolver)
@@ -127,6 +136,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return;
         }
 
+        /// <inheritdoc/>
         public async Task SaveStateAsync(
             string? daprAddress,
             string? stateStore,
@@ -156,6 +166,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
+        /// <inheritdoc/>
         public async Task<DaprStateRecord> GetStateAsync(
             string? daprAddress,
             string stateStore,
@@ -179,6 +190,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return new DaprStateRecord(key, contentStream, eTag);
         }
 
+        /// <inheritdoc/>
         public async Task InvokeMethodAsync(
             string? daprAddress,
             string appId,
@@ -206,6 +218,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
+        /// <inheritdoc/>
         public async Task SendToDaprBindingAsync(
             string? daprAddress,
             DaprBindingMessage message,
@@ -229,6 +242,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
+        /// <inheritdoc/>
         public async Task PublishEventAsync(
             string? daprAddress,
             string name,
@@ -252,6 +266,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
+        /// <inheritdoc/>
         public async Task<JsonDocument> GetSecretAsync(
             string? daprAddress,
             string secretStoreName,
@@ -295,59 +310,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         private void EnsureDaprAddress(ref string? daprAddress)
         {
             (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
-        }
-
-        class DaprException : Exception
-        {
-            public DaprException(HttpStatusCode statusCode, string errorCode, string message)
-                : base(message)
-            {
-                this.StatusCode = statusCode;
-                this.ErrorCode = errorCode;
-            }
-
-            public DaprException(HttpStatusCode statusCode, string errorCode, string message, Exception innerException)
-                : base(message, innerException)
-            {
-                this.StatusCode = statusCode;
-                this.ErrorCode = errorCode;
-            }
-
-            HttpStatusCode StatusCode { get; set; }
-
-            string ErrorCode { get; set; }
-
-            public override string ToString()
-            {
-                if (this.InnerException != null)
-                {
-                    return string.Format(
-                        "Status Code: {0}; Error Code: {1} ; Message: {2}; Inner Exception: {3}",
-                        this.StatusCode,
-                        this.ErrorCode,
-                        this.Message,
-                        this.InnerException);
-                }
-
-                return string.Format(
-                    "Status Code: {0}; Error Code: {1} ; Message: {2}",
-                    this.StatusCode,
-                    this.ErrorCode,
-                    this.Message);
-            }
-        }
-
-        class DaprSidecarNotPresentException : DaprException
-        {
-            public DaprSidecarNotPresentException(HttpStatusCode statusCode, string errorCode, string message)
-                : base(statusCode, errorCode, message)
-            {
-            }
-
-            public DaprSidecarNotPresentException(HttpStatusCode statusCode, string errorCode, string message, Exception innerException)
-                : base(statusCode, errorCode, message, innerException)
-            {
-            }
         }
     }
 }
