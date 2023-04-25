@@ -159,7 +159,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     JsonSerializer.Serialize(body, JsonUtils.DefaultSerializerOptions),
                     Encoding.UTF8,
                     "application/json");
+                req.Content.Headers.ContentType.CharSet = string.Empty;
             }
+
+            Console.WriteLine("Here, sending request to Dapr" + req.ToString());
 
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
             await ThrowIfDaprFailure(response);
