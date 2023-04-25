@@ -162,8 +162,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 req.Content.Headers.ContentType.CharSet = string.Empty;
             }
 
-            Console.WriteLine("Here, sending request to Dapr" + req.ToString());
-
             HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
             await ThrowIfDaprFailure(response);
         }
