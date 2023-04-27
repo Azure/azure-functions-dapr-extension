@@ -18,7 +18,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
 
     class DaprStateConverter :
         IAsyncConverter<DaprStateAttribute, DaprStateRecord>,
-        IAsyncConverter<DaprStateAttribute, byte[]>,
         IAsyncConverter<DaprStateAttribute, string>,
         IAsyncConverter<DaprStateAttribute, Stream>,
         IAsyncConverter<DaprStateAttribute, JsonElement>,
@@ -44,34 +43,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
             }
 
             return record;
-        }
-
-        public async Task<byte[]> ConvertAsync(
-            DaprStateAttribute input,
-            CancellationToken cancellationToken)
-        {
-            string content = await this.GetStringContentAsync(input, cancellationToken);
-            if (string.IsNullOrEmpty(content))
-            {
-                return Array.Empty<byte>();
-            }
-
-            // Per Yaron, Dapr only supports JSON payloads over HTTP.
-            // By default we assume that the payload is a JSON-serialized base64 string of bytes
-            JsonElement json = JsonDocument.Parse(content).RootElement;
-            byte[]? bytes;
-
-            try
-            {
-                bytes = JsonSerializer.Deserialize<byte[]>(json);
-            }
-            catch (JsonException)
-            {
-                // Looks like it's not actually JSON - just return the raw bytes
-                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(json, JsonUtils.DefaultSerializerOptions));
-            }
-
-            return bytes ?? Array.Empty<byte>();
         }
 
         Task<string> IAsyncConverter<DaprStateAttribute, string>.ConvertAsync(
