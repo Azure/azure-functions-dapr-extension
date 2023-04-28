@@ -96,7 +96,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             var daprSecretConverter = new DaprSecretConverter(this.daprClient);
             var secretsRule = context.AddBindingRule<DaprSecretAttribute>();
-            secretsRule.BindToInput<byte[]>(daprSecretConverter);
             secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<JsonElement>(daprSecretConverter);
             secretsRule.BindToInput<JObject>(daprSecretConverter);
