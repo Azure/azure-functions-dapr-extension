@@ -3,12 +3,12 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
 {
     using System;
     using System.Text.Json;
     using System.Text.Json.Serialization;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
 
     /// <summary>
     /// Payload for outbound Dapr pub/sub events.
@@ -46,24 +46,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         }
 
         /// <summary>
-        /// Gets the name of the pub/sub.
+        /// Gets or sets the name of the pub/sub.
         /// </summary>
         /// <remarks>
-        /// If the pub/sub name is not specified, it is inferred from the
-        /// <see cref="DaprPublishAttribute"/> binding attribute.
+        /// If the pub/sub name is not specified, it is inferred from the DaprPublishOutput attribute.
         /// </remarks>
         [JsonPropertyName("pubsubname")]
-        public string? PubSubName { get; internal set; }
+        public string? PubSubName { get; set; }
 
         /// <summary>
-        /// Gets the name of the topic.
+        /// Gets or sets the name of the topic.
         /// </summary>
         /// <remarks>
-        /// If the topic name is not specified, it is inferred from the
-        /// <see cref="DaprPublishAttribute"/> binding attribute.
+        /// If the topic name is not specified, it is inferred from the DaprPublishOutput attribute.
         /// </remarks>
         [JsonPropertyName("topic")]
-        public string? Topic { get; internal set; }
+        public string? Topic { get; set; }
 
         /// <summary>
         /// Gets the payload of the pub/sub event.

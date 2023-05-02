@@ -3,8 +3,10 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
 {
+    using System;
+
     /// <summary>
     /// Parameters for Dapr invoke-method operations.
     /// </summary>

@@ -11,7 +11,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <!--TODO: Need to figure out how to set the version number.-->
-    <SupportedVersion>0.0.0-preview.0.91</SupportedVersion>
+    <SupportedVersion>0.0.0-preview.0.85</SupportedVersion>
     <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
   </PropertyGroup>
 
@@ -43,6 +43,7 @@
 
   <!-- Project dependency -->
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj" />
     <ProjectReference Include="..\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

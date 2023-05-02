@@ -7,13 +7,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
 {
     using System;
     using System.IO;
-    using System.Text;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Newtonsoft.Json.Linq;
 
     class DaprStateConverter :

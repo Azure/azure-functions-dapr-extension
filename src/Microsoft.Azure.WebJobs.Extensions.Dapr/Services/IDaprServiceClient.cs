@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
 
     /// <summary>
     /// DaprServiceClient interface.

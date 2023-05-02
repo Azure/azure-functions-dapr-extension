@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System.IO;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
 
     /// <summary>

@@ -8,6 +8,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
     using System;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
 
     internal class JsonElementConverter : JsonConverter<JsonElement>
     {

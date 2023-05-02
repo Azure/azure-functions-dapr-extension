@@ -5,23 +5,23 @@
 
 namespace dotnet_isolated_azurefunction
 {
-    //using System.IO;
-    //using Microsoft.AspNetCore.Http;
-    //using Microsoft.Azure.Functions.Worker;
-    //using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
-    //using Microsoft.Azure.Functions.Worker.Http;
-    //using Microsoft.Extensions.Logging;
+    using System.IO;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
+    using Microsoft.Azure.Functions.Worker;
+    using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
+    using Microsoft.Azure.Functions.Worker.Http;
 
-    //public static class PublishOutputBinding
-    //{
-    //    [Function("PublishOutputBinding")]
-    //    public static void Run(
-    //        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "topic/{topicName}")] HttpRequestData req,
-    //        [DaprPublishOutput(PubSubName = "%PubSubName%", Topic = "{topicName}")] out DaprPubSubEvent pubSubEvent,
-    //        FunctionContext functionContext)
-    //    {
-    //        string requestBody = new StreamReader(req.Body).ReadToEnd();
-    //        pubSubEvent = new DaprPubSubEvent(requestBody);
-    //    }
-    //}
+    public static class PublishOutputBinding
+    {
+        [Function("PublishOutputBinding")]
+        [DaprPublishOutput(PubSubName = "%PubSubName%", Topic = "{topicName}")]
+        public static DaprPubSubEvent Run(
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "topic/{topicName}")] HttpRequestData req,
+            FunctionContext functionContext)
+        {
+            string requestBody = new StreamReader(req.Body).ReadToEnd();
+
+            return new DaprPubSubEvent(requestBody);
+        }
+    }
 }

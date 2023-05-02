@@ -6,10 +6,10 @@
 namespace dotnet_azurefunction
 {
     using CloudNative.CloudEvents;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json.Linq;
 
     public static class TransferEventBetweenTopics
     {

@@ -14,14 +14,14 @@ namespace dotnet_isolated_azurefunction
     public static class SendMessageToKafka
     {
         [Function("SendMessageToKafka")]
-        public static void Run(
-            [DaprServiceInvocationTrigger] JsonElement payload,
-            [DaprBindingOutput(BindingName = "%KafkaBindingName%", Operation = "create")] out object messages,
-            ILogger log)
+        [DaprBindingOutput(BindingName = "%KafkaBindingName%", Operation = "create")]
+        public static JsonElement Run(
+            [DaprServiceInvocationTrigger] JsonElement payload, FunctionContext functionContext)
         {
+            var log = functionContext.GetLogger("SendMessageToKafka");
             log.LogInformation("C#  function processed a SendMessageToKafka request.");
 
-            messages = payload;
+            return payload;
         }
     }
 }

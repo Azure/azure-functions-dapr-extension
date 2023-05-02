@@ -6,6 +6,7 @@
 namespace dotnet_isolated_azurefunction
 {
     using Azure.Messaging;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
     using Microsoft.Extensions.Logging;
@@ -17,15 +18,14 @@ namespace dotnet_isolated_azurefunction
         /// and then republish it to another topic with edited message content
         /// </summary>
         [Function("TransferEventBetweenTopics")]
-        public static void Run(
-            [DaprTopicTrigger("%PubSubName%", Topic = "A")] CloudEvent subEvent,
-            //[DaprPublishOutput(PubSubName = "%PubSubName%", Topic = "B")] out object pubEvent,
-            ILogger log)
+        [DaprPublishOutput(PubSubName = "%PubSubName%", Topic = "B")]
+        public static DaprPubSubEvent Run(
+            [DaprTopicTrigger("%PubSubName%", Topic = "A")] CloudEvent subEvent, FunctionContext functionContext)
         {
+            var log = functionContext.GetLogger("TransferEventBetweenTopics");
             log.LogInformation("C# function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
 
-            //TODO: add DaprPubSubEvent
-            //pubEvent = new DaprPubSubEvent("Transfer from Topic A: " + subEvent.Data);
+            return new DaprPubSubEvent("Transfer from Topic A: " + subEvent.Data);
         }
     }
 }

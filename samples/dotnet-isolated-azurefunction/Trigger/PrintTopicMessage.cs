@@ -17,9 +17,9 @@ namespace dotnet_isolated_azurefunction
         /// </summary>
         [Function("PrintTopicMessage")]
         public static void Run(
-            [DaprTopicTrigger("%PubSubName%", Topic = "B")] CloudEvent subEvent,
-            ILogger log)
+            [DaprTopicTrigger("%PubSubName%", Topic = "B")] CloudEvent subEvent, FunctionContext functionContext)
         {
+            var log = functionContext.GetLogger("PrintTopicMessage");
             log.LogInformation("C# function processed a PrintTopicMessage request from the Dapr Runtime.");
             log.LogInformation($"Topic B received a message: {subEvent.Data}.");
         }
