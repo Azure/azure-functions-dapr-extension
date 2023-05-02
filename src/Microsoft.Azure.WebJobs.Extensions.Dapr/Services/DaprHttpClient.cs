@@ -132,7 +132,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             {
                 if (socketException.SocketErrorCode == SocketError.ConnectionRefused)
                 {
-                    throw new DaprSidecarNotPresentException(HttpStatusCode.ServiceUnavailable, ErrorCodes.ErrDaprSidecarDoesNotExist, "Dapr sidecar is not present. Please follow this link (https://docs.dapr.io/operations/troubleshooting/common_issues/) to debug the issue with dapr.", ex);
+                    throw new DaprSidecarNotPresentException(HttpStatusCode.ServiceUnavailable, ErrorCodes.ErrDaprSidecarDoesNotExist, "Dapr sidecar is not present. Please follow this link (https://aka.ms/azure-functions-dapr-sidecar-missing) to debug the issue with dapr.", ex);
                 }
 
                 throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, ex.Message, ex);

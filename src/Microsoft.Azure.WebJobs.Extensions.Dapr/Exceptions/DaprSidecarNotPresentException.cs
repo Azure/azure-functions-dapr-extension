@@ -12,6 +12,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     /// <summary>
     /// Dapr sidecar not present exception.
     /// </summary>
+    [Serializable]
     public class DaprSidecarNotPresentException : DaprException
     {
         /// <summary>

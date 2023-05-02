@@ -7,10 +7,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions
 {
     using System;
     using System.Net;
+    using System.Runtime.Serialization;
 
     /// <summary>
     /// Dapr exception.
     /// </summary>
+    [Serializable]
     public class DaprException : Exception
     {
         /// <summary>
@@ -40,9 +42,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions
             this.ErrorCode = errorCode;
         }
 
-        HttpStatusCode StatusCode { get; set; }
+        /// <summary>
+        /// Gets or sets http status code.
+        /// </summary>
+        [DataMember]
+        public HttpStatusCode StatusCode { get; set; }
 
-        string ErrorCode { get; set; }
+        /// <summary>
+        /// Gets or sets error code.
+        /// </summary>
+        [DataMember]
+        public string ErrorCode { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
