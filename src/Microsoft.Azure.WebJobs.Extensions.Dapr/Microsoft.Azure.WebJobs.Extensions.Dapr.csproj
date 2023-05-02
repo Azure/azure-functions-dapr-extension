@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Microsoft.Azure.WebJobs.Extensions.Dapr</PackageId>    
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
-
-  <!-- Additional Nuget package properties. -->
-  <PropertyGroup>
-    <Description>This extension adds bindings for Dapr</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Microsoft.Azure.WebJobs.Extensions.Dapr</PackageId>
+    <IsPackable>true</IsPackable>
+    <Title>Microsoft.Azure.WebJobs.Extensions.Dapr</Title>
+    <Description>Dapr extension for Azure functions using the in-proc worker.</Description>
+    <Summary>Dapr extension for Azure functions using the in-proc worker.</Summary>
   </PropertyGroup>
 
   <!-- Use C# 9.0 features -->

@@ -23,7 +23,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         /// <summary>
         /// Gets or sets the HTTP verb associated with the method to invoke.
         /// </summary>
-        public string HttpVerb { get; set; } = "GET";
+        public string? HttpVerb { get; set; }
 
         /// <summary>
         /// Gets or sets the body of the invoke-method operation.

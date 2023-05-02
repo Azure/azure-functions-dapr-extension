@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="dapr_common.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -8,7 +7,7 @@
     <NoWarn></NoWarn>
     <!-- Don't append TargetFramework to output path. -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-   </PropertyGroup>
+  </PropertyGroup>
 
   <!-- Cls Compliant -->
   <PropertyGroup>
@@ -29,21 +28,11 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
-  
-  <!-- Enable delay signing with Key.snk -->
-  <!-- Keep it disabled as binaries in referenced package CloudNative.CloudEvents doesn't have strong name.-->
-  <!--
+
+  <!-- Signing -->
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  -->
-  
-  <PropertyGroup>
-    <Product>Azure Functions Dapr Extension</Product>
-    <Copyright>Copyright (c) Microsoft Corporation.  All rights reserved.</Copyright>
-    <Company>Microsoft</Company>
-    <Authors>Microsoft</Authors>
   </PropertyGroup>
 
   <!-- Use MinVer for assembly, nuget versioning based on git tags -->
@@ -61,4 +50,17 @@
     <!--<MinVerVerbosity>detailed</MinVerVerbosity>-->
   </PropertyGroup>
 
+  <!-- Enable sourcelink https://docs.microsoft.com/dotnet/standard/library-guidance/sourcelink -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.*" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <!-- Enable Deterministic Builds for github actions -->
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
 </Project>

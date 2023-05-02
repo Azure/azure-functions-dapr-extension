@@ -53,7 +53,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                     this.attr.DaprAddress,
                     item.AppId!,
                     item.MethodName!,
-                    item.HttpVerb,
+                    item.HttpVerb!,
                     item.Body,
                     cancellationToken);
             }

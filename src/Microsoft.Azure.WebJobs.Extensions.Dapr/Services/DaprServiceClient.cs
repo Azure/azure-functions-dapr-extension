@@ -107,6 +107,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     JsonSerializer.Serialize(body, JsonUtils.DefaultSerializerOptions),
                     Encoding.UTF8,
                     "application/json");
+                req.Content.Headers.ContentType.CharSet = string.Empty;
             }
 
             await this.daprClient.SendAsync(req, cancellationToken);

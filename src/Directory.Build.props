@@ -1,25 +1,4 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)..\properties\dapr_managed.props" />
-  <Import Project="$(MSBuildThisFileDirectory)..\properties\dapr_nuget.props" />
-
-  <PropertyGroup>
-    <OutputPath>$(RepoRoot)bin\$(Configuration)\prod\$(MSBuildProjectName)\</OutputPath>
-
-    <!-- Stylecop needs the documentation file to exist -->
-    <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
-  </PropertyGroup>
-
-  <!-- Enable sourcelink https://docs.microsoft.com/dotnet/standard/library-guidance/sourcelink -->
-  <PropertyGroup>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.*" PrivateAssets="All"/>
-  </ItemGroup>
-
-  <!-- Enable Deterministic Builds for github actions -->
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\properties\webjobs.props" Condition="$(MSBuildProjectName.Contains('WebJobs'))"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\properties\workers.props" Condition="$(MSBuildProjectName.Contains('Worker'))"/>
 </Project>
