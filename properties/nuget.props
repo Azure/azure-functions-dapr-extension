@@ -1,0 +1,35 @@
+<Project>
+  <!-- Set Paths -->
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)..\</RepoRoot>
+    <RequestedVerbosity Condition=" '$(RequestedVerbosity)' == '' ">minimal</RequestedVerbosity>
+  </PropertyGroup>
+
+  <!-- General properties -->
+  <PropertyGroup>
+    <Authors>Microsoft</Authors>
+    <Company>Microsoft</Company>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Owners>Microsoft</Owners>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageOutputPath>$(RepoRoot)bin\$(Configuration)\nugets</PackageOutputPath>
+    <PackageProjectUrl>https://github.com/Azure/azure-functions-dapr-extension</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageTags>Microsoft, Azure-Functions, Dapr</PackageTags>
+    <Product>Azure Functions Dapr Extension</Product>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Azure/azure-functions-dapr-extension</RepositoryUrl>
+  </PropertyGroup>
+
+  <!-- Enable symbols package generation. https://docs.microsoft.com/nuget/create-packages/symbol-packages-snupkg -->
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>$(RepoRoot)bin\$(Configuration)\prod\$(MSBuildProjectName)\</OutputPath>
+    <!-- Stylecop needs the documentation file to exist -->
+    <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
+  </PropertyGroup>
+</Project>

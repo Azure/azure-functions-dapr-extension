@@ -1,39 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- Set Paths -->
-  <PropertyGroup>
-    <RepoRoot>$(MSBuildThisFileDirectory)..\</RepoRoot>
-    <RequestedVerbosity Condition=" '$(RequestedVerbosity)' == '' ">minimal</RequestedVerbosity>
-  </PropertyGroup>
-
-  <!-- General properties -->
-  <PropertyGroup>
-    <Authors>Microsoft</Authors>
-    <Company>Microsoft</Company>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <Owners>Microsoft</Owners>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageOutputPath>$(RepoRoot)bin\$(Configuration)\nugets</PackageOutputPath>
-    <PackageProjectUrl>https://github.com/Azure/azure-functions-dapr-extension</PackageProjectUrl>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageTags>Microsoft, Azure-Functions, Dapr</PackageTags>
-    <Product>Azure Functions Dapr Extension</Product>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Azure/azure-functions-dapr-extension</RepositoryUrl>
-  </PropertyGroup>
-
-  <!-- Signing -->
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-
-  <!-- Enable symbols package generation. https://docs.microsoft.com/nuget/create-packages/symbol-packages-snupkg -->
-  <PropertyGroup>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
-
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -63,6 +29,12 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <!-- Signing -->
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
   <!-- Use MinVer for assembly, nuget versioning based on git tags -->
   <ItemGroup>
     <PackageReference Include="MinVer" Version="2.3.0">
@@ -76,12 +48,6 @@
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <MinVerDefaultPreReleasePhase>preview</MinVerDefaultPreReleasePhase>
     <!--<MinVerVerbosity>detailed</MinVerVerbosity>-->
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <OutputPath>$(RepoRoot)bin\$(Configuration)\prod\$(MSBuildProjectName)\</OutputPath>
-    <!-- Stylecop needs the documentation file to exist -->
-    <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
 
   <!-- Enable sourcelink https://docs.microsoft.com/dotnet/standard/library-guidance/sourcelink -->

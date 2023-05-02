@@ -1,5 +1,5 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)..\properties\dapr_managed.props" />
+  <Import Project=".\common.props" />
 
   <PropertyGroup>
     <!-- Set Output Path for tests-->

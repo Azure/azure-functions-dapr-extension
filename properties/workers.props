@@ -1,5 +1,6 @@
 <Project>
   <Import Project=".\common.props" />
+  <Import Project=".\nuget.props" />
 
   <PropertyGroup>
     <PackageIconUrl>https://aka.ms/azure-functions-package-icon</PackageIconUrl>
