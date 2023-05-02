@@ -22,10 +22,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     class DaprTopicTriggerBindingProvider : ITriggerBindingProvider
     {
-        readonly DaprServiceListener serviceListener;
+        readonly IDaprServiceListener serviceListener;
         readonly INameResolver nameResolver;
 
-        public DaprTopicTriggerBindingProvider(DaprServiceListener serviceListener, INameResolver nameResolver)
+        public DaprTopicTriggerBindingProvider(IDaprServiceListener serviceListener, INameResolver nameResolver)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
             this.nameResolver = nameResolver;
@@ -66,13 +66,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             static readonly JsonEventFormatter CloudEventFormatter = new JsonEventFormatter();
 
-            readonly DaprServiceListener serviceListener;
+            readonly IDaprServiceListener serviceListener;
             readonly string pubSubName;
             readonly string topic;
             readonly string route;
 
             public DaprTopicTriggerBinding(
-                DaprServiceListener serviceListener,
+                IDaprServiceListener serviceListener,
                 string pubSubName,
                 string topic,
                 string route,
@@ -117,7 +117,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 readonly DaprTopicSubscription topic;
 
                 public DaprTopicListener(
-                    DaprServiceListener serviceListener,
+                    IDaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
                     DaprTopicSubscription topic)
                     : base(serviceListener)

@@ -10,13 +10,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
     using System.Text.Json;
     using System.Text.Json.Serialization;
 
-    internal static class JsonUtils
+    /// <summary>
+    /// Utility methods for JSON serialization.
+    /// </summary>
+    public static class JsonUtils
     {
+        /// <summary>
+        /// Default <see cref="JsonSerializerOptions"/> used for serialization.
+        /// </summary>
         public static readonly JsonSerializerOptions DefaultSerializerOptions = new JsonSerializerOptions()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
+        /// <summary>
+        /// A <see cref="JsonConverter{T}"/> for <see cref="JsonElement"/>.
+        /// </summary>
         public class JsonElementConverter : JsonConverter<JsonElement>
         {
             /// <inheritdoc/>

@@ -16,9 +16,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     {
         readonly ConcurrentQueue<DaprBindingMessage> requests = new ConcurrentQueue<DaprBindingMessage>();
         readonly DaprBindingAttribute attr;
-        readonly DaprServiceClient daprService;
+        readonly IDaprServiceClient daprService;
 
-        public DaprBindingAsyncCollector(DaprBindingAttribute attr, DaprServiceClient daprService)
+        public DaprBindingAsyncCollector(DaprBindingAttribute attr, IDaprServiceClient daprService)
         {
             this.attr = attr;
             this.daprService = daprService;

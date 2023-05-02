@@ -15,9 +15,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     abstract class DaprListenerBase : IListener
     {
-        readonly DaprServiceListener serviceListener;
+        readonly IDaprServiceListener serviceListener;
 
-        public DaprListenerBase(DaprServiceListener serviceListener)
+        public DaprListenerBase(IDaprServiceListener serviceListener)
         {
             this.serviceListener = serviceListener;
         }

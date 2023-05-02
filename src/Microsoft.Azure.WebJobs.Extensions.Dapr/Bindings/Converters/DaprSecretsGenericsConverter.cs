@@ -13,9 +13,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
 
     internal class DaprSecretsGenericsConverter<T> : DaprGenericsConverterBase<DaprSecretAttribute, T>
     {
-        readonly DaprServiceClient daprClient;
+        readonly IDaprServiceClient daprClient;
 
-        public DaprSecretsGenericsConverter(DaprServiceClient daprClient)
+        public DaprSecretsGenericsConverter(IDaprServiceClient daprClient)
             : base(daprClient)
         {
             this.daprClient = daprClient;

@@ -18,10 +18,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
     class DaprServiceInvocationTriggerBindingProvider : ITriggerBindingProvider
     {
-        readonly DaprServiceListener serviceListener;
+        readonly IDaprServiceListener serviceListener;
         readonly INameResolver nameResolver;
 
-        public DaprServiceInvocationTriggerBindingProvider(DaprServiceListener serviceListener, INameResolver resolver)
+        public DaprServiceInvocationTriggerBindingProvider(IDaprServiceListener serviceListener, INameResolver resolver)
         {
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
             this.nameResolver = resolver;
@@ -44,11 +44,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         class DaprServiceInvocationTriggerBinding : DaprTriggerBindingBase
         {
-            readonly DaprServiceListener serviceListener;
+            readonly IDaprServiceListener serviceListener;
             readonly string methodName;
 
             public DaprServiceInvocationTriggerBinding(
-                DaprServiceListener serviceListener,
+                IDaprServiceListener serviceListener,
                 string methodName,
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
@@ -68,7 +68,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 readonly string methodName;
 
                 public DaprServiceInvocationListener(
-                    DaprServiceListener serviceListener,
+                    IDaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
                     string methodName)
                     : base(serviceListener)
