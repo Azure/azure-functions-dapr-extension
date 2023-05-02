@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\properties\tests.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\properties\tests.props" />
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>

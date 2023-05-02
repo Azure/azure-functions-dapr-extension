@@ -1,0 +1,4 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\properties\webjobs.props" Condition="$(MSBuildProjectName.Contains('WebJobs'))"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\properties\workers.props" Condition="$(MSBuildProjectName.Contains('Worker'))"/>
+</Project>
