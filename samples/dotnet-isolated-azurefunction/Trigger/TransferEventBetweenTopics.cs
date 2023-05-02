@@ -9,7 +9,6 @@ namespace dotnet_isolated_azurefunction
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json.Linq;
 
     public static class TransferEventBetweenTopics
     {

@@ -6,7 +6,6 @@
 namespace dotnet_isolated_azurefunction
 {
     using System.IO;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
     using Microsoft.Azure.Functions.Worker.Http;
