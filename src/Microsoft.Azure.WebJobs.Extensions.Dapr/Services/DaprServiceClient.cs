@@ -8,16 +8,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Net;
     using System.Net.Http;
-    using System.Net.Sockets;
-    using System.Runtime.Serialization;
     using System.Text;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
 
     /// <summary>
@@ -25,19 +21,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     /// </summary>
     public partial class DaprServiceClient : IDaprServiceClient
     {
-        readonly HttpClient httpClient;
         readonly string defaultDaprAddress;
+        readonly IDaprClient daprClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprServiceClient"/> class.
         /// </summary>
-        /// <param name="clientFactory">Client factory.</param>
+        /// <param name="daprClient">Dapr client.</param>
         /// <param name="nameResolver">Name resolver.</param>
-        public DaprServiceClient(
-            IHttpClientFactory clientFactory,
-            INameResolver nameResolver)
+        public DaprServiceClient(IDaprClient daprClient, INameResolver nameResolver)
         {
-            this.httpClient = clientFactory.CreateClient("DaprServiceClient");
+            this.daprClient = daprClient;
 
             // "daprAddress" is an environment variable created by the Dapr process
             this.defaultDaprAddress = GetDefaultDaprAddress(nameResolver);
@@ -51,89 +45,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             }
 
             return $"http://localhost:{daprPort}";
-        }
-
-        private static async Task<HttpResponseMessage> DaprHttpCall(Func<Task<HttpResponseMessage>> httpCall)
-        {
-            try
-            {
-                var response = await httpCall();
-                await ThrowIfDaprFailure(response);
-
-                return response;
-            }
-            catch (HttpRequestException ex) when (ex.InnerException is SocketException socketException)
-            {
-                if (socketException.SocketErrorCode == SocketError.ConnectionRefused)
-                {
-                    throw new DaprSidecarNotPresentException(HttpStatusCode.ServiceUnavailable, "ERR_DAPR_SIDECAR_DOES_NOT_EXIST", "Dapr sidecar is not present. Please follow this link (https://docs.dapr.io/operations/troubleshooting/common_issues/) to debug the issue with dapr.", ex);
-                }
-
-                throw new DaprException(HttpStatusCode.InternalServerError, "ERR_DAPR_REQUEST_FAILED", ex.Message, ex);
-            }
-            catch (DaprException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new DaprException(HttpStatusCode.InternalServerError, "ERR_DAPR_REQUEST_FAILED", ex.Message, ex);
-            }
-        }
-
-        private static async Task ThrowIfDaprFailure(HttpResponseMessage response)
-        {
-            if (!response.IsSuccessStatusCode)
-            {
-                string errorCode = string.Empty;
-                string errorMessage = string.Empty;
-
-                if (response.Content != null && response.Content.Headers.ContentLength != 0)
-                {
-                    JsonElement daprError;
-
-                    try
-                    {
-                        string content = await response.Content.ReadAsStringAsync();
-                        daprError = JsonDocument.Parse(content).RootElement;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new DaprException(
-                            response.StatusCode,
-                            "ERR_UNKNOWN",
-                            "The returned error message from Dapr Service is not a valid JSON Object.",
-                            e);
-                    }
-
-                    if (daprError.TryGetProperty("message", out JsonElement errorMessageToken))
-                    {
-                        errorMessage = errorMessageToken.GetRawText();
-                    }
-
-                    if (daprError.TryGetProperty("errorCode", out JsonElement errorCodeToken))
-                    {
-                        errorCode = errorCodeToken.GetRawText();
-                    }
-                }
-
-                // avoid potential overrides: specific 404 error messages can be returned from Dapr
-                // ex: https://docs.dapr.io/reference/api/actors_api/#get-actor-state
-                if (response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    throw new DaprException(
-                        response.StatusCode,
-                        string.IsNullOrEmpty(errorCode) ? "ERR_DOES_NOT_EXIST" : errorCode,
-                        string.IsNullOrEmpty(errorMessage) ? "The requested Dapr resource is not properly configured." : errorMessage);
-                }
-
-                throw new DaprException(
-                    response.StatusCode,
-                    string.IsNullOrEmpty(errorCode) ? "ERR_UNKNOWN" : errorCode,
-                    string.IsNullOrEmpty(errorMessage) ? "No meaningful error message is returned." : errorMessage);
-            }
-
-            return;
         }
 
         /// <inheritdoc/>
@@ -154,16 +65,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 System.Text.Json.JsonSerializer.Serialize(values, JsonUtils.DefaultSerializerOptions),
                 System.Text.Encoding.UTF8,
                 "application/json");
+            var uri = $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}";
 
-            await DaprHttpCall(async () =>
-            {
-                var response = await this.httpClient.PostAsync(
-                 $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}",
-                 stringContent,
-                 cancellationToken);
-
-                return response;
-            });
+            await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -175,14 +79,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         {
             this.EnsureDaprAddress(ref daprAddress);
 
-            var response = await DaprHttpCall(async () =>
-            {
-                var response = await this.httpClient.GetAsync(
-                    $"{daprAddress}/v1.0/state/{stateStore}/{key}",
-                    cancellationToken);
+            var uri = $"{daprAddress}/v1.0/state/{stateStore}/{key}";
 
-                return response;
-            });
+            var response = await this.daprClient.GetAsync(uri, cancellationToken);
 
             Stream contentStream = await response.Content.ReadAsStreamAsync();
             string? eTag = response.Headers.ETag?.Tag;
@@ -210,12 +109,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     "application/json");
             }
 
-            await DaprHttpCall(async () =>
-            {
-                var response = await this.httpClient.SendAsync(req, cancellationToken);
-
-                return response;
-            });
+            await this.daprClient.SendAsync(req, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -230,16 +124,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 System.Text.Json.JsonSerializer.Serialize(message, JsonUtils.DefaultSerializerOptions),
                 System.Text.Encoding.UTF8,
                 "application/json");
+            string uri = $"{daprAddress}/v1.0/bindings/{message.BindingName}";
 
-            await DaprHttpCall(async () =>
-            {
-                var response = await this.httpClient.PostAsync(
-                    $"{daprAddress}/v1.0/bindings/{message.BindingName}",
-                    stringContent,
-                    cancellationToken);
-
-                return response;
-            });
+            await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -258,12 +145,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 req.Content = new StringContent(payload?.GetRawText(), Encoding.UTF8, "application/json");
             }
 
-            await DaprHttpCall(async () =>
-            {
-                HttpResponseMessage response = await this.httpClient.SendAsync(req, cancellationToken);
-
-                return response;
-            });
+            await this.daprClient.SendAsync(req, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -292,14 +174,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 metadataQuery = "?" + metadata;
             }
 
-            var response = await DaprHttpCall(async () =>
-            {
-                var response = await this.httpClient.GetAsync(
-                    $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}",
-                    cancellationToken);
+            string uri = $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}";
 
-                return response;
-            });
+            var response = await this.daprClient.GetAsync(uri, cancellationToken);
 
             string secretPayload = await response.Content.ReadAsStringAsync();
 

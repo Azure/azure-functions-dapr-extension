@@ -31,6 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 .Services
                 .AddSingleton<IDaprServiceClient, DaprServiceClient>()
                 .AddSingleton<IDaprServiceListener, DaprServiceListener>()
+                .AddSingleton<IDaprClient, DaprHttpClient>()
                 .AddHttpClient();
             return builder;
         }
