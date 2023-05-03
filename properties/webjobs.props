@@ -1,6 +1,5 @@
 <Project>
-  <Import Project=".\common.props" />
-  <Import Project=".\nuget.props" />
+  <Import Project=".\core.props" />
 
   <PropertyGroup>
     <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</PackageIconUrl>

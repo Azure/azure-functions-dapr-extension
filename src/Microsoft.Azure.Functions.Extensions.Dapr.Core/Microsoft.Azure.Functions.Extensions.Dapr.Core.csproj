@@ -13,20 +13,6 @@
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>C:\AzureFunctionsExtensions\azure-functions-dapr-extension\properties\key.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>False</DelaySign>
   </PropertyGroup>
-
-  <!-- Meta packages and development tools -->
-  <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="All" />
-  </ItemGroup>
-
-  <!-- StyleCop configuration -->
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\.stylecop\stylecop.json" />
-    <Compile Include="..\..\.stylecop\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
-  </ItemGroup>
 
 </Project>

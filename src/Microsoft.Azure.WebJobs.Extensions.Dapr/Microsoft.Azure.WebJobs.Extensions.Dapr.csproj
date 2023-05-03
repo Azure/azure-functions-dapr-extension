@@ -35,17 +35,7 @@
     <PackageReference Include="CloudNative.CloudEvents" Version="2.6.0" />
     <PackageReference Include="CloudNative.CloudEvents.SystemTextJson" Version="2.6.0" />
   </ItemGroup>
-
-  <!-- Meta packages and development tools -->
-  <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="All" />
-  </ItemGroup>
-
-  <!-- StyleCop configuration -->
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\.stylecop\stylecop.json" />
-    <Compile Include="..\..\.stylecop\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
-  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj" />
   </ItemGroup>
