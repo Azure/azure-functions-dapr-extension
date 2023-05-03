@@ -1,6 +1,5 @@
 <Project>
   <Import Project=".\core.props" />
-
   <PropertyGroup>
     <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</PackageIconUrl>
     <PackageIcon>icon.png</PackageIcon>

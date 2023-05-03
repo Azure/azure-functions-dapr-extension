@@ -1,6 +1,5 @@
 <Project>
   <Import Project=".\core.props" />
-
   <PropertyGroup>
     <PackageIconUrl>https://aka.ms/azure-functions-package-icon</PackageIconUrl>
     <PackageIcon>icon.png</PackageIcon>

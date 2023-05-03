@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
     /// <summary>
     /// Parameter attribute for the Dapr secret input binding.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter)]
     public class DaprSecretInputAttribute : DaprBaseInputAttribute
     {
         /// <summary>
