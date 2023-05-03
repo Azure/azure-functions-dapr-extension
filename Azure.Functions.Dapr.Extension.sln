@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-isolated-azurefuncti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worker.Extensions.Dapr.Tests", "test\Worker.Extensions.Dapr.Tests\Worker.Extensions.Dapr.Tests.csproj", "{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Functions.Extensions.Dapr.Core", "src\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj", "{CE382838-8F90-432F-BE3C-1250FB2C5D36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.Extensions.Dapr.Core", "src\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj", "{CE382838-8F90-432F-BE3C-1250FB2C5D36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
