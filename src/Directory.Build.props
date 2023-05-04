@@ -1,5 +1,5 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\properties\core.props" Condition="$(MSBuildProjectName.Contains('Core'))"/>
   <Import Project="$(MSBuildThisFileDirectory)..\properties\webjobs.props" Condition="$(MSBuildProjectName.Contains('WebJobs'))"/>
   <Import Project="$(MSBuildThisFileDirectory)..\properties\workers.props" Condition="$(MSBuildProjectName.Contains('Worker'))"/>
-  <Import Project="$(MSBuildThisFileDirectory)..\properties\core.props" Condition="$(MSBuildProjectName.Contains('Core'))"/>
 </Project>

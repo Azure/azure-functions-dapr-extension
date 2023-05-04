@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Microsoft.Azure.Functions.Extensions.Dapr.Core</PackageId>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->
