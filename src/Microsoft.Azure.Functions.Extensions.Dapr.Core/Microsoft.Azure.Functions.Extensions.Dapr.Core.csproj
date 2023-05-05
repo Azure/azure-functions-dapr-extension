@@ -5,17 +5,33 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Microsoft.Azure.Functions.Extensions.Dapr.Core</PackageId>
     <IsPackable>true</IsPackable>
+    <!-- Default version for dev -->
+    <Version>99.99.99</Version>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="6.0.7" />
   </ItemGroup>
-  
+
   <!-- Use C# 9.0 features -->
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- Delete the nuget cache for the package -->
+  <Target Name="RemoveNugetPackageCache" BeforeTargets="Build">
+    <RemoveDir Directories="$(NugetPackageRoot)/$(PackageId.ToLower())/99.99.99"></RemoveDir>
+    <Message Text="Deleted nuget cache for $(PackageId.ToLower())/99.99.99" Importance="high" />
+  </Target>
+
+  <!-- Copy the nupkg to local-packages folder -->
+  <Target Name="CopyNupkg" AfterTargets="Pack">
+    <ItemGroup>
+      <_Packages Include="..\..\bin\$(Configuration)\nugets\$(PackageId.ToLower()).*.nupkg" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_Packages)" DestinationFolder="../../local-packages" />
+    <Message Text="Copied $(PackageId.ToLower()) to local-packages" Importance="high" />
+  </Target>
 </Project>

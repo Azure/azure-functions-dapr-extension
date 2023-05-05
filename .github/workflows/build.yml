@@ -33,10 +33,10 @@ jobs:
           dotnet-version: 6.0
       - name: Build solution - release
         run: dotnet build --configuration release
-      - name: Run Unit Tests Tests - release
+      - name: Run Unit Tests - release
         run: dotnet test --configuration release --no-build --verbosity normal
       - name: Generate Nuget Packages - release
-        run: dotnet pack --configuration release
+        run: dotnet pack --configuration release -p:PackageVersion=${REL_VERSION}
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
