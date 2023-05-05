@@ -12,19 +12,18 @@ import sys
 gitRef = os.getenv("GITHUB_REF")
 tagRefPrefix = "refs/tags/v"
 
+# Is this an edge build?
 if gitRef is None or not gitRef.startswith(tagRefPrefix):
-    print ("##[set-env name=REL_VERSION;]edge")
-    print ("This is daily build from {}...".format(gitRef))
+    print("##[set-env name=REL_VERSION;]edge")
+    print("This is daily build from {}...".format(gitRef))
     sys.exit(0)
 
+# Prepare release version
 releaseVersion = gitRef[len(tagRefPrefix):]
-releaseNotePath="docs/release_notes/v{}.md".format(releaseVersion)
 
-if gitRef.find("-rc.") > 0:
-    print ("Release Candidate build from {}...".format(gitRef))
-else:
-    # Set LATEST_RELEASE to true
-    print ("##[set-env name=LATEST_RELEASE;]true")
-    print ("Release build from {}...".format(gitRef))
+# Is this a preview build?
+if gitRef.find("-preview") > 0:
+    print("##[set-env name=PREVIEW_RELEASE;]true")
+    print("Preview build from {}...".format(gitRef))
 
-print ("##[set-env name=REL_VERSION;]{}".format(releaseVersion))
+print("##[set-env name=REL_VERSION;]{}".format(releaseVersion))
