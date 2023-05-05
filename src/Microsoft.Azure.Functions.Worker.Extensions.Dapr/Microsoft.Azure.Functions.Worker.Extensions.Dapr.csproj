@@ -11,8 +11,9 @@
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <!--TODO: Need to figure out how to set the version number.-->
-    <SupportedVersion>0.0.0-preview.0.118</SupportedVersion>
+    <!-- Default version for dev -->
+    <Version>99.99.99</Version>
+    <SupportedVersion>99.99.99</SupportedVersion>
     <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
   </PropertyGroup>
 
@@ -30,14 +31,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" Version="1.1.1" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions.ExtensionInformationAttribute">
       <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Dapr</_Parameter1>
       <_Parameter2>$(SupportedVersion)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj" />
   </ItemGroup>

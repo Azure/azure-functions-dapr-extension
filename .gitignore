@@ -262,3 +262,6 @@ __pycache__/
 .DS_Store
 
 .ionide
+
+# Local packages folder
+./local-packages/
