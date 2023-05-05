@@ -38,7 +38,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 var data = (byte[])value;
 
                 var stringData = System.Text.Encoding.UTF8.GetString(data, 0, data.Length);
-                this.Value = JsonDocument.Parse(stringData).RootElement;
+
+                try
+                {
+                    this.Value = JsonDocument.Parse(stringData).RootElement;
+                }
+                catch (JsonException)
+                {
+                    this.Value = JsonDocument.Parse("\"" + stringData + "\"").RootElement;
+                }
 
                 return;
             }

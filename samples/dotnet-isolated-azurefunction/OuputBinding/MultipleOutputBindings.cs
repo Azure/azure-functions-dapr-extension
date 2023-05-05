@@ -19,7 +19,7 @@
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.WriteString("Success!");
 
-            string myQueueOutput = "some output";
+            string myQueueOutput = "\"CurrentTime: " + DateTime.UtcNow.ToString() + "\"";
 
             return new MyOutputType()
             {
@@ -31,7 +31,7 @@
 
     public class MyOutputType
     {
-        [DaprStateOutput("%StateStoreName%", Key = "product")]
+        [DaprStateOutput("%StateStoreName%", Key = "MultiOutputKey")]
         public string? Name { get; set; }
 
         public HttpResponseData? HttpResponse { get; set; }
