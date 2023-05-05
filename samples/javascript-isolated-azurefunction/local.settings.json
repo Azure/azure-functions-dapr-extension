@@ -2,10 +2,10 @@
   "IsEncrypted": false,
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-    "PubSubName": "messagebus", // should be same as metatdata.name in components/messagebus.yaml
+    "FUNCTIONS_WORKER_RUNTIME": "node",
     "StateStoreName": "statestore", // should be same as metatdata.name in components/statestore.yaml
     "KafkaBindingName": "sample-topic", // should be same as metatdata.name in components/kafka_binding.yaml
+    "PubSubName": "messagebus", // should be same as metatdata.name in components/messagebus.yaml
     "AzureWebJobsSecretStorageType": "files"
   }
 }

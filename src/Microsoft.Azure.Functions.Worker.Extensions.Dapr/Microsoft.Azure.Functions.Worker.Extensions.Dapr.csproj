@@ -12,7 +12,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <!--TODO: Need to figure out how to set the version number.-->
-    <SupportedVersion>0.0.0-preview.0.115</SupportedVersion>
+    <SupportedVersion>0.0.0-preview.0.118</SupportedVersion>
     <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
   </PropertyGroup>
 
