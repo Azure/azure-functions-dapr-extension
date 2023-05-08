@@ -13,6 +13,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using CloudNative.CloudEvents.SystemTextJson;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;

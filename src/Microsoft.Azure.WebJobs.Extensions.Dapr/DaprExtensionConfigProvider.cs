@@ -10,6 +10,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System.IO;
     using System.Text;
     using System.Text.Json;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters;
@@ -62,13 +63,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             // NOTE: The order of conversions for each binding rules is important!
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
-            stateRule.AddConverter<byte[], DaprStateRecord>(CreateSaveStateParameters);
-            stateRule.AddConverter<JsonElement, DaprStateRecord>(CreateSaveStateParameters);
-            stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
-            stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
-            stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
+            stateRule.BindToCollector<JsonElement>(typeof(DaprJsonElementAsyncCollectorBuilder), this.daprClient);
             stateRule.BindToInput<DaprStateRecord>(daprStateConverter);
-            stateRule.BindToInput<byte[]>(daprStateConverter);
             stateRule.BindToInput<string>(daprStateConverter);
             stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToInput<JsonElement>(daprStateConverter);
@@ -98,7 +94,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             var daprSecretConverter = new DaprSecretConverter(this.daprClient);
             var secretsRule = context.AddBindingRule<DaprSecretAttribute>();
-            secretsRule.BindToInput<byte[]>(daprSecretConverter);
             secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<JsonElement>(daprSecretConverter);
             secretsRule.BindToInput<JObject>(daprSecretConverter);

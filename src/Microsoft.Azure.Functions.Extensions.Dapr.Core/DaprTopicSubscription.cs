@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
 {
     using System.Text.Json.Serialization;
 
@@ -11,7 +11,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     /// Dapr Topic Subscription returned when Dapr discover the topic subscriptions.
     /// https://docs.dapr.io/reference/api/pubsub_api/#provide-a-route-for-dapr-to-discover-topic-subscriptions.
     /// </summary>
-    internal class DaprTopicSubscription
+    public class DaprTopicSubscription
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprTopicSubscription"/> class.

@@ -9,6 +9,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System.IO;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
 
     /// <summary>
@@ -32,6 +33,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         // Internal constructor used only by the binding code.
         internal DaprStateRecord(object value)
         {
+            if (value.GetType().Name == "Byte[]")
+            {
+                var data = (byte[])value;
+
+                var stringData = System.Text.Encoding.UTF8.GetString(data, 0, data.Length);
+
+                try
+                {
+                    this.Value = JsonDocument.Parse(stringData).RootElement;
+                }
+                catch (JsonException)
+                {
+                    this.Value = JsonDocument.Parse("\"" + stringData + "\"").RootElement;
+                }
+
+                return;
+            }
+
             this.Value = JsonDocument.Parse(JsonSerializer.Serialize(value, JsonUtils.DefaultSerializerOptions)).RootElement;
         }
 

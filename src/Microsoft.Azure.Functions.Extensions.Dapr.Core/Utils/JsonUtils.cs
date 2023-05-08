@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
+namespace Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils
 {
     using System;
     using System.Text.Encodings.Web;

@@ -3,13 +3,13 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace Microsoft.Azure.WebJobs.Extensions.Dapr
+namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
 {
     using System;
     using System.Collections.Generic;
     using System.Text.Json;
     using System.Text.Json.Serialization;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
 
     /// <summary>
     /// Parameters for invoking a Dapr binding.
