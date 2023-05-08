@@ -33,15 +33,20 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0
-      - name: (TEMP) List files in the current directory
-        run: ls -la
-      - name: Manually create the local-packages directory
-        run: mkdir local-packages
+      # The MSBuild Copy task does not seem to work on GitHub Actions.
+      # This is a workaround to build the nuget packages one by one,
+      # and have a manual step to copy the packages to the local-packages folder.
+      - name: Build Microsoft.Azure.Functions.Extensions.Dapr.Core
+        run: dotnet build src/Microsoft.Azure.Functions.Extensions.Dapr.Core/Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj --configuration release --configfile nuget.config
+      - name: Build Microsoft.Azure.WebJobs.Extensions.Dapr
+        run: dotnet build src/Microsoft.Azure.WebJobs.Extensions.Dapr/Microsoft.Azure.WebJobs.Extensions.Dapr.csproj --configuration release --configfile nuget.config
+      - name: Copy NuGet packages to local-packages folder
+        run: |
+          mkdir -p local-packages
+          cp ${{ env.NUPKG_OUTDIR }}/*.nupkg local-packages
+      # Now build the solution and run the tests.
       - name: Build solution - release
         run: dotnet build --configuration release --configfile nuget.config
-      - name: (TEMP) List files in the local-packages directory
-        run: ls -la local-packages
-        if: always()
       - name: Run Unit Tests - release
         run: dotnet test --configuration release --no-build --verbosity normal
       - name: Generate Nuget Packages - release
