@@ -40,6 +40,12 @@ jobs:
         run: dotnet build src/Microsoft.Azure.Functions.Extensions.Dapr.Core/Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj --configuration release --configfile nuget.config
       - name: Build Microsoft.Azure.WebJobs.Extensions.Dapr
         run: dotnet build src/Microsoft.Azure.WebJobs.Extensions.Dapr/Microsoft.Azure.WebJobs.Extensions.Dapr.csproj --configuration release --configfile nuget.config
+      - uses: lhotari/action-upterm@v1
+        with:
+          ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+          limit-access-to-actor: true
+          ## limits ssh access and adds the ssh public keys of the listed GitHub users
+          limit-access-to-users: shubham1172
       - name: Copy NuGet packages to local-packages folder
         run: |
           mkdir -p local-packages
