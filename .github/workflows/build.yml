@@ -24,7 +24,7 @@ jobs:
       APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
-      NUPKG_OUTDIR: bin/Release/nugets
+      NUPKG_OUTDIR: bin/release/nugets
     steps:
       - uses: actions/checkout@v2
       - name: Parse release version
