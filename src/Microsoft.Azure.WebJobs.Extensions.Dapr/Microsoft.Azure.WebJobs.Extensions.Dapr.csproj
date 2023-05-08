@@ -51,6 +51,6 @@
       <_Packages Include="..\..\bin\$(Configuration)\nugets\$(PackageId.ToLower()).*.nupkg" />
     </ItemGroup>
     <Copy SourceFiles="@(_Packages)" DestinationFolder="../../local-packages" />
-    <Message Text="Copied $(PackageId.ToLower()) to local-packages" Importance="high" />
+    <Message Text="Copied $(PackageId.ToLower()) to $(MSBuildProjectDirectory)/../../local-packages" Importance="high" />
   </Target>
 </Project>

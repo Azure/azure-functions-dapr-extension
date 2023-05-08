@@ -32,9 +32,14 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0
+          dotnet-version: 6.0
+      - name: (TEMP) List files in the current directory
+        run: ls -la
       - name: Build solution - release
         run: dotnet build --configuration release --configfile nuget.config
+      - name: (TEMP) List files in the current directory
+        run: ls -la
+        if: always()
       - name: Run Unit Tests - release
         run: dotnet test --configuration release --no-build --verbosity normal
       - name: Generate Nuget Packages - release
