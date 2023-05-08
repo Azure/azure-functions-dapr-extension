@@ -1,7 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS installer-env
 
 # Copy the Microsoft.Azure.WebJobs.Extensions.Dapr, style cop, and dotnet sample into the installer-env to build
-COPY /src/Microsoft.Azure.WebJobs.Extensions.Dapr /src/src/Microsoft.Azure.WebJobs.Extensions.Dapr 
+COPY /src/Microsoft.Azure.WebJobs.Extensions.Dapr /src/src/Microsoft.Azure.WebJobs.Extensions.Dapr
+COPY /src/Microsoft.Azure.Functions.Extensions.Dapr.Core /src/src/Microsoft.Azure.Functions.Extensions.Dapr.Core
 COPY /.stylecop /src/.stylecop
 COPY /samples/dotnet-azurefunction /src/samples/dotnet-function-app
 
