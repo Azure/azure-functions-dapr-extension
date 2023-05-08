@@ -35,10 +35,12 @@ jobs:
           dotnet-version: 6.0
       - name: (TEMP) List files in the current directory
         run: ls -la
+      - name: Manually create the local-packages directory
+        run: mkdir local-packages
       - name: Build solution - release
         run: dotnet build --configuration release --configfile nuget.config
-      - name: (TEMP) List files in the current directory
-        run: ls -la
+      - name: (TEMP) List files in the local-packages directory
+        run: ls -la local-packages
         if: always()
       - name: Run Unit Tests - release
         run: dotnet test --configuration release --no-build --verbosity normal
