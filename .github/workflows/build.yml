@@ -38,10 +38,12 @@ jobs:
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
-      - name: Generate Nuget Packages - ${{ env.CONFIGURATION }}
+      - name: Generate NuGet Packages - ${{ env.CONFIGURATION }}
+        if: startswith(github.ref, 'refs/tags/v')
         run: dotnet pack --configuration ${{ env.CONFIGURATION }} -p:PackageVersion=${REL_VERSION}
         # Since we create local development nuget packages, we need to clean them up.
       - name: Clean up development Nuget packages
+        if: startswith(github.ref, 'refs/tags/v')
         run: rm -rf ${{ env.NUPKG_OUTDIR }}/*${{ env.DEV_VERSION_SUFFIX }}*.nupkg
       - name: Upload artifacts
         uses: actions/upload-artifact@master
