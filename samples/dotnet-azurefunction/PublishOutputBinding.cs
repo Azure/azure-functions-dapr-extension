@@ -7,6 +7,7 @@ namespace dotnet_azurefunction
 {
     using System.IO;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs.Extensions.Http;

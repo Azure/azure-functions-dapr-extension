@@ -13,8 +13,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Azure.WebJobs.Host.Bindings;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Listeners;

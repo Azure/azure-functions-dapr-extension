@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Microsoft.Azure.Functions.Worker.Extensions.Dapr</PackageId>
+    <Description>DAPR extension for Azure Functions</Description>
+    <IsPackable>true</IsPackable>
+    <Company>Microsoft</Company>
+    <Authors>Microsoft</Authors>
+    <Product>DAPR Extension</Product>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <!-- Default version for dev -->
+    <Version>99.99.99</Version>
+    <SupportedVersion>99.99.99</SupportedVersion>
+    <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
+  </PropertyGroup>
+
+  <!-- Additional Nuget package properties. -->
+  <PropertyGroup>
+    <Description>This extension adds bindings for Dapr</Description>
+  </PropertyGroup>
+
+  <!-- Use C# 9.0 features -->
+  <PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions.ExtensionInformationAttribute">
+      <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Dapr</_Parameter1>
+      <_Parameter2>$(SupportedVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj" />
+  </ItemGroup>
+</Project>

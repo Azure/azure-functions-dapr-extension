@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.WebJobs.Extensions.Dapr", "src\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj", "{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE}"
 EndProject
@@ -19,7 +19,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36331ABF-6DF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{33E065E0-9CB4-422A-9880-FF71D089BAB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-azurefunction", "samples\dotnet-azurefunction\dotnet-azurefunction.csproj", "{BE820001-1DE7-4565-8650-4880EDFEF7E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-azurefunction", "samples\dotnet-azurefunction\dotnet-azurefunction.csproj", "{BE820001-1DE7-4565-8650-4880EDFEF7E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.Worker.Extensions.Dapr", "src\Microsoft.Azure.Functions.Worker.Extensions.Dapr\Microsoft.Azure.Functions.Worker.Extensions.Dapr.csproj", "{4F535602-5333-4941-8678-5D2AD95A6513}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-isolated-azurefunction", "samples\dotnet-isolated-azurefunction\dotnet-isolated-azurefunction.csproj", "{53AE9999-C6E4-4245-8E19-0BD93AA73117}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Worker.Extensions.Dapr.Tests", "test\Worker.Extensions.Dapr.Tests\Worker.Extensions.Dapr.Tests.csproj", "{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.Extensions.Dapr.Core", "src\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj", "{CE382838-8F90-432F-BE3C-1250FB2C5D36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +47,22 @@ Global
 		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE820001-1DE7-4565-8650-4880EDFEF7E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F535602-5333-4941-8678-5D2AD95A6513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F535602-5333-4941-8678-5D2AD95A6513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F535602-5333-4941-8678-5D2AD95A6513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F535602-5333-4941-8678-5D2AD95A6513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,6 +71,10 @@ Global
 		{6D6AD659-C741-4AD8-B1AE-CC731A7B21EE} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
 		{8F4768AF-D8B6-40CC-8FCA-C4EC32D442A9} = {33E065E0-9CB4-422A-9880-FF71D089BAB8}
 		{BE820001-1DE7-4565-8650-4880EDFEF7E7} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
+		{4F535602-5333-4941-8678-5D2AD95A6513} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
+		{53AE9999-C6E4-4245-8E19-0BD93AA73117} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
+		{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894} = {33E065E0-9CB4-422A-9880-FF71D089BAB8}
+		{CE382838-8F90-432F-BE3C-1250FB2C5D36} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACF358FE-D84B-4EF9-95B4-E4F537B6D76F}

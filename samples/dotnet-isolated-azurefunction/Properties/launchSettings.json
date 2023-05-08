@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "dotnet_isolated_azurefunction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7270",
+      "launchBrowser": false
+    }
+  }
+}
