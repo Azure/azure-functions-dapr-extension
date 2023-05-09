@@ -63,7 +63,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             // NOTE: The order of conversions for each binding rules is important!
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
-            stateRule.BindToCollector<JsonElement>(typeof(DaprJsonElementAsyncCollectorBuilder), this.daprClient);
+            stateRule.AddConverter<JsonElement, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
             stateRule.BindToInput<DaprStateRecord>(daprStateConverter);
             stateRule.BindToInput<string>(daprStateConverter);
             stateRule.BindToInput<Stream>(daprStateConverter);
