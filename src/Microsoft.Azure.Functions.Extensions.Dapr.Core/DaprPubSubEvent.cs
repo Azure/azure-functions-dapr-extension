@@ -30,6 +30,24 @@ namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
                 throw new ArgumentNullException(nameof(payload));
             }
 
+            if (payload.GetType().Name == "Byte[]")
+            {
+                var data = (byte[])payload;
+
+                var stringData = System.Text.Encoding.UTF8.GetString(data, 0, data.Length);
+
+                try
+                {
+                    this.Payload = JsonDocument.Parse(stringData).RootElement;
+                }
+                catch (JsonException)
+                {
+                    this.Payload = JsonDocument.Parse("\"" + stringData + "\"").RootElement;
+                }
+
+                return;
+            }
+
             string serializedData = string.Empty;
             try
             {

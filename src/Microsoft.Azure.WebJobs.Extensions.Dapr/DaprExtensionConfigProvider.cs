@@ -63,7 +63,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             // NOTE: The order of conversions for each binding rules is important!
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
-            stateRule.BindToCollector<JsonElement>(typeof(DaprJsonElementAsyncCollectorBuilder), this.daprClient);
+            stateRule.AddConverter<JsonElement, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
             stateRule.BindToInput<DaprStateRecord>(daprStateConverter);
             stateRule.BindToInput<string>(daprStateConverter);
             stateRule.BindToInput<Stream>(daprStateConverter);
@@ -79,7 +82,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
 
             var publishRule = context.AddBindingRule<DaprPublishAttribute>();
-            publishRule.AddConverter<byte[], DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<JsonElement, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<JObject, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<object, DaprPubSubEvent>(CreatePubSubEvent);
@@ -88,7 +90,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             var daprBindingRule = context.AddBindingRule<DaprBindingAttribute>();
             daprBindingRule.AddConverter<JsonElement, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<JObject, DaprBindingMessage>(CreateBindingMessage);
-            daprBindingRule.AddConverter<byte[], DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<object, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.BindToCollector(attr => new DaprBindingAsyncCollector(attr, this.daprClient));
 
@@ -107,11 +108,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             context.AddBindingRule<DaprBindingTriggerAttribute>()
                 .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener, this.nameResolver));
-        }
-
-        static DaprPubSubEvent CreatePubSubEvent(byte[] arg)
-        {
-            return CreatePubSubEvent(BytesToJsonElement(arg));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(object arg)
@@ -144,11 +140,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         static DaprBindingMessage CreateBindingMessage(object paramValues)
         {
             return new DaprBindingMessage(paramValues);
-        }
-
-        static DaprBindingMessage CreateBindingMessage(byte[] paramValues)
-        {
-            return CreateBindingMessage(BytesToJsonElement(paramValues));
         }
 
         static DaprBindingMessage CreateBindingMessage(JObject arg)
@@ -187,11 +178,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             return message;
-        }
-
-        internal static DaprStateRecord CreateSaveStateParameters(byte[] arg)
-        {
-            return CreateSaveStateParameters(BytesToJsonElement(arg));
         }
 
         internal static DaprStateRecord CreateSaveStateParameters(JObject value)
