@@ -88,7 +88,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             var daprBindingRule = context.AddBindingRule<DaprBindingAttribute>();
             daprBindingRule.AddConverter<JsonElement, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<JObject, DaprBindingMessage>(CreateBindingMessage);
-            daprBindingRule.AddConverter<byte[], DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<object, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.BindToCollector(attr => new DaprBindingAsyncCollector(attr, this.daprClient));
 
