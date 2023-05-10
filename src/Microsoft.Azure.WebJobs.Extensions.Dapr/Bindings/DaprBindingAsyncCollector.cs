@@ -19,7 +19,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         readonly DaprBindingAttribute attr;
         readonly IDaprServiceClient daprServiceClient;
 
-        public DaprBindingAsyncCollector(DaprBindingAttribute attr, IDaprServiceClient daprService)
+        public DaprBindingAsyncCollector(DaprBindingAttribute attr, IDaprServiceClient daprServiceClient)
         {
             this.attr = attr;
             this.daprServiceClient = daprService;
