@@ -16,33 +16,38 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Dapr service client.
     /// </summary>
     public partial class DaprServiceClient : IDaprServiceClient
     {
+        private const int DefaultDaprPort = 3500;
+
+        readonly ILogger logger;
         readonly string defaultDaprAddress;
         readonly IDaprClient daprClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprServiceClient"/> class.
         /// </summary>
+        /// <param name="loggerFactory">Logger factory.</param>
         /// <param name="daprClient">Dapr client.</param>
         /// <param name="nameResolver">Name resolver.</param>
-        public DaprServiceClient(IDaprClient daprClient, INameResolver nameResolver)
+        public DaprServiceClient(ILoggerFactory loggerFactory, IDaprClient daprClient, INameResolver nameResolver)
         {
+            this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory());
             this.daprClient = daprClient;
-
-            // "daprAddress" is an environment variable created by the Dapr process
-            this.defaultDaprAddress = GetDefaultDaprAddress(nameResolver);
+            this.defaultDaprAddress = this.GetDefaultDaprAddress(nameResolver);
         }
 
-        private static string GetDefaultDaprAddress(INameResolver resolver)
+        private string GetDefaultDaprAddress(INameResolver resolver)
         {
             if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
             {
-                daprPort = 3500;
+                daprPort = DefaultDaprPort;
+                this.logger.LogDebug("DAPR_HTTP_PORT environment variable not found. Using port {daprPort} as default.", daprPort);
             }
 
             return $"http://localhost:{daprPort}";

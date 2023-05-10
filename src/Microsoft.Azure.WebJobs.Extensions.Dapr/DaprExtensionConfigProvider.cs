@@ -57,7 +57,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentNullException("context");
             }
 
-            this.logger.LogInformation($"Registered dapr extension");
+            this.logger.LogInformation($"Registered Dapr extension");
 
             var daprStateConverter = new DaprStateConverter(this.daprClient);
 

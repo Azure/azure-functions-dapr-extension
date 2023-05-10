@@ -26,14 +26,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
         readonly HashSet<DaprTopicSubscription> topics = new HashSet<DaprTopicSubscription>(new DaprTopicSubscriptionComparer());
         readonly string appAddress;
-        readonly ILogger log;
+        readonly ILogger logger;
 
         IWebHost? host;
         int serverStarted;
 
         public DaprServiceListener(ILoggerFactory loggerFactory, INameResolver resolver)
         {
-            this.log = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
             this.appAddress = GetDefaultAppAddress(resolver);
         }
 
@@ -75,9 +75,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     })
                     .Build();
 
-                this.log.LogInformation($"Starting Dapr HTTP listener on {this.appAddress} with {this.listeners.Count} function listener(s) registered.");
+                this.logger.LogInformation($"Starting Dapr HTTP listener on {this.appAddress} with {this.listeners.Count} function listener(s) registered.");
                 await this.host.StartAsync(cancellationToken);
-                this.log.LogInformation("Dapr HTTP host started successfully.");
+                this.logger.LogInformation("Dapr HTTP host started successfully.");
             }
         }
 
@@ -89,9 +89,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 this.listeners.Count == 0 &&
                 Interlocked.CompareExchange(ref this.serverStarted, 0, 1) == 1)
             {
-                this.log.LogInformation($"Stopping Dapr HTTP listener.");
+                this.logger.LogInformation($"Stopping Dapr HTTP listener.");
                 await this.host.StopAsync(cancellationToken);
-                this.log.LogInformation($"Dapr HTTP host stopped successfully.");
+                this.logger.LogInformation($"Dapr HTTP host stopped successfully.");
             }
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         {
             if (this.topics.Add(topic))
             {
-                this.log.LogInformation("Registered topic: {PubSubName}/{TopicName} -> {Route}", topic.PubSubName, topic.Topic, topic.Route);
+                this.logger.LogInformation("Registered topic: {PubSubName}/{TopicName} -> {Route}", topic.PubSubName, topic.Topic, topic.Route);
             }
         }
 
@@ -138,8 +138,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 else if (
 
                     // pub/sub name and topic name are case-sensitive in dapr
-                    //
-                    // routing is handled by ASP.NET and is case-INsensitive
+                    // routing is handled by ASP.NET and is case-insensitive
                     topic1.PubSubName.Equals(topic2.PubSubName, StringComparison.Ordinal)
                     && topic1.Topic.Equals(topic2.Topic, StringComparison.Ordinal)
                     && topic1.Route.Equals(topic2.Route, StringComparison.OrdinalIgnoreCase))
