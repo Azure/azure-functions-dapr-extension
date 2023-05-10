@@ -33,6 +33,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         // Internal constructor used only by the binding code.
         internal DaprStateRecord(object value)
         {
+            // TODO: This is a temporary workaround for converter, where isolated worker is sending byte[] instead of actual type defined in azure functions.
+            // This will be removed once we have a fix for converter
             if (value.GetType().Name == "Byte[]")
             {
                 var data = (byte[])value;
