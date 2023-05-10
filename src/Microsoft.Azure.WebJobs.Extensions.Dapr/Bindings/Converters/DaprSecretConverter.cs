@@ -16,7 +16,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
     class DaprSecretConverter :
         IAsyncConverter<DaprSecretAttribute, string?>,
         IAsyncConverter<DaprSecretAttribute, JsonElement>,
-        IAsyncConverter<DaprSecretAttribute, JObject>
+        IAsyncConverter<DaprSecretAttribute, JObject>,
+        IAsyncConverter<DaprSecretAttribute, JToken>
     {
         readonly IDaprServiceClient daprClient;
 
@@ -46,6 +47,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
         {
             JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
             return JObject.Parse(JsonSerializer.Serialize(result, JsonUtils.DefaultSerializerOptions));
+        }
+
+        async Task<JToken> IAsyncConverter<DaprSecretAttribute, JToken>.ConvertAsync(
+            DaprSecretAttribute input,
+            CancellationToken cancellationToken)
+        {
+            JsonDocument result = await this.GetSecretsAsync(input, cancellationToken);
+            return JToken.Parse(JsonSerializer.Serialize(result, JsonUtils.DefaultSerializerOptions));
         }
 
         private Task<JsonDocument> GetSecretsAsync(DaprSecretAttribute input, CancellationToken cancellationToken)
