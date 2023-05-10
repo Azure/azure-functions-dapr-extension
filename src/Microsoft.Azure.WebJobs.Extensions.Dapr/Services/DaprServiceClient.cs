@@ -68,12 +68,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 this.EnsureDaprAddress(ref daprAddress);
 
                 var stringContent = new StringContent(
-                    System.Text.Json.JsonSerializer.Serialize(values, JsonUtils.DefaultSerializerOptions),
-                    System.Text.Encoding.UTF8,
+                    JsonSerializer.Serialize(values, JsonUtils.DefaultSerializerOptions),
+                    Encoding.UTF8,
                     "application/json");
                 var uri = $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}";
 
                 await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+            }
+            catch (JsonException ex)
+            {
+                throw new DaprException(HttpStatusCode.BadRequest, ErrorCodes.ErrDaprBadRequest, "Failed to serialize. Reason: " + ex.Message, ex);
             }
             catch (Exception ex)
             {
@@ -142,6 +146,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
                 await this.daprClient.SendAsync(req, cancellationToken);
             }
+            catch (JsonException ex)
+            {
+                throw new DaprException(HttpStatusCode.BadRequest, ErrorCodes.ErrDaprBadRequest, "Failed to serialize. Reason: " + ex.Message, ex);
+            }
             catch (Exception ex)
             {
                 if (ex is DaprException || ex is DaprSidecarNotPresentException)
@@ -164,12 +172,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 this.EnsureDaprAddress(ref daprAddress);
 
                 var stringContent = new StringContent(
-                    System.Text.Json.JsonSerializer.Serialize(message, JsonUtils.DefaultSerializerOptions),
-                    System.Text.Encoding.UTF8,
+                    JsonSerializer.Serialize(message, JsonUtils.DefaultSerializerOptions),
+                    Encoding.UTF8,
                     "application/json");
                 string uri = $"{daprAddress}/v1.0/bindings/{message.BindingName}";
 
                 await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+            }
+            catch (JsonException ex)
+            {
+                throw new DaprException(HttpStatusCode.BadRequest, ErrorCodes.ErrDaprBadRequest, "Failed to serialize. Reason: " + ex.Message, ex);
             }
             catch (Exception ex)
             {
