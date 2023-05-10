@@ -10,7 +10,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Listeners;
 
     abstract class DaprListenerBase : IListener
@@ -45,17 +47,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             try
             {
-                // TODO: How do we handle failed function calls? We probably shouldn't 500, as they could retry indefinitely
                 await this.DispatchInternalAsync(context);
             }
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
             {
                 // No-op. This is expected when the request is aborted.
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                context.Response.StatusCode = 500;
-                await context.Response.WriteAsync(string.Empty);
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    var exception = ex as DaprException;
+                    context.Response.StatusCode = (int)exception!.StatusCode;
+                    await context.Response.WriteAsync(exception!.Message);
+                }
+                else
+                {
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync($"Function invocation failed: {ex.Message}");
+                }
             }
         }
 

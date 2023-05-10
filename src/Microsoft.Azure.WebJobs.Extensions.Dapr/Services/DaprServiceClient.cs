@@ -8,6 +8,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Text.Json;
@@ -16,6 +17,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
 
     /// <summary>
     /// Dapr service client.
@@ -60,15 +63,31 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 throw new ArgumentNullException(nameof(stateStore));
             }
 
-            this.EnsureDaprAddress(ref daprAddress);
+            try
+            {
+                this.EnsureDaprAddress(ref daprAddress);
 
-            var stringContent = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(values, JsonUtils.DefaultSerializerOptions),
-                System.Text.Encoding.UTF8,
-                "application/json");
-            var uri = $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}";
+                var stringContent = new StringContent(
+                    JsonSerializer.Serialize(values, JsonUtils.DefaultSerializerOptions),
+                    Encoding.UTF8,
+                    "application/json");
+                var uri = $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}";
 
-            await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+                await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+            }
+            catch (JsonException ex)
+            {
+                throw new DaprException(HttpStatusCode.BadRequest, ErrorCodes.ErrDaprBadRequest, "Failed to serialize. Reason: " + ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    throw;
+                }
+
+                throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, "An error occurred while saving state.", ex);
+            }
         }
 
         /// <inheritdoc/>
@@ -78,16 +97,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             string key,
             CancellationToken cancellationToken)
         {
-            this.EnsureDaprAddress(ref daprAddress);
+            try
+            {
+                this.EnsureDaprAddress(ref daprAddress);
 
-            var uri = $"{daprAddress}/v1.0/state/{stateStore}/{key}";
+                var uri = $"{daprAddress}/v1.0/state/{stateStore}/{key}";
 
-            var response = await this.daprClient.GetAsync(uri, cancellationToken);
+                var response = await this.daprClient.GetAsync(uri, cancellationToken);
 
-            Stream contentStream = await response.Content.ReadAsStreamAsync();
-            string? eTag = response.Headers.ETag?.Tag;
+                Stream contentStream = await response.Content.ReadAsStreamAsync();
+                string? eTag = response.Headers.ETag?.Tag;
 
-            return new DaprStateRecord(key, contentStream, eTag);
+                return new DaprStateRecord(key, contentStream, eTag);
+            }
+            catch (Exception ex)
+            {
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    throw;
+                }
+
+                throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, "An error occurred while getting state.", ex);
+            }
         }
 
         /// <inheritdoc/>
@@ -99,19 +130,35 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             object? body,
             CancellationToken cancellationToken)
         {
-            this.EnsureDaprAddress(ref daprAddress);
-
-            var req = new HttpRequestMessage(new HttpMethod(httpVerb), $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}");
-            if (body != null)
+            try
             {
-                req.Content = new StringContent(
-                    JsonSerializer.Serialize(body, JsonUtils.DefaultSerializerOptions),
-                    Encoding.UTF8,
-                    "application/json");
-                req.Content.Headers.ContentType.CharSet = string.Empty;
-            }
+                this.EnsureDaprAddress(ref daprAddress);
 
-            await this.daprClient.SendAsync(req, cancellationToken);
+                var req = new HttpRequestMessage(new HttpMethod(httpVerb), $"{daprAddress}/v1.0/invoke/{appId}/method/{methodName}");
+                if (body != null)
+                {
+                    req.Content = new StringContent(
+                        JsonSerializer.Serialize(body, JsonUtils.DefaultSerializerOptions),
+                        Encoding.UTF8,
+                        "application/json");
+                    req.Content.Headers.ContentType.CharSet = string.Empty;
+                }
+
+                await this.daprClient.SendAsync(req, cancellationToken);
+            }
+            catch (JsonException ex)
+            {
+                throw new DaprException(HttpStatusCode.BadRequest, ErrorCodes.ErrDaprBadRequest, "Failed to serialize. Reason: " + ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    throw;
+                }
+
+                throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, "An error occurred while invoking method.", ex);
+            }
         }
 
         /// <inheritdoc/>
@@ -120,15 +167,31 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             DaprBindingMessage message,
             CancellationToken cancellationToken)
         {
-            this.EnsureDaprAddress(ref daprAddress);
+            try
+            {
+                this.EnsureDaprAddress(ref daprAddress);
 
-            var stringContent = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(message, JsonUtils.DefaultSerializerOptions),
-                System.Text.Encoding.UTF8,
-                "application/json");
-            string uri = $"{daprAddress}/v1.0/bindings/{message.BindingName}";
+                var stringContent = new StringContent(
+                    JsonSerializer.Serialize(message, JsonUtils.DefaultSerializerOptions),
+                    Encoding.UTF8,
+                    "application/json");
+                string uri = $"{daprAddress}/v1.0/bindings/{message.BindingName}";
 
-            await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+                await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+            }
+            catch (JsonException ex)
+            {
+                throw new DaprException(HttpStatusCode.BadRequest, ErrorCodes.ErrDaprBadRequest, "Failed to serialize. Reason: " + ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    throw;
+                }
+
+                throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, "An error occurred while sending request to dapr binding.", ex);
+            }
         }
 
         /// <inheritdoc/>
@@ -139,15 +202,27 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             JsonElement? payload,
             CancellationToken cancellationToken)
         {
-            this.EnsureDaprAddress(ref daprAddress);
-
-            var req = new HttpRequestMessage(HttpMethod.Post, $"{daprAddress}/v1.0/publish/{name}/{topicName}");
-            if (payload != null)
+            try
             {
-                req.Content = new StringContent(payload?.GetRawText(), Encoding.UTF8, "application/json");
-            }
+                this.EnsureDaprAddress(ref daprAddress);
 
-            await this.daprClient.SendAsync(req, cancellationToken);
+                var req = new HttpRequestMessage(HttpMethod.Post, $"{daprAddress}/v1.0/publish/{name}/{topicName}");
+                if (payload != null)
+                {
+                    req.Content = new StringContent(payload?.GetRawText(), Encoding.UTF8, "application/json");
+                }
+
+                await this.daprClient.SendAsync(req, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    throw;
+                }
+
+                throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, "An error occurred while publishing event.", ex);
+            }
         }
 
         /// <inheritdoc/>
@@ -168,22 +243,34 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 throw new ArgumentNullException(nameof(key));
             }
 
-            this.EnsureDaprAddress(ref daprAddress);
-
-            string metadataQuery = string.Empty;
-            if (!string.IsNullOrEmpty(metadata))
+            try
             {
-                metadataQuery = "?" + metadata;
+                this.EnsureDaprAddress(ref daprAddress);
+
+                string metadataQuery = string.Empty;
+                if (!string.IsNullOrEmpty(metadata))
+                {
+                    metadataQuery = "?" + metadata;
+                }
+
+                string uri = $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}";
+
+                var response = await this.daprClient.GetAsync(uri, cancellationToken);
+
+                string secretPayload = await response.Content.ReadAsStringAsync();
+
+                // The response is always expected to be a JSON object
+                return JsonDocument.Parse(secretPayload);
             }
+            catch (Exception ex)
+            {
+                if (ex is DaprException || ex is DaprSidecarNotPresentException)
+                {
+                    throw;
+                }
 
-            string uri = $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}";
-
-            var response = await this.daprClient.GetAsync(uri, cancellationToken);
-
-            string secretPayload = await response.Content.ReadAsStringAsync();
-
-            // The response is always expected to be a JSON object
-            return JsonDocument.Parse(secretPayload);
+                throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, "An error occurred while getting secret.", ex);
+            }
         }
 
         private void EnsureDaprAddress(ref string? daprAddress)

@@ -20,12 +20,7 @@ namespace Microsoft.Azure.Functions.Worker.Extensions.Dapr
         /// <param name="pubSubName">The pub/sub name.</param>
         public DaprTopicTriggerAttribute(string pubSubName)
         {
-            if (pubSubName is null)
-            {
-                throw new ArgumentNullException(nameof(pubSubName));
-            }
-
-            this.PubSubName = pubSubName;
+            this.PubSubName = pubSubName ?? throw new ArgumentNullException(nameof(pubSubName));
         }
 
         /// <summary>
