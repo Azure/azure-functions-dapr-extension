@@ -30,6 +30,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
         public const string ErrDaprResourceDoesNotExist = "ERR_DAPR_RESOURCE_DOES_NOT_EXIST";
 
         /// <summary>
+        /// Bad request.
+        /// </summary>
+        public const string ErrDaprBadRequest = "ERR_DAPR_BAD_REQUEST";
+
+        /// <summary>
         /// Unknown Error.
         /// </summary>
         public const string ErrUnknown = "ERR_UNKNOWN";
