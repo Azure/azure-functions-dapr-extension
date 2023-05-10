@@ -22,7 +22,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         public DaprBindingAsyncCollector(DaprBindingAttribute attr, IDaprServiceClient daprServiceClient)
         {
             this.attr = attr;
-            this.daprServiceClient = daprService;
+            this.daprServiceClient = daprServiceClient;
         }
 
         public Task AddAsync(DaprBindingMessage item, CancellationToken cancellationToken = default)
