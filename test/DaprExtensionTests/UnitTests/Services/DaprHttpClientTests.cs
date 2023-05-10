@@ -5,16 +5,25 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Extensions.Logging;
+    using Moq;
     using Xunit;
 
     public class DaprHttpClientTests
     {
+        private readonly ILoggerFactory loggerFactory;
+
+        public DaprHttpClientTests()
+        {
+            this.loggerFactory = new Mock<LoggerFactory>().Object;
+        }
+
         [Fact]
         public async Task PostAsync_Success()
         {
             // Arrange
             var clientFactory = new TestHttpClientFactory(new HttpResponseMessage(HttpStatusCode.OK));
-            var httpClient = new DaprHttpClient(clientFactory);
+            var httpClient = new DaprHttpClient(this.loggerFactory, clientFactory);
             var content = new StringContent("Hello World");
             var cancellationToken = CancellationToken.None;
 
@@ -30,7 +39,7 @@
         {
             // Arrange
             var clientFactory = new TestHttpClientFactory(new HttpResponseMessage(HttpStatusCode.OK));
-            var httpClient = new DaprHttpClient(clientFactory);
+            var httpClient = new DaprHttpClient(this.loggerFactory, clientFactory);
             var cancellationToken = CancellationToken.None;
 
             // Act
@@ -45,7 +54,7 @@
         {
             // Arrange
             var clientFactory = new TestHttpClientFactory(new HttpResponseMessage(HttpStatusCode.OK));
-            var httpClient = new DaprHttpClient(clientFactory);
+            var httpClient = new DaprHttpClient(this.loggerFactory, clientFactory);
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api");
             var cancellationToken = CancellationToken.None;
 
