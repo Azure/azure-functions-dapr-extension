@@ -87,7 +87,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                         string content = await response.Content.ReadAsStringAsync();
                         daprError = JsonDocument.Parse(content).RootElement;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (e is JsonException || e is ArgumentException)
                     {
                         throw new DaprException(
                             response.StatusCode,

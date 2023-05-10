@@ -15,9 +15,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Azure.WebJobs.Host.Bindings;
     using Microsoft.Azure.WebJobs.Host.Config;
-    using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
 
@@ -30,6 +30,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         readonly IDaprServiceClient daprClient;
         readonly IDaprServiceListener daprListener;
         readonly INameResolver nameResolver;
+        readonly ILoggerFactory loggerFactory;
         readonly ILogger logger;
 
         public DaprExtensionConfigProvider(
@@ -40,14 +41,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
             this.daprListener = daprListener ?? throw new ArgumentNullException(nameof(daprListener));
-
-            if (loggerFactory == null)
-            {
-                throw new ArgumentNullException(nameof(loggerFactory));
-            }
-
-            this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             this.nameResolver = nameResolver;
+
+            this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprTriggerCategory());
         }
 
         public void Initialize(ExtensionConfigContext context)
@@ -101,13 +98,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             secretsRule.BindToInput<OpenType>(typeof(DaprSecretsGenericsConverter<>), this.daprClient);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
-                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(this.daprListener, this.nameResolver));
+                .BindToTrigger(new DaprServiceInvocationTriggerBindingProvider(
+                    this.loggerFactory.CreateLogger(LoggingUtils.CreateDaprTriggerCategory("ServiceInvocationTrigger")),
+                    this.daprListener,
+                    this.nameResolver));
 
             context.AddBindingRule<DaprTopicTriggerAttribute>()
-                .BindToTrigger(new DaprTopicTriggerBindingProvider(this.daprListener, this.nameResolver));
+                .BindToTrigger(new DaprTopicTriggerBindingProvider(
+                    this.loggerFactory.CreateLogger(LoggingUtils.CreateDaprTriggerCategory("TopicTrigger")),
+                    this.daprListener,
+                    this.nameResolver));
 
             context.AddBindingRule<DaprBindingTriggerAttribute>()
-                .BindToTrigger(new DaprBindingTriggerBindingProvider(this.daprListener, this.nameResolver));
+                .BindToTrigger(new DaprBindingTriggerBindingProvider(
+                    this.loggerFactory.CreateLogger(LoggingUtils.CreateDaprTriggerCategory("BindingTrigger")),
+                    this.daprListener,
+                    this.nameResolver));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(object arg)

@@ -8,9 +8,13 @@ all: build
 build:
 	dotnet build --configuration $(CONFIGURATION) --configfile nuget.config
 
+# Test target
+test:
+	dotnet test --configuration $(CONFIGURATION)
+
 # Clean target
 clean:
 	dotnet clean
 
 # Phony targets
-.PHONY: all build clean
+.PHONY: all build test clean

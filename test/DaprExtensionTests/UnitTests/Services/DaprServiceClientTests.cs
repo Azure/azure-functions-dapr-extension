@@ -31,6 +31,8 @@ namespace DaprExtensionTests.UnitTests.Services
         public DaprServiceClientTests()
         {
             this.loggerFactoryMock = new Mock<ILoggerFactory>();
+            loggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+
             this.nameResolverMock = new Mock<INameResolver>();
             this.daprClientMock = new Mock<IDaprClient>();
 
