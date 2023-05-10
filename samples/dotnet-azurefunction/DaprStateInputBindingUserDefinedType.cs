@@ -22,7 +22,7 @@ namespace dotnet_isolated_azurefunction
         {
             log.LogInformation("C# function processed a DaprStateInputBindingUserDefinedType request from the Dapr Runtime.");
 
-            //print the fetched state value
+            // print the fetched state value
             log.LogInformation(JsonSerializer.Serialize(data));
         }
     }

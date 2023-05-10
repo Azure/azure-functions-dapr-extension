@@ -18,11 +18,12 @@ namespace dotnet_azurefunction
         [FunctionName("CreateNewOrder")]
         public static void Run(
             [DaprServiceInvocationTrigger] JObject payload,
-            [DaprState("%StateStoreName%", Key = "order")] out object order,
+            [DaprState("%StateStoreName%", Key = "order")] out JToken order,
             ILogger log)
         {
             log.LogInformation("C# function processed a CreateNewOrder request from the Dapr Runtime.");
 
+            // payload must be of the format { "data": { "value": "some value" } }
             order = payload["data"];
         }
     }

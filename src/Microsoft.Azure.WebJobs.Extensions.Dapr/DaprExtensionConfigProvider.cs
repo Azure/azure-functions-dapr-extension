@@ -65,6 +65,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             var stateRule = context.AddBindingRule<DaprStateAttribute>();
             stateRule.AddConverter<JsonElement, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.AddConverter<JObject, DaprStateRecord>(CreateSaveStateParameters);
+            stateRule.AddConverter<JToken, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.AddConverter<object, DaprStateRecord>(CreateSaveStateParameters);
             stateRule.BindToCollector(attr => new DaprSaveStateAsyncCollector(attr, this.daprClient));
             stateRule.BindToInput<DaprStateRecord>(daprStateConverter);
@@ -72,24 +73,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             stateRule.BindToInput<Stream>(daprStateConverter);
             stateRule.BindToInput<JsonElement>(daprStateConverter);
             stateRule.BindToInput<JObject>(daprStateConverter);
+            stateRule.BindToInput<JToken>(daprStateConverter);
             stateRule.BindToInput<OpenType>(typeof(DaprStateGenericsConverter<>), this.daprClient);
 
             var invokeRule = context.AddBindingRule<DaprInvokeAttribute>();
             invokeRule.AddConverter<byte[], InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.AddConverter<JsonElement, InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.AddConverter<JObject, InvokeMethodParameters>(CreateInvokeMethodParameters);
+            invokeRule.AddConverter<JToken, InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.AddConverter<object, InvokeMethodParameters>(CreateInvokeMethodParameters);
             invokeRule.BindToCollector(attr => new DaprInvokeMethodAsyncCollector(attr, this.daprClient));
 
             var publishRule = context.AddBindingRule<DaprPublishAttribute>();
             publishRule.AddConverter<JsonElement, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<JObject, DaprPubSubEvent>(CreatePubSubEvent);
+            publishRule.AddConverter<JToken, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.AddConverter<object, DaprPubSubEvent>(CreatePubSubEvent);
             publishRule.BindToCollector(attr => new DaprPublishAsyncCollector(attr, this.daprClient));
 
             var daprBindingRule = context.AddBindingRule<DaprBindingAttribute>();
             daprBindingRule.AddConverter<JsonElement, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<JObject, DaprBindingMessage>(CreateBindingMessage);
+            daprBindingRule.AddConverter<JToken, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.AddConverter<object, DaprBindingMessage>(CreateBindingMessage);
             daprBindingRule.BindToCollector(attr => new DaprBindingAsyncCollector(attr, this.daprClient));
 
@@ -98,6 +103,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             secretsRule.BindToInput<string?>(daprSecretConverter);
             secretsRule.BindToInput<JsonElement>(daprSecretConverter);
             secretsRule.BindToInput<JObject>(daprSecretConverter);
+            secretsRule.BindToInput<JToken>(daprSecretConverter);
             secretsRule.BindToInput<OpenType>(typeof(DaprSecretsGenericsConverter<>), this.daprClient);
 
             context.AddBindingRule<DaprServiceInvocationTriggerAttribute>()
@@ -118,6 +124,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         static DaprPubSubEvent CreatePubSubEvent(JObject arg)
         {
             return CreatePubSubEvent(CreateJsonElementFromJObject(arg));
+        }
+
+        static DaprPubSubEvent CreatePubSubEvent(JToken arg)
+        {
+            return CreatePubSubEvent(CreateJsonElementFromJToken(arg));
         }
 
         static DaprPubSubEvent CreatePubSubEvent(JsonElement json)
@@ -145,6 +156,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         static DaprBindingMessage CreateBindingMessage(JObject arg)
         {
             return CreateBindingMessage(CreateJsonElementFromJObject(arg));
+        }
+
+        static DaprBindingMessage CreateBindingMessage(JToken arg)
+        {
+            return CreateBindingMessage(CreateJsonElementFromJToken(arg));
         }
 
         static DaprBindingMessage CreateBindingMessage(JsonElement jsonElement)
@@ -185,6 +201,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             return CreateSaveStateParameters(CreateJsonElementFromJObject(value));
         }
 
+        internal static DaprStateRecord CreateSaveStateParameters(JToken value)
+        {
+            return CreateSaveStateParameters(CreateJsonElementFromJToken(value));
+        }
+
         internal static DaprStateRecord CreateSaveStateParameters(JsonElement parametersJson)
         {
             if (!parametersJson.TryGetProperty("value", out JsonElement value))
@@ -215,6 +236,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JObject arg)
         {
             return CreateInvokeMethodParameters(CreateJsonElementFromJObject(arg));
+        }
+
+        internal static InvokeMethodParameters CreateInvokeMethodParameters(JToken arg)
+        {
+            return CreateInvokeMethodParameters(CreateJsonElementFromJToken(arg));
         }
 
         internal static InvokeMethodParameters CreateInvokeMethodParameters(JsonElement parametersJson)
@@ -250,6 +276,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         }
 
         internal static JsonElement CreateJsonElementFromJObject(JObject obj)
+        {
+            return JsonDocument.Parse(obj.ToString()).RootElement;
+        }
+
+        internal static JsonElement CreateJsonElementFromJToken(JToken obj)
         {
             return JsonDocument.Parse(obj.ToString()).RootElement;
         }
