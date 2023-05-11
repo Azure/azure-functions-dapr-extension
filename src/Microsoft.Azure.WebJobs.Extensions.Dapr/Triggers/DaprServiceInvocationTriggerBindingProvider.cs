@@ -15,14 +15,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
+    using Microsoft.Extensions.Logging;
 
     class DaprServiceInvocationTriggerBindingProvider : ITriggerBindingProvider
     {
+        readonly ILogger logger;
         readonly IDaprServiceListener serviceListener;
         readonly INameResolver nameResolver;
 
-        public DaprServiceInvocationTriggerBindingProvider(IDaprServiceListener serviceListener, INameResolver resolver)
+        public DaprServiceInvocationTriggerBindingProvider(ILogger logger, IDaprServiceListener serviceListener, INameResolver resolver)
         {
+            this.logger = logger;
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
             this.nameResolver = resolver;
         }
@@ -39,27 +42,30 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             string methodName = TriggerHelper.ResolveTriggerName(parameter, this.nameResolver, attribute.MethodName);
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprServiceInvocationTriggerBinding(this.serviceListener, methodName, parameter));
+                new DaprServiceInvocationTriggerBinding(this.logger, this.serviceListener, methodName, parameter));
         }
 
         class DaprServiceInvocationTriggerBinding : DaprTriggerBindingBase
         {
+            readonly ILogger logger;
             readonly IDaprServiceListener serviceListener;
             readonly string methodName;
 
             public DaprServiceInvocationTriggerBinding(
+                ILogger logger,
                 IDaprServiceListener serviceListener,
                 string methodName,
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
             {
+                this.logger = logger;
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
                 this.methodName = methodName ?? throw new ArgumentNullException(nameof(methodName));
             }
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprServiceInvocationListener(this.serviceListener, executor, this.methodName);
+                return new DaprServiceInvocationListener(this.logger, this.serviceListener, executor, this.methodName);
             }
 
             sealed class DaprServiceInvocationListener : DaprListenerBase
@@ -68,14 +74,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 readonly string methodName;
 
                 public DaprServiceInvocationListener(
+                    ILogger logger,
                     IDaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
                     string methodName)
                     : base(serviceListener)
                 {
+                    this.Logger = logger;
                     this.executor = executor;
                     this.methodName = methodName;
                 }
+
+                public override ILogger Logger { get; }
 
                 public override void Dispose()
                 {
