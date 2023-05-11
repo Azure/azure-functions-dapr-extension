@@ -12,8 +12,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
-    using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Listeners;
+    using Microsoft.Extensions.Logging;
 
     abstract class DaprListenerBase : IListener
     {
@@ -23,6 +23,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             this.serviceListener = serviceListener;
         }
+
+        public abstract ILogger Logger { get; }
 
         public abstract void AddRoute(IRouteBuilder routeBuilder);
 
@@ -52,17 +54,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
             {
                 // No-op. This is expected when the request is aborted.
+                this.Logger.LogWarning("Request was aborted.");
             }
             catch (Exception ex)
             {
                 if (ex is DaprException || ex is DaprSidecarNotPresentException)
                 {
+                    this.Logger.LogError(ex, "Function invocation failed with status code {StatusCode}", ((DaprException)ex).StatusCode);
                     var exception = ex as DaprException;
                     context.Response.StatusCode = (int)exception!.StatusCode;
                     await context.Response.WriteAsync(exception!.Message);
                 }
                 else
                 {
+                    this.Logger.LogError(ex, "Function invocation failed.");
                     context.Response.StatusCode = 500;
                     await context.Response.WriteAsync($"Function invocation failed: {ex.Message}");
                 }

@@ -12,29 +12,34 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Dapr client.
     /// </summary>
     public class DaprHttpClient : IDaprClient
     {
+        readonly ILogger logger;
         readonly HttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprHttpClient"/> class.
         /// </summary>
+        /// <param name="loggerFactory">Logger factory.</param>
         /// <param name="clientFactory">Client factory.</param>
-        public DaprHttpClient(IHttpClientFactory clientFactory)
+        public DaprHttpClient(ILoggerFactory loggerFactory, IHttpClientFactory clientFactory)
         {
+            this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory());
             this.httpClient = clientFactory.CreateClient("DaprServiceClient");
         }
 
         /// <inheritdoc/>
         public async Task<HttpResponseMessage> PostAsync(string uri, StringContent stringContent, CancellationToken cancellationToken)
         {
-            return await DaprHttpCall(async () =>
+            return await this.DaprHttpCall(async () =>
             {
                 var response = await this.httpClient.PostAsync(uri, stringContent, cancellationToken);
 
@@ -45,7 +50,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         /// <inheritdoc/>
         public async Task<HttpResponseMessage> GetAsync(string uri, CancellationToken cancellationToken)
         {
-            return await DaprHttpCall(async () =>
+            return await this.DaprHttpCall(async () =>
             {
                 var response = await this.httpClient.GetAsync(uri, cancellationToken);
 
@@ -56,7 +61,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         /// <inheritdoc/>
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)
         {
-            return await DaprHttpCall(async () =>
+            return await this.DaprHttpCall(async () =>
             {
                 HttpResponseMessage response = await this.httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -64,10 +69,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
-        private static async Task ThrowIfDaprFailure(HttpResponseMessage response)
+        private async Task ThrowIfDaprFailure(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {
+                this.logger.LogWarning($"Dapr Service returned an error. Status Code: {response.StatusCode}");
+
                 string errorCode = string.Empty;
                 string errorMessage = string.Empty;
 
@@ -80,7 +87,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                         string content = await response.Content.ReadAsStringAsync();
                         daprError = JsonDocument.Parse(content).RootElement;
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (e is JsonException || e is ArgumentException)
                     {
                         throw new DaprException(
                             response.StatusCode,
@@ -119,12 +126,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return;
         }
 
-        private static async Task<HttpResponseMessage> DaprHttpCall(Func<Task<HttpResponseMessage>> httpCall)
+        private async Task<HttpResponseMessage> DaprHttpCall(Func<Task<HttpResponseMessage>> httpCall)
         {
             try
             {
                 var response = await httpCall();
-                await ThrowIfDaprFailure(response);
+                await this.ThrowIfDaprFailure(response);
 
                 return response;
             }
@@ -132,7 +139,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             {
                 if (socketException.SocketErrorCode == SocketError.ConnectionRefused)
                 {
-                    throw new DaprSidecarNotPresentException(HttpStatusCode.ServiceUnavailable, ErrorCodes.ErrDaprSidecarDoesNotExist, "Dapr sidecar is not present. Please follow this link (https://aka.ms/azure-functions-dapr-sidecar-missing) to debug the issue with dapr.", ex);
+                    throw new DaprSidecarNotPresentException(HttpStatusCode.ServiceUnavailable, ErrorCodes.ErrDaprSidecarDoesNotExist, "Dapr sidecar is not present. Please see (https://aka.ms/azure-functions-dapr-sidecar-missing) for more.", ex);
                 }
 
                 throw new DaprException(HttpStatusCode.InternalServerError, ErrorCodes.ErrDaprRequestFailed, ex.Message, ex);

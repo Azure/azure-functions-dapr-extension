@@ -20,14 +20,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Azure.WebJobs.Host.Executors;
     using Microsoft.Azure.WebJobs.Host.Triggers;
+    using Microsoft.Extensions.Logging;
 
     class DaprTopicTriggerBindingProvider : ITriggerBindingProvider
     {
+        readonly ILogger logger;
         readonly IDaprServiceListener serviceListener;
         readonly INameResolver nameResolver;
 
-        public DaprTopicTriggerBindingProvider(IDaprServiceListener serviceListener, INameResolver nameResolver)
+        public DaprTopicTriggerBindingProvider(ILogger logger, IDaprServiceListener serviceListener, INameResolver nameResolver)
         {
+            this.logger = logger;
             this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
             this.nameResolver = nameResolver;
         }
@@ -60,19 +63,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprTopicTriggerBinding(this.serviceListener, pubSubName, topic, route, parameter));
+                new DaprTopicTriggerBinding(this.logger, this.serviceListener, pubSubName, topic, route, parameter));
         }
 
         class DaprTopicTriggerBinding : DaprTriggerBindingBase
         {
             static readonly JsonEventFormatter CloudEventFormatter = new JsonEventFormatter();
 
+            readonly ILogger logger;
             readonly IDaprServiceListener serviceListener;
             readonly string pubSubName;
             readonly string topic;
             readonly string route;
 
             public DaprTopicTriggerBinding(
+                ILogger logger,
                 IDaprServiceListener serviceListener,
                 string pubSubName,
                 string topic,
@@ -80,6 +85,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 ParameterInfo parameter)
                 : base(serviceListener, parameter)
             {
+                this.logger = logger;
                 this.serviceListener = serviceListener ?? throw new ArgumentNullException(nameof(serviceListener));
                 this.pubSubName = pubSubName ?? throw new ArgumentNullException(nameof(pubSubName));
                 this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
@@ -88,7 +94,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             protected override DaprListenerBase OnCreateListener(ITriggeredFunctionExecutor executor)
             {
-                return new DaprTopicListener(this.serviceListener, executor, new DaprTopicSubscription(this.pubSubName, this.topic, this.route));
+                return new DaprTopicListener(this.logger, this.serviceListener, executor, new DaprTopicSubscription(this.pubSubName, this.topic, this.route));
             }
 
             protected override object ConvertFromJson(JsonElement jsonElement, Type destinationType)
@@ -118,16 +124,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 readonly DaprTopicSubscription topic;
 
                 public DaprTopicListener(
+                    ILogger logger,
                     IDaprServiceListener serviceListener,
                     ITriggeredFunctionExecutor executor,
                     DaprTopicSubscription topic)
                     : base(serviceListener)
                 {
+                    this.Logger = logger;
                     this.executor = executor;
                     this.topic = topic;
 
                     serviceListener.RegisterTopic(this.topic);
                 }
+
+                public override ILogger Logger { get; }
 
                 public override void Dispose()
                 {

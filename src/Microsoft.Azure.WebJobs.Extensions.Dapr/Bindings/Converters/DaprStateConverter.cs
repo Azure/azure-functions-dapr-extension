@@ -99,14 +99,14 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
             return JToken.Parse(content);
         }
 
-        async Task<string> GetStringContentAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        private async Task<string> GetStringContentAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
             DaprStateRecord stateRecord = await this.GetStateRecordAsync(input, cancellationToken);
             var contentJson = await JsonDocument.ParseAsync(stateRecord.ContentStream);
             return JsonSerializer.Serialize(contentJson, JsonUtils.DefaultSerializerOptions);
         }
 
-        async Task<DaprStateRecord> GetStateRecordAsync(DaprStateAttribute input, CancellationToken cancellationToken)
+        private async Task<DaprStateRecord> GetStateRecordAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
             DaprStateRecord stateRecord = await this.daprClient.GetStateAsync(
                 input.DaprAddress,
