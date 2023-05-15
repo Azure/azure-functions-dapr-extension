@@ -5,8 +5,6 @@
 
 namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
 {
-    using System;
-
     /// <summary>
     /// Parameters for Dapr invoke-method operations.
     /// </summary>
