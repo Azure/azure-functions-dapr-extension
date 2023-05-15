@@ -9,6 +9,7 @@
     using Microsoft.Azure.Functions.Worker.Http;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
+    using System.Text.Json;
 
     public class MultipleOutputBindings
     {
@@ -19,11 +20,11 @@
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.WriteString("Success!");
 
-            string myQueueOutput = "\"CurrentTime: " + DateTime.UtcNow.ToString() + "\"";
+            var jsonDocument = JsonSerializer.SerializeToDocument(new { value = "123" });
 
             return new MyOutputType()
             {
-                Name = myQueueOutput,
+                Data = jsonDocument.RootElement,
                 HttpResponse = response
             };
         }
@@ -32,7 +33,7 @@
     public class MyOutputType
     {
         [DaprStateOutput("%StateStoreName%", Key = "MultiOutputKey")]
-        public string? Name { get; set; }
+        public JsonElement Data { get; set; }
 
         public HttpResponseData? HttpResponse { get; set; }
     }
