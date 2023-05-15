@@ -30,26 +30,6 @@ namespace Microsoft.Azure.Functions.Extensions.Dapr.Core
                 throw new ArgumentNullException(nameof(payload));
             }
 
-            // TODO: This is a temporary workaround for converter, where isolated worker is sending byte[] instead of actual type defined in azure functions.
-            // This will be removed once we have a fix for converter
-            if (payload.GetType().Name == "Byte[]")
-            {
-                var data = (byte[])payload;
-
-                var stringData = System.Text.Encoding.UTF8.GetString(data, 0, data.Length);
-
-                try
-                {
-                    this.Payload = JsonDocument.Parse(stringData).RootElement;
-                }
-                catch (JsonException)
-                {
-                    this.Payload = JsonDocument.Parse("\"" + stringData + "\"").RootElement;
-                }
-
-                return;
-            }
-
             string serializedData = string.Empty;
             try
             {
