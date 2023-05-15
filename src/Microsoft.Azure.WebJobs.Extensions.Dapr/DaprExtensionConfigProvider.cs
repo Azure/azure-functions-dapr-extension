@@ -151,25 +151,25 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             if (!json.TryGetProperty("payload", out JsonElement payload))
             {
-                throw new ArgumentException("A 'payload' parameter is required for outbound pub/sub operations.", nameof(json));
+                throw new ArgumentException($"A '{nameof(json).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.");
             }
 
             object? payloadObject = payload.Deserialize<object>();
             if (payloadObject == null)
             {
-                throw new ArgumentException($"A '{nameof(payloadObject).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
+                throw new ArgumentException($"Could not deserialize '{nameof(payloadObject).ToLowerInvariant()}' parameter for outbound pub/sub operations.");
             }
 
             DaprPubSubEvent event_ = new DaprPubSubEvent(payloadObject);
 
-            if (json.TryGetProperty("topic", out JsonElement topic))
-            {
-                event_.Topic = topic.GetString();
-            }
-
             if (json.TryGetProperty("pubsubname", out JsonElement pubsubName))
             {
                 event_.PubSubName = pubsubName.GetString();
+            }
+
+            if (json.TryGetProperty("topic", out JsonElement topic))
+            {
+                event_.Topic = topic.GetString();
             }
 
             return event_;
