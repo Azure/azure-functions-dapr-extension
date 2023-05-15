@@ -17,14 +17,17 @@ namespace dotnet_isolated_azurefunction
         /// </summary>
         [Function("CreateNewOrder")]
         [DaprStateOutput("%StateStoreName%", Key = "order")]
-        public static Order Run(
-            [DaprServiceInvocationTrigger] Order payload, 
+        public static JsonElement Run(
+            [DaprServiceInvocationTrigger] JsonElement payload, 
             FunctionContext functionContext)
         {
             var log = functionContext.GetLogger("CreateNewOrder");
             log.LogInformation("C# function processed a CreateNewOrder request from the Dapr Runtime.");
 
-            return payload;
+            // payload must be of the format { "data": { "value": "some value" } }
+            payload.TryGetProperty("data", out JsonElement data);
+
+            return data;
         }
     }
 }
