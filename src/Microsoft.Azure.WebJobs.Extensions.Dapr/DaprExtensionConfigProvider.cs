@@ -149,10 +149,27 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         static DaprPubSubEvent CreatePubSubEvent(JsonElement json)
         {
-            DaprPubSubEvent? event_ = JsonSerializer.Deserialize<DaprPubSubEvent>(json);
-            if (event_ == null)
+            if (!json.TryGetProperty("payload", out JsonElement payload))
             {
-                throw new ArgumentException($"A '{nameof(event_.Payload).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
+                throw new ArgumentException("A 'payload' parameter is required for outbound pub/sub operations.", nameof(json));
+            }
+
+            object? payloadObject = payload.Deserialize<object>();
+            if (payloadObject == null)
+            {
+                throw new ArgumentException($"A '{nameof(payloadObject).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.", nameof(json));
+            }
+
+            DaprPubSubEvent event_ = new DaprPubSubEvent(payloadObject);
+
+            if (json.TryGetProperty("topic", out JsonElement topic))
+            {
+                event_.Topic = topic.GetString();
+            }
+
+            if (json.TryGetProperty("pubsubname", out JsonElement pubsubName))
+            {
+                event_.PubSubName = pubsubName.GetString();
             }
 
             return event_;
