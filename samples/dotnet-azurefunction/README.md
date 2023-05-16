@@ -81,12 +81,13 @@ You're up and running! Both Dapr and your app logs will appear here.
 ```csharp
 [FunctionName("CreateNewOrder")]
 public static void Run(
-    [DaprServiceInvocationTrigger] JObject payload, 
-    [DaprState("%StateStoreName%", Key = "order")] out object order,
+    [DaprServiceInvocationTrigger] JObject payload,
+    [DaprState("%StateStoreName%", Key = "order")] out JToken order,
     ILogger log)
 {
     log.LogInformation("C# function processed a CreateNewOrder request from the Dapr Runtime.");
 
+    // payload must be of the format { "data": { "value": "some value" } }
     order = payload["data"];
 }
 ```
@@ -97,17 +98,17 @@ Now you can invoke this function by using the Dapr cli in a new command line ter
 
 Windows Command Prompt
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method CreateNewOrder --data "{ \"data\": {\"value\": { \"orderId\": \"41\" } } }"
 ```
 
 Windows PowerShell
 ```powershell
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{\"data\": { \"orderId\": \"41\" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{ \"data\": {\"value\": { \"orderId\": \"41\" } } }'
 ```
 
 Linux or MacOS
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{ "data": {"value": { "orderId": "41" } } }'
 ```
 
 You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
@@ -117,8 +118,10 @@ POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 
 {
     "data": {
-        "orderId": "42"
-    } 
+        "value": {
+            "orderId": "41"
+        }
+    }
 }
 ```
 
@@ -228,7 +231,7 @@ This section demonstrates the integration of this extension with Dapr Binding co
 [FunctionName("ConsumeMessageFromKafka")]
 public static void Run(
     // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
-    [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JObject triggerData,
+    [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JsonElement triggerData,
     ILogger log)
 {
     log.LogInformation("Hello from Kafka!");
@@ -241,7 +244,7 @@ Now let's look at how our function uses `DaprBinding` to push messages into our 
 ```csharp
 [FunctionName("SendMessageToKafka")]
 public static async void Run(
-    [DaprServiceInvocationTrigger] JObject payload,
+    [DaprServiceInvocationTrigger] JsonElement payload,
     [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<object> messages,
     ILogger log)
 {

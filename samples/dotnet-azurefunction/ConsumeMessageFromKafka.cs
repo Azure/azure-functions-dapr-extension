@@ -9,6 +9,7 @@ namespace dotnet_azurefunction
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
+    using System.Text.Json;
 
     public static class ConsumeMessageFromKafka
     {
@@ -19,7 +20,7 @@ namespace dotnet_azurefunction
         [FunctionName("ConsumeMessageFromKafka")]
         public static void Run(
             // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
-            [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JObject triggerData,
+            [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JsonElement triggerData,
             ILogger log)
         {
             log.LogInformation("Hello from Kafka!");
