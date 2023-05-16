@@ -38,5 +38,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
         /// Unknown Error.
         /// </summary>
         public const string ErrUnknown = "ERR_UNKNOWN";
+
+        /// <summary>
+        /// No Content.
+        /// </summary>
+        public const string ErrNoContent = "ERR_NO_CONTENT";
     }
 }

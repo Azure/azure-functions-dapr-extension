@@ -7,13 +7,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
 {
     using System;
     using System.IO;
+    using System.Net;
     using System.Text;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Newtonsoft.Json.Linq;
 
     class DaprStateConverter :
@@ -132,6 +135,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Bindings.Converters
         private async Task<string> GetStringContentAsync(DaprStateAttribute input, CancellationToken cancellationToken)
         {
             DaprStateRecord stateRecord = await this.GetStateRecordAsync(input, cancellationToken);
+
+            if (stateRecord.ContentStream.Length == 0)
+            {
+                throw new DaprException(
+                HttpStatusCode.NotFound,
+                ErrorCodes.ErrNoContent,
+                $"Failed getting state with key {input.Key} from state store {input.StateStore}: state {input.Key} not found.");
+            }
+
             var contentJson = await JsonDocument.ParseAsync(stateRecord.ContentStream);
             return JsonSerializer.Serialize(contentJson, JsonUtils.DefaultSerializerOptions);
         }

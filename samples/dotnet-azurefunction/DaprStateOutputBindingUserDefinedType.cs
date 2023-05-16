@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-namespace dotnet_isolated_azurefunction
+namespace dotnet_azurefunction
 {
     using System.Text.Json;
     using System.Text.Json.Serialization;
