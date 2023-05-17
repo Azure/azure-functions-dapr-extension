@@ -5,12 +5,11 @@
 
 namespace dotnet_azurefunction
 {
-    using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using System.Collections.Generic;
-    using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
+    using Microsoft.Extensions.Logging;
 
     public static class RetrieveSecretLocal
     {
@@ -20,7 +19,7 @@ namespace dotnet_azurefunction
         [FunctionName("RetrieveSecretLocal")]
         public static void Run(
             [DaprServiceInvocationTrigger] object args,
-            [DaprSecret("localsecretstore", "mysecret", Metadata = "metadata.namespace=default")] Data secret,
+            [DaprSecret("localsecretstore", "mysecret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
             ILogger log)
         {
             log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");
@@ -28,25 +27,11 @@ namespace dotnet_azurefunction
             // print the fetched secret value
             // this is only for demo purpose
             // please do not log any real secret in your production code        
-            //foreach (var kvp in secret)
-            //{
-            //    log.LogInformation("Stored secret: Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            //}
+            foreach (var kvp in secret)
+            {
+                log.LogInformation("Stored secret: Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+            }
 
-            log.LogInformation(JsonSerializer.Serialize(secret));
-
-        }
-
-        public class Data
-        {
-            [JsonPropertyName("mysecret")]
-            public Secret mysecret { get; set; }
-        }
-
-        public class Secret
-        {
-            [JsonPropertyName("token")]
-            public string Token { get; set; }
         }
     }
 }
