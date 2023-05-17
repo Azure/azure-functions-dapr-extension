@@ -1,7 +1,7 @@
 import logging
-import json
-import azure.functions as func
+
 
 def main(triggerData: str) -> None:
-    logging.info('Hello from Kafka!')
+    logging.info(
+        'Python function processed a ConsumeMessageFromKafka request from the Dapr Runtime.')
     logging.info('Trigger data: ' + triggerData)

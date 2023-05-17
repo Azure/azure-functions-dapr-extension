@@ -3,7 +3,7 @@
   "bindings": [
     {
       "type": "daprBindingTrigger",
-      "bindingName": "sample-topic",
+      "bindingName": "%KafkaBindingName%",
       "name": "triggerData",
       "direction": "in"
     }
