@@ -133,11 +133,12 @@ import json
 import azure.functions as func
 
 def main(payload,
-         order: func.Out[str]) -> None:
-    logging.info('Python function processed a CreateNewOrder request from the Dapr Runtime.')  
-    payload_json = json.loads(payload)
-    logging.info(payload_json["data"])
-    order.set(json.dumps(payload_json["data"]))
+         order: func.Out[bytes]) -> None:
+    logging.info(
+        'Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
+    subEvent_json = json.loads(subEvent)
+    payload = "Transfer from Topic A: " + str(subEvent_json["data"])
+    pubEvent.set(json.dumps({"payload": payload}).encode('utf-8'))
 ```
 
 ```json
@@ -265,7 +266,7 @@ In your terminal window, you should see logs to confirm the expected result:
 
 ```python
 def main(subEvent,
-         pubEvent: func.Out[bytes]) -> None:
+         pubEvent: func.Out[str]) -> None:
     logging.info('Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
     subEvent_json = json.loads(subEvent)
     payload = "Transfer from Topic A: " + str(subEvent_json["data"])
@@ -279,7 +280,7 @@ def main(subEvent,
   "bindings": [
     {
       "type": "daprTopicTrigger",
-      "pubsubname": "messagebus",
+      "pubsubname": "%PubsubName%",
       "topic": "A",
       "name": "subEvent",
       "direction": "in",
@@ -289,7 +290,7 @@ def main(subEvent,
       "type": "daprPublish",
       "direction": "out",
       "name": "pubEvent",
-      "pubsubname": "messagebus",
+      "pubsubname": "%PubsubName%",
       "topic": "B"
     }
   ]
@@ -327,7 +328,8 @@ This sections describes how this extension integrates with Dapr Binding componen
 
 ```python
 def main(triggerData: str) -> None:
-    logging.info('Hello from Kafka!')
+    logging.info(
+        'Python function processed a ConsumeMessageFromKafka request from the Dapr Runtime.')
     logging.info('Trigger data: ' + triggerData)
 ```
 ```json
@@ -336,7 +338,7 @@ def main(triggerData: str) -> None:
   "bindings": [
     {
       "type": "daprBindingTrigger",
-      "bindingName": "sample-topic",
+      "bindingName": "%KafkaBindingName%",
       "name": "triggerData",
       "direction": "in"
     }
