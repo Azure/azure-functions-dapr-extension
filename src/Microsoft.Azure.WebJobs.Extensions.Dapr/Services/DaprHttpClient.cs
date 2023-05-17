@@ -73,8 +73,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         {
             if (!response.IsSuccessStatusCode)
             {
-                this.logger.LogWarning($"Dapr Service returned an error. Status Code: {response.StatusCode}");
-
                 string errorCode = string.Empty;
                 string errorMessage = string.Empty;
 
@@ -89,6 +87,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     }
                     catch (Exception e) when (e is JsonException || e is ArgumentException)
                     {
+                        this.logger.LogError($"The returned error message from Dapr Service is not a valid JSON Object. Status Code: {response.StatusCode}");
                         throw new DaprException(
                             response.StatusCode,
                             ErrorCodes.ErrUnknown,
@@ -106,6 +105,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                         errorCode = errorCodeToken.GetRawText();
                     }
                 }
+
+                this.logger.LogError($"Dapr Service returned an error. Status Code: {response.StatusCode}, Error Code: {errorCode}, Error Message: {errorMessage}");
 
                 // avoid potential overrides: specific 404 error messages can be returned from Dapr
                 // ex: https://docs.dapr.io/reference/api/actors_api/#get-actor-state

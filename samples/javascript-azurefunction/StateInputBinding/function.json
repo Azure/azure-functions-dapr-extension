@@ -7,7 +7,7 @@
         "get",
         "options"
       ],
-      "authLevel": "function",
+      "authLevel": "anonymous",
       "name": "req"
     },
     {
