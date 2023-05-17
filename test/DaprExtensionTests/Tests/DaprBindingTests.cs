@@ -167,7 +167,7 @@ namespace DaprExtensionTests
             new object[] { "Hello, world!" },
             new object[] { DateTime.Now },
             new object[] { Guid.NewGuid() },
-            //new object[] { Guid.NewGuid().ToByteArray() }, // TODO: Removing this test for now because byte[] converter is removed. once byte[] converter is fixed, we can add this back.
+            new object[] { Guid.NewGuid().ToByteArray() },
             new object[] { new { arg1 = 2, arg2 = 3 } },
             new object[] { new UserDefinedType { P1 = "Hello, world!", P2 = 3, P3 = DateTime.UtcNow } },
         };
