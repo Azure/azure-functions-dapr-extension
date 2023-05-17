@@ -3,7 +3,7 @@
   "bindings": [
     {
       "type": "daprTopicTrigger",
-      "pubsubname": "messagebus",
+      "pubsubname": "%PubSubName%",
       "topic": "A",
       "name": "subEvent",
       "direction": "in",
@@ -13,7 +13,7 @@
       "type": "daprPublish",
       "direction": "out",
       "name": "pubEvent",
-      "pubsubname": "messagebus",
+      "pubsubname": "%PubSubName%",
       "topic": "B"
     }
   ]

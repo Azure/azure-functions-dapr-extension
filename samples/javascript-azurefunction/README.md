@@ -184,7 +184,7 @@ In your terminal window, you should see logs to confirm the expected result:
 module.exports = async function (context) {
     context.log("Node function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
 
-    context.bindings.pubEvent = { "payload": "Transfer from Topic A: " + context.bindings.subEvent.Data };
+    context.bindings.pubEvent = { "payload": "Transfer from Topic A: " + JSON.stringify(context.bindings.subEvent.data) };
 }
 ```
 
@@ -201,7 +201,7 @@ Also, the function below subscribes to topic `B` which simply prints the message
 ```javascript
 module.exports = async function (context) {
     context.log("Node function processed a PrintTopicMessage request from the Dapr Runtime.");
-    context.log(`Topic B received a message: ${subEvent.data}.`);
+    context.log(`Topic B received a message: ${JSON.stringify(context.bindings.subEvent.data)}.`);
 };
 ```
 
@@ -227,17 +227,16 @@ This section describes how this extension integrates with the Dapr Binding compo
 
 ```javascript
 module.exports = async function (context) {
-    context.log("Hello from Kafka!");
-
-    context.log(`Trigger data: ${context.bindings.triggerData}`);
+    context.log("Node function processed a ConsumeMessageFromKafka request from the Dapr Runtime.");
+    context.log(`Trigger data: ${JSON.stringify(context.bindings.triggerData)}`);
 };
 ```
-Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance.
+Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance in `SendMessageToKafka` function:
 
 ```javascript
 module.exports = async function (context) {
-    context.log("Node HTTP trigger function processed a request.");
-    context.bindings.messages = context.bindings.payload;
+    context.log("Node function processed a SendMessageToKafka request from the Dapr Runtime.");
+    context.bindings.messages = { "data": context.bindings.args };
 };
 ```
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding.
