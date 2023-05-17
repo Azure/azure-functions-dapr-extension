@@ -245,7 +245,7 @@ Now let's look at how our function uses `DaprBinding` to push messages into our 
 [FunctionName("SendMessageToKafka")]
 public static async void Run(
     [DaprServiceInvocationTrigger] JsonElement payload,
-    [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<object> messages,
+    [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<JsonElement> messages,
     ILogger log)
 {
     log.LogInformation("C# HTTP trigger function processed a request.");
@@ -259,12 +259,12 @@ You can use service invocation to invoke this function:
 
 Windows
 ```powershell
-dapr invoke --app-id functionapp --method SendMessageToKafka --data '{\"message\": \"hello!\" }'
+dapr invoke --app-id functionapp --method SendMessageToKafka --data '{\"data\":{\"message\": \"hello!\" }}'
 ```
 
 Linux/MacOS
 ```shell
-dapr invoke --app-id functionapp --method SendMessageToKafka --data '{"message": "hello!" }'
+dapr invoke --app-id functionapp --method SendMessageToKafka --data '{"data":{"message": "hello!" }}'
 ```
 
 The Dapr function logs should show the following:

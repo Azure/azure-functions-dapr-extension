@@ -20,7 +20,7 @@ namespace dotnet_azurefunction
         [FunctionName("ConsumeMessageFromKafka")]
         public static void Run(
             // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
-            [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JsonElement triggerData,
+            [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JObject triggerData,
             ILogger log)
         {
             log.LogInformation("Hello from Kafka!");

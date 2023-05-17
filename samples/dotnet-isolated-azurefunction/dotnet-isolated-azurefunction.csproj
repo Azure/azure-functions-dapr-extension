@@ -8,6 +8,7 @@
     <RootNamespace>dotnet_isolated_azurefunction</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CloudNative.CloudEvents" Version="2.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
