@@ -3,8 +3,10 @@
     {
       "type": "httpTrigger",
       "name": "req",
-      "authLevel": "function",
-      "method": [ "post" ],
+      "authLevel": "anonymous",
+      "method": [
+        "post"
+      ],
       "route": "topic/{topicName}"
     },
     {
