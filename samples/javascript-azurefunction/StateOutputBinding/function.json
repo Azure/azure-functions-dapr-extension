@@ -12,10 +12,9 @@
     {
       "type": "daprState",
       "direction": "out",
-      "name": "dapr",
+      "name": "state",
       "stateStore": "statestore",
-      "key": "{key}",
-      "daprAddress": "%daprAddress%"
+      "key": "{key}"
     },
     {
       "type": "http",
