@@ -5,10 +5,11 @@
 
 namespace dotnet_azurefunction
 {
-    using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using System.Collections.Generic;
+    using System.Text.Json.Serialization;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
+    using Microsoft.Extensions.Logging;
 
     public static class RetrieveSecretLocal
     {
@@ -18,7 +19,7 @@ namespace dotnet_azurefunction
         [FunctionName("RetrieveSecretLocal")]
         public static void Run(
             [DaprServiceInvocationTrigger] object args,
-            [DaprSecret("localsecretstore", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
+            [DaprSecret("localsecretstore", "mysecret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
             ILogger log)
         {
             log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");

@@ -70,14 +70,14 @@ You can run through a quickstart of developing some JavaScript Azure Functions t
 
 ### .NET Functions
 
-[Install the NuGet package](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension) for this extension into your function app project.
+[Install the NuGet package](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr) for this extension into your function app project.
 
 ### Non-.NET Functions
 
 While this extension is in preview it is not included in the default extension bundle for functions.  You can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
 
 1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
-1. Run `func extensions install -p Dapr.AzureFunctions.Extension -v 0.10.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Dapr.AzureFunctions.Extension).  You must have the .NET Core SDK installed in order for this command to work.
+1. Run `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v 0.10.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).  You must have the .NET Core SDK installed in order for this command to work.
 
 This also means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where you could include in your app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
 
@@ -87,13 +87,13 @@ The samples in this repo (other than the quickstart) are set up to run using a l
 
 You can use a development build of the extension for any function by:
 
-- Referencing the Dapr.AzureFunctions.Extension project in your .NET function
+- Referencing the Microsoft.Azure.WebJobs.Extensions.Dapr project in your .NET function
 - Publishing the extension to the `bin/` directory of your non-.NET function
 
 Example for non-.NET function:
 
 ```sh
-dotnet publish /path/to/Dapr.AzureFunctions.Extension -o bin/
+dotnet publish /path/to/Microsoft.Azure.WebJobs.Extensions.Dapr -o bin/
 ```
 
 ## Dapr ports and listeners
@@ -228,3 +228,12 @@ spec:
 [python-invoke-output]: ./samples/python-azurefunction/InvokeOutputBinding/__init__.py
 [python-publish-output]: ./samples/python-azurefunction/PublishOutputBinding/__init__.py
 [python-binding-output]: ./samples/python-azurefunction/SendMessageToKafka/__init__.py
+
+## Known Issues
+
+- **By Design:** In out-of-proc model, supoort for POCO model isn't available as of now, so, all the payloads must send Json data and these data should be used as JsonElement type in Azure Functions. Please look at the Note section to find out required values for each bindings and triggers.
+
+
+## Note
+
+- Dapr extension uses System.Text.Json, so it is advisable to use STJ library to avoid data conversion issues.

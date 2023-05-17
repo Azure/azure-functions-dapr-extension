@@ -1,26 +1,22 @@
 ﻿namespace dotnet_isolated_azurefunction.OuputBinding
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Net;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.Functions.Worker.Http;
+    using System.Text.Json;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
-    using System.Text.Json;
+    using Microsoft.Azure.Functions.Worker.Http;
 
     public class MultipleOutputBindings
     {
         [Function("MultiOutput")]
-        public static MyOutputType Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req,
+        public static MyOutputType Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{key}")] HttpRequestData req,
         FunctionContext context)
         {
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.WriteString("Success!");
 
-            var jsonDocument = JsonSerializer.SerializeToDocument(new { value = "123" });
+            //Http trigger URI should look like : http://localhost:7071/api/anykey?somekey=somevalue
+            var jsonDocument = JsonSerializer.SerializeToDocument(new { value = req.Url.Query });
 
             return new MyOutputType()
             {

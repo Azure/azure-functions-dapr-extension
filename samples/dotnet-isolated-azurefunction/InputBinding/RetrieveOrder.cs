@@ -18,7 +18,7 @@ namespace dotnet_isolated_azurefunction
         [Function("RetrieveOrder")]
         public static void Run(
             [DaprServiceInvocationTrigger] object args,
-            [DaprStateInput("%StateStoreName%", Key = "order")] Order data, FunctionContext functionContext)
+            [DaprStateInput("%StateStoreName%", Key = "order")] JsonElement data, FunctionContext functionContext)
         {
             var log = functionContext.GetLogger("RetrieveOrder");
             log.LogInformation("C# function processed a RetrieveOrder request from the Dapr Runtime.");

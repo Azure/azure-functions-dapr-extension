@@ -20,7 +20,7 @@ namespace dotnet_azurefunction
         [FunctionName("TransferEventBetweenTopics")]
         public static void Run(
             [DaprTopicTrigger("%PubSubName%", Topic = "A")] CloudEvent subEvent,
-            [DaprPublish(PubSubName = "%PubSubName%", Topic = "B")] out object pubEvent,
+            [DaprPublish(PubSubName = "%PubSubName%", Topic = "B")] out DaprPubSubEvent pubEvent,
             ILogger log)
         {
             log.LogInformation("C# function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
