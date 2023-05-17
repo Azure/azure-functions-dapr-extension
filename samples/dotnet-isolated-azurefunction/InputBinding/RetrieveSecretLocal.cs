@@ -31,7 +31,6 @@ namespace dotnet_isolated_azurefunction
             {
                 log.LogInformation("Stored secret: Key = {0}, Value = {1}", kvp.Key, kvp.Value);
             }
-
         }
     }
 }

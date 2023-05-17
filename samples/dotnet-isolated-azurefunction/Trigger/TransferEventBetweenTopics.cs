@@ -5,7 +5,7 @@
 
 namespace dotnet_isolated_azurefunction
 {
-    using Azure.Messaging;
+    using CloudNative.CloudEvents;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
