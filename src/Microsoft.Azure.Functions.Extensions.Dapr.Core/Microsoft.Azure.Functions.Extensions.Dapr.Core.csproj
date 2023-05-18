@@ -7,6 +7,8 @@
     <IsPackable>true</IsPackable>
     <!-- Default version for dev -->
     <Version>99.99.99</Version>
+    <Description>Common models and utilities for Dapr extension for Azure functions.</Description>
+    <Summary>Common models and utilities for Dapr extension for Azure functions.</Summary>
   </PropertyGroup>
 
   <!-- Microsoft 1st party dependencies -->
