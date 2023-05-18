@@ -21,7 +21,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_PATH }}
       CONFIGURATION: Release
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
@@ -55,7 +55,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           echo performing docker login
-          docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
+          docker login ${{ secrets.DOCKER_REGISTRY_URL }} -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
           echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
           echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
           docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
