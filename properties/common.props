@@ -33,7 +33,6 @@
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <PublicSign>true</PublicSign>
-    <DelaySign>true</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)MSSharedLibKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
