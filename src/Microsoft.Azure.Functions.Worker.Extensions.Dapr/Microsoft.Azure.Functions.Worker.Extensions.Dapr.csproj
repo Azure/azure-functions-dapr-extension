@@ -14,12 +14,13 @@
     <!-- Default version for dev -->
     <Version>99.99.99</Version>
     <SupportedVersion>99.99.99</SupportedVersion>
-    <PackageTags>Microsoft Azure WebJobs AzureFunctions Isolated DotnetIsolated DAPR Worker</PackageTags>
+    <PackageTags>Microsoft Azure WebJobs Azure-Functions Isolated Dotnet-Isolated Dapr Worker</PackageTags>
   </PropertyGroup>
 
   <!-- Additional Nuget package properties. -->
   <PropertyGroup>
-    <Description>This extension adds bindings for Dapr</Description>
+    <Description>Dapr extension for Azure functions using the isolated execution model.</Description>
+    <Summary>Dapr extension for Azure functions using the isolated execution model.</Summary>
   </PropertyGroup>
 
   <!-- Use C# 9.0 features -->

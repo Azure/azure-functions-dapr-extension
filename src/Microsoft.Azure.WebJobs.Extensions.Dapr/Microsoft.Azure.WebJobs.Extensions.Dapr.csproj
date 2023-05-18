@@ -6,8 +6,8 @@
     <PackageId>Microsoft.Azure.WebJobs.Extensions.Dapr</PackageId>
     <IsPackable>true</IsPackable>
     <Title>Microsoft.Azure.WebJobs.Extensions.Dapr</Title>
-    <Description>Dapr extension for Azure functions using the in-proc worker.</Description>
-    <Summary>Dapr extension for Azure functions using the in-proc worker.</Summary>
+    <Description>Dapr extension for Azure functions using the in-process execution model.</Description>
+    <Summary>Dapr extension for Azure functions using the in-process execution model.</Summary>
     <!-- Default version for dev -->
     <Version>99.99.99</Version>
   </PropertyGroup>
