@@ -30,10 +30,11 @@
   </PropertyGroup>
 
   <!-- Signing -->
-  <PropertyGroup>
+  <!-- Skip signing here and rely on the Azure SDK CI to sign the assembly -->
+  <!-- <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <!-- Enable sourcelink https://docs.microsoft.com/dotnet/standard/library-guidance/sourcelink -->
   <PropertyGroup>
