@@ -41,7 +41,7 @@ jobs:
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
       - name: Generate NuGet Packages - ${{ env.CONFIGURATION }}
-        if: startswith(github.ref, 'refs/tags/v')
+        # if: startswith(github.ref, 'refs/tags/v')
         run: dotnet pack --configuration ${{ env.CONFIGURATION }} -p:PackageVersion=${REL_VERSION}
         # Since we create local development nuget packages, we need to clean them up.
       - name: Clean up development Nuget packages
