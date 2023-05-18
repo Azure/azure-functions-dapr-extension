@@ -38,6 +38,27 @@ jobs:
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
+      # The docker image is not pushed for pull requests,
+      # but the image is built to ensure that the Dockerfile and the sample app are valid.
+      - name: Set a sample app registry when it is a pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          OWNER_NAME="${OWNER_NAME,,}" # convert to lowercase
+          echo "Setting sample app registry to ghcr.io/${OWNER_NAME}"
+          echo "APP_REGISTRY=ghcr.io/${OWNER_NAME}" >> $GITHUB_ENV
+      - name: Build samples docker images
+        run: |
+          echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+          docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
+      - name: Push samples docker images
+        if: github.event_name != 'pull_request'
+        run: |
+          echo performing docker login
+          docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
+          echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+          echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
+          docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
       - name: Generate NuGet Packages - ${{ env.CONFIGURATION }}
         if: startswith(github.ref, 'refs/tags/v')
         run: dotnet pack --configuration ${{ env.CONFIGURATION }} -p:PackageVersion=${REL_VERSION}
@@ -51,7 +72,7 @@ jobs:
         with:
           name: release_drop
           path: ${{ env.NUPKG_OUTDIR }}
-      - name: Publish binaries to github for tags
+      - name: Create a GitHub Release
         if: startswith(github.ref, 'refs/tags/v')
         run: |
           RELEASE_ARTIFACT=(${NUPKG_OUTDIR}/*)
@@ -75,24 +96,3 @@ jobs:
           export AZCOPY_SPA_CLIENT_SECRET=${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
           ./azcopy login --service-principal --application-id ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           ./azcopy copy "${{ env.NUPKG_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/dotnet/${{ env.REL_VERSION }}/"
-      # The docker image is not pushed for pull requests,
-      # but the image is built to ensure that the Dockerfile and the sample app are valid.
-      - name: Set a sample app registry when it is a pull request
-        if: github.event_name == 'pull_request'
-        run: |
-          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
-          OWNER_NAME="${OWNER_NAME,,}" # convert to lowercase
-          echo "Setting sample app registry to ghcr.io/${OWNER_NAME}"
-          echo "APP_REGISTRY=ghcr.io/${OWNER_NAME}" >> $GITHUB_ENV
-      - name: Build samples docker images
-        run: |
-          echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-          docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
-      - name: Push samples docker images
-        if: github.event_name != 'pull_request'
-        run: |
-          echo performing docker login
-          docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
-          echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-          echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
-          docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
