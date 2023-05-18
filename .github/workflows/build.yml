@@ -26,11 +26,10 @@ jobs:
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
-      REL_VERSION: "0.14.0-preview01"
     steps:
       - uses: actions/checkout@v2
-      # - name: Parse release version
-      #   run: python ./.github/scripts/get_release_version.py
+      - name: Parse release version
+        run: python ./.github/scripts/get_release_version.py
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
@@ -40,20 +39,20 @@ jobs:
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
       - name: Generate NuGet Packages - ${{ env.CONFIGURATION }}
-        # if: startswith(github.ref, 'refs/tags/v')
+        if: startswith(github.ref, 'refs/tags/v')
         run: dotnet pack --configuration ${{ env.CONFIGURATION }} -p:PackageVersion=${REL_VERSION}
         # Since we create local development nuget packages, we need to clean them up.
       - name: Clean up development Nuget packages
-        # if: startswith(github.ref, 'refs/tags/v')
+        if: startswith(github.ref, 'refs/tags/v')
         run: rm -rf $NUPKG_OUTDIR/*${DEV_VERSION_SUFFIX}.*{nupkg,snupkg}
       - name: Upload artifacts
         uses: actions/upload-artifact@master
-        # if: startswith(github.ref, 'refs/tags/v')
+        if: startswith(github.ref, 'refs/tags/v')
         with:
           name: release_drop
           path: ${{ env.NUPKG_OUTDIR }}
       - name: Publish binaries to github for tags
-        # if: startswith(github.ref, 'refs/tags/v')
+        if: startswith(github.ref, 'refs/tags/v')
         run: |
           RELEASE_ARTIFACT=(${NUPKG_OUTDIR}/*)
           export GITHUB_TOKEN=${{ secrets.RELEASE_TOKEN }}
@@ -63,10 +62,19 @@ jobs:
           --repo "${GITHUB_REPOSITORY}" \
           --title "Azure Functions Dapr Extension v${REL_VERSION}" \
           --notes "Release Azure Functions Dapr Extension v${REL_VERSION}"
-      # - name: Publish nuget packages to nuget.org for tags
-      #   if: startswith(github.ref, 'refs/tags/v') && !(endsWith(github.ref, '-rc') || endsWith(github.ref, '-dev') || endsWith(github.ref, '-prerelease'))
-      #   run: |
-      #     dotnet nuget push "${{ env.NUPKG_OUTDIR }}/*.nupkg" --skip-duplicate --api-key ${{ secrets.NUGETORG_DAPR_API_KEY }} --source https://api.nuget.org/v3/index.json
+      - name: Upload NuGet packages to Azure blob storage
+        if: |
+          startsWith(github.ref, 'refs/tags/v') &&
+          !(endsWith(github.ref, '-rc') || endsWith(github.ref, '-dev') || endsWith(github.ref, '-prerelease')) &&
+          github.repository == 'Azure/azure-functions-dapr-extension'
+        run: |
+          # Install azcopy
+          wget -O azcopy_v10.tar.gz https://aka.ms/downloadazcopy-v10-linux && tar -xf azcopy_v10.tar.gz --strip-components=1
+
+          # Upload nuget packages to Azure blob storage
+          set AZCOPY_SPA_CLIENT_SECRET=${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
+          ./azcopy login --service-principal --application-id ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
+          ./azcopy copy "${{ env.NUPKG_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/dotnet/${{ env.REL_VERSION }}/"
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
       - name: Set a sample app registry when it is a pull request
@@ -80,11 +88,11 @@ jobs:
         run: |
           echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
           docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
-      # - name: Push samples docker images
-      #   if: github.event_name != 'pull_request'
-      #   run: |
-      #     echo performing docker login
-      #     docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
-      #     echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-      #     echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
-      #     docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
+      - name: Push samples docker images
+        if: github.event_name != 'pull_request'
+        run: |
+          echo performing docker login
+          docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
+          echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+          echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
+          docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
