@@ -26,6 +26,8 @@ jobs:
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
+      # TODO: Temporary
+      REL_VERSION: "0.14.0-preview01"
     steps:
       - uses: actions/checkout@v2
       - name: Parse release version
@@ -44,7 +46,7 @@ jobs:
         # Since we create local development nuget packages, we need to clean them up.
       - name: Clean up development Nuget packages
         # if: startswith(github.ref, 'refs/tags/v')
-        run: rm -rf ${{ env.NUPKG_OUTDIR }}/*${{ env.DEV_VERSION_SUFFIX }}*.nupkg
+        run: rm -rf $NUPKG_OUTDIR/*${DEV_VERSION_SUFFIX}.*{nupkg,snupkg}
       - name: Upload artifacts
         uses: actions/upload-artifact@master
         # if: startswith(github.ref, 'refs/tags/v')
@@ -79,11 +81,11 @@ jobs:
         run: |
           echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
           docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
-      - name: Push samples docker images
-        if: github.event_name != 'pull_request'
-        run: |
-          echo performing docker login 
-          docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
-          echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
-          echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
-          docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
+      # - name: Push samples docker images
+      #   if: github.event_name != 'pull_request'
+      #   run: |
+      #     echo performing docker login
+      #     docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
+      #     echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+      #     echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
+      #     docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}

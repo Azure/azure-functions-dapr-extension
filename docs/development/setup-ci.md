@@ -18,9 +18,12 @@ A GitHub account.
 |--|--|
 | DOCKER_REGISTRY_ID | Username for Docker registry, required for uploading sample image|
 | DOCKER_REGISTRY_PASS | Password for Docker registry, required for uploading sample image|
-| DOCKER_REGISTRY | URL to Docker registry, required for uploading sample image|
-| RELEASE_TOKEN | Token to publish binaries to GitHub during release (TODO: add permissions) |
-| NUGETORG_DAPR_API_KEY | API key to publish package to NuGet |
+| DOCKER_REGISTRY | URL to Docker registry, required for uploading sample image |
+| RELEASE_TOKEN | Token to publish binaries to GitHub during release (minimum permissions: `repo`) |
+| AZCOPY_SPA_APPLICATION_ID | Service principal application ID for AzCopy, required for uploading NuGet packages |
+| AZCOPY_SPA_CLIENT_SECRET | Service principal client secret for AzCopy, required for uploading NuGet packages |
+
+Note, `AZCOPY_*` secrets should not be set for forks, as they are only required for uploading NuGet packages for official release. The step that requires these secrets will be skipped for forks.
 
 4. Go to `Settings` -> `Actions` -> `General` and make sure to allow running GitHub Actions.
 
