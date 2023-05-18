@@ -12,10 +12,6 @@ import sys
 gitRef = os.getenv("GITHUB_REF")
 tagRefPrefix = "refs/tags/v"
 
-# TEMP
-print("##[set-env name=REL_VERSION;]{}".format("0.14.0-preview01"))
-sys.exit(0)
-
 # Is this an edge build?
 if gitRef is None or not gitRef.startswith(tagRefPrefix):
     print("##[set-env name=REL_VERSION;]edge")

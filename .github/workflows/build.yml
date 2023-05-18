@@ -26,10 +26,11 @@ jobs:
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
+      REL_VERSION: "0.14.0-preview01"
     steps:
       - uses: actions/checkout@v2
-      - name: Parse release version
-        run: python ./.github/scripts/get_release_version.py
+      # - name: Parse release version
+      #   run: python ./.github/scripts/get_release_version.py
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
