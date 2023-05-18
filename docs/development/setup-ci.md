@@ -19,7 +19,7 @@ A GitHub account.
 | DOCKER_REGISTRY_ID | Username for Docker registry, required for uploading sample image|
 | DOCKER_REGISTRY_PASS | Password for Docker registry, required for uploading sample image|
 | DOCKER_REGISTRY | URL to Docker registry, required for uploading sample image|
-| GITHUB_TOKEN | Token to publish binaries to GitHub during release |
+| GITHUB_TOKEN | Token to publish binaries to GitHub during release (*automatically created by GitHub*) |
 | NUGETORG_DAPR_API_KEY | API key to publish package to NuGet |
 
 4. Go to `Settings` -> `Actions` -> `General` and make sure to allow running GitHub Actions.
