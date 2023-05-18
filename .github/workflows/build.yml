@@ -54,11 +54,11 @@ jobs:
       - name: Publish binaries to github for tags
         # if: startswith(github.ref, 'refs/tags/v')
         run: |
-          RELEASE_ARTIFACT=(${{ env.NUPKG_OUTDIR }}/*)
+          RELEASE_ARTIFACT=(${NUPKG_OUTDIR}/*)
           export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           echo "Uploading Nuget packages to GitHub Release"
 
-          gh release create "v${REL_VERSION}" "${env.NUPKG_OUTDIR}/*" \
+          gh release create "v${REL_VERSION}" ${RELEASE_ARTIFACT[*]} \
           --repo "${GITHUB_REPOSITORY}" \
           --title "Azure Functions Dapr Extension v${REL_VERSION}" \
           --notes "Release Azure Functions Dapr Extension v${REL_VERSION}"
