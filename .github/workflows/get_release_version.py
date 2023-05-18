@@ -26,4 +26,6 @@ if gitRef.find("-preview") > 0:
     print("##[set-env name=PREVIEW_RELEASE;]true")
     print("Preview build from {}...".format(gitRef))
 
-print("##[set-env name=REL_VERSION;]{}".format(releaseVersion))
+# TEMPORARY: Set release version to 0.14.0-preview01
+# print("##[set-env name=REL_VERSION;]{}".format(releaseVersion))
+print("##[set-env name=REL_VERSION;]{}".format("0.14.0-preview01"))
