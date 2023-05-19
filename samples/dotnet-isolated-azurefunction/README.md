@@ -1,6 +1,6 @@
 ﻿# .NET Azure Function Sample in out-of-proc (OOP) mode
 
-This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components in out-of-proc (OOP) mode. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
+This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components in out-of-proc (OOP) execution model. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
 1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
@@ -28,7 +28,7 @@ In this folder, you will find `local.settings.json`, which lists a few app setti
 
 The `%` denotes an app setting value, for the following binding as an example:
 
-`[DaprState("%StateStoreName%", Key = "product")]`
+`[DaprStateOutput("%StateStoreName%", Key = "product")]`
 
  In the runtime, the binding will check the `local.settings.json` file and resolve `%StateStoreName%` into `statestore`. The function will then make a call into the state store named as `statestore`.
 
@@ -223,15 +223,15 @@ public static void Run(
 Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance.
 
 ```csharp
-[FunctionName("SendMessageToKafka")]
-public static async void Run(
-    [DaprServiceInvocationTrigger] JsonElement payload,
-    [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<object> messages,
-    ILogger log)
+[Function("SendMessageToKafka")]
+[DaprBindingOutput(BindingName = "%KafkaBindingName%", Operation = "create")]
+public static JsonElement Run(
+    [DaprServiceInvocationTrigger] JsonElement payload, FunctionContext functionContext)
 {
-    log.LogInformation("C# HTTP trigger function processed a request.");
+    var log = functionContext.GetLogger("SendMessageToKafka");
+    log.LogInformation("C#  function processed a SendMessageToKafka request.");
 
-    await messages.AddAsync(payload);
+    return payload;
 }
 ```
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. `IAsyncCollector<object>` allows you to send multiple message by calling `AddAsync` with different payloads. 
