@@ -37,7 +37,7 @@ jobs:
       - name: Build solution - ${{ env.CONFIGURATION }}
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
-        run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+        run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
       - name: Codecov
         uses: codecov/codecov-action@v3
       - name: Publish code coverage report
