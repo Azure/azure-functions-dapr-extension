@@ -58,7 +58,7 @@ jobs:
           line_coverage=$(cat coverage/Summary.txt | awk '/Line coverage:/ {print substr($NF, 1, length($NF)-1)}')
           
           # Define the minimum required code coverage threshold (e.g., 70%)
-          threshold= $COVERAGE_THRESHOLD
+          threshold=$COVERAGE_THRESHOLD
           echo "threshold is set to $threshold"
           # Compare the line coverage with the threshold
           if (( $(echo "$line_coverage < $threshold" | bc -l) )); then
