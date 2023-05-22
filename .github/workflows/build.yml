@@ -66,7 +66,7 @@ jobs:
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
         
           # Read the coverage summary from the generated report
-          coverageSummary=$(cat coverage/Summary.txt)
+          coverageSummary=$(cat coverage/index.htm)
       
           # Extract the coverage percentage using grep
           coveragePercentage=$(echo "$coverageSummary" | grep -oP 'Total\s+\K\d+')
