@@ -42,9 +42,12 @@ jobs:
         uses: codecov/codecov-action@v3
       - name: upload test results
         run: |
-          cd /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests/
+          cd /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests
       - name: Publish code coverage report
         uses: actions/upload-artifact@v2
+        with:
+          name: Code Coverage
+          path: /
       - name: change directory
         run: cd /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/
       # The docker image is not pushed for pull requests,
