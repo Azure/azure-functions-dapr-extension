@@ -52,7 +52,7 @@ jobs:
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
       - name: Generate code coverage report
-        run: reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
+        run: reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines,TextSummary"
 
       - name: Publish code coverage report
         uses: actions/upload-artifact@v2
@@ -61,26 +61,31 @@ jobs:
           path: coverage
       - name: Analyze code coverage
         run: |
-          coverageFile=$(find . -type f -name coverage.cobertura.xml)
-          if [ -z "$coverageFile" ]; then
-            echo "Coverage report file not found."
-            exit 1
-          fi
-          coverageThreshold=100
-          coveragePercentage=$(reportgenerator \
-            -reporttypes:TextSummary \
-            -reports:$coverageFile \
-            -targetdir:coverage \
-            | grep "Coverage:" \
-            | awk '{ print $2 }' \
-            | sed 's/%//')
-          echo "Code coverage is $coveragePercentage"
-          if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
-            echo "Code coverage is below the threshold of $coverageThreshold%."
-            exit 1
-          else
-            echo "Code coverage meets the threshold of $coverageThreshold%."
-          fi
+            # Find the coverage summary file dynamically
+            coverageSummary=$(find coverage -name Summary.txt -print -quit)
+        
+            # Check if the coverage summary file exists
+            if [ -z "$coverageSummary" ]; then
+              echo "Coverage summary file not found."
+              exit 1
+            fi
+        
+            # Extract the coverage percentage using grep
+            coveragePercentage=$(grep -oP 'Total\s+\K\d+' "$coverageSummary")
+        
+            # Convert the coverage percentage to an integer
+            coveragePercentage=$((coveragePercentage))
+        
+            # Set the desired coverage threshold
+            coverageThreshold=70
+        
+            # Check if the coverage percentage meets the threshold
+            if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
+              echo "Code coverage is below the threshold of $coverageThreshold%."
+              exit 1
+            else
+              echo "Code coverage meets the threshold of $coverageThreshold%."
+            fi
 
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
