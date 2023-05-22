@@ -61,6 +61,12 @@ jobs:
           path: coverage
       - name: Analyze code coverage
         run: |
+          # Install reportgenerator
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+      
+          # Run reportgenerator to generate the coverage report
+          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
+        
           # Read the coverage summary from the generated report
           coverageSummary=$(cat coverage/Summary.txt)
       
