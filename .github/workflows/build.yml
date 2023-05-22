@@ -61,23 +61,14 @@ jobs:
           path: coverage
       - name: Analyze code coverage
         run: |
-      
-          # Run reportgenerator to generate the coverage report
-          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
-        
-          # Read the coverage summary from the generated report
-          coverageSummary=$(cat coverage/index.htm)
-      
-          # Extract the coverage percentage using grep
-          coveragePercentage=$(echo "$coverageSummary" | grep -oP 'Total\s+\K\d+')
-      
-          # Convert the coverage percentage to an integer
+          coverageIndexFile=$(find coverage -name index.htm -print -quit)
+          if [ -z "$coverageIndexFile" ]; then
+            echo "Coverage report index file not found."
+            exit 1
+          fi
+          coveragePercentage=$(grep -oP '<td class="header" style="color:Red;"><b>\K\d+' "$coverageIndexFile")
           coveragePercentage=$((coveragePercentage))
-      
-          # Set the desired coverage threshold
           coverageThreshold=70
-      
-          # Check if the coverage percentage meets the threshold
           if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
             echo "Code coverage is below the threshold of $coverageThreshold%."
             exit 1
