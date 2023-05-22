@@ -26,7 +26,7 @@ jobs:
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
-      CODE_COVERAGE_THRESHOLD: 70
+      COVERAGE_THRESHOLD: 70
     steps:
       - uses: actions/checkout@v2
       - name: Parse release version
@@ -58,7 +58,7 @@ jobs:
           line_coverage=$(cat coverage/Summary.txt | awk '/Line coverage:/ {print substr($NF, 1, length($NF)-1)}')
           
           # Define the minimum required code coverage threshold (e.g., 70%)
-          threshold= $(${{ env.CODE_COVERAGE_THRESHOLD }})
+          threshold= $COVERAGE_THRESHOLD
           echo "threshold is set to $threshold"
           # Compare the line coverage with the threshold
           if (( $(echo "$line_coverage < $threshold" | bc -l) )); then
