@@ -61,14 +61,19 @@ jobs:
           path: coverage
       - name: Analyze code coverage
         run: |
-          coverageIndexFile=$(find coverage -name index.htm -print -quit)
-          if [ -z "$coverageIndexFile" ]; then
-            echo "Coverage report index file not found."
+          coverageFile=$(find . -type f -name coverage.cobertura.xml)
+          if [ -z "$coverageFile" ]; then
+            echo "Coverage report file not found."
             exit 1
           fi
-          coveragePercentage=$(grep -oP '<td class="header" style="color:Red;"><b>\K\d+' "$coverageIndexFile")
-          coveragePercentage=$((coveragePercentage))
           coverageThreshold=70
+          coveragePercentage=$(dotnet tool run dotnet-reportgenerator-globaltool \
+            -reporttypes:TextSummary \
+            -reports:$coverageFile \
+            -targetdir:coverage \
+            | grep "Coverage:" \
+            | awk '{ print $2 }' \
+            | sed 's/%//')
           if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
             echo "Code coverage is below the threshold of $coverageThreshold%."
             exit 1
