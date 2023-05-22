@@ -67,13 +67,14 @@ jobs:
             exit 1
           fi
           coverageThreshold=100
-          coveragePercentage=$(dotnet tool run dotnet-reportgenerator-globaltool \
+          coveragePercentage=$(reportgenerator \
             -reporttypes:TextSummary \
             -reports:$coverageFile \
             -targetdir:coverage \
             | grep "Coverage:" \
             | awk '{ print $2 }' \
             | sed 's/%//')
+          echo "Code coverage is $coveragePercentage"
           if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
             echo "Code coverage is below the threshold of $coverageThreshold%."
             exit 1
