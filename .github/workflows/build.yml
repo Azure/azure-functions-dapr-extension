@@ -41,22 +41,12 @@ jobs:
         run: |
           #dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
           dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
-      # - name: Codecov
-      #   uses: codecov/codecov-action@v3
-      # - name: Publish code coverage report
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: Code Coverage
-      #     path: /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests/
-
       - name: Install report generator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
-
       - name: Generate code coverage report
         run: |
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:TextSummary"
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
-
       - name: Publish code coverage report
         uses: actions/upload-artifact@v2
         with:
@@ -68,8 +58,8 @@ jobs:
           line_coverage=$(cat coverage/Summary.txt | awk '/Line coverage:/ {print substr($NF, 1, length($NF)-1)}')
           
           # Define the minimum required code coverage threshold (e.g., 70%)
-          threshold= ${{ env.CODE_COVERAGE_THRESHOLD }}
-          
+          threshold= $(${{ env.CODE_COVERAGE_THRESHOLD }})
+          echo "threshold is set to $threshold"
           # Compare the line coverage with the threshold
           if (( $(echo "$line_coverage < $threshold" | bc -l) )); then
             echo "Code coverage is below the threshold $threshold%. Line coverage: $line_coverage%"
