@@ -52,7 +52,9 @@ jobs:
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
       - name: Generate code coverage report
-        run: reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:TextSummary"
+        run: |
+          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:TextSummary"
+          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
 
       - name: Publish code coverage report
         uses: actions/upload-artifact@v2
@@ -69,10 +71,10 @@ jobs:
           
           # Compare the line coverage with the threshold
           if (( $(echo "$line_coverage < $threshold" | bc -l) )); then
-            echo "Code coverage is below the threshold. Line coverage: $line_coverage%"
+            echo "Code coverage is below the threshold $threshold%. Line coverage: $line_coverage%"
             exit 1  # Fail the build
           else
-            echo "Code coverage meets the threshold. Line coverage: $line_coverage%"
+            echo "Code coverage meets the threshold $threshold%. Line coverage: $line_coverage%"
           fi
 
       # The docker image is not pushed for pull requests,
