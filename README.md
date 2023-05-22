@@ -70,7 +70,11 @@ You can run through a quickstart of developing some JavaScript Azure Functions t
 
 ### .NET Functions
 
-[Install the NuGet package](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr) for this extension into your function app project.
+```
+dotnet add package Microsoft.Azure.WebJobs.Extensions.Dapr
+```
+
+For dotnet out-of-proc (isolated) projects, use [Microsoft.Azure.Functions.Worker.Extensions.Dapr](https://www.nuget.org/packages/Microsoft.Azure.Functions.Worker.Extensions.Dapr)
 
 ### Non-.NET Functions
 
@@ -189,6 +193,10 @@ spec:
 ---
 ```
 
+## Known Issues
+
+- **By Design:** In out-of-proc model, support for POCO model isn't available for output bindings and triggers, all the payloads must send JSON data and these data should be used as JsonElement type in Azure Functions. Please look at the [Note section][dotnet-out-of-proc] to find out required values for each bindings and triggers.
+
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
 [topic-trigger-docs]: ./docs/triggers.md#topic-trigger
@@ -228,12 +236,6 @@ spec:
 [python-invoke-output]: ./samples/python-azurefunction/InvokeOutputBinding/__init__.py
 [python-publish-output]: ./samples/python-azurefunction/PublishOutputBinding/__init__.py
 [python-binding-output]: ./samples/python-azurefunction/SendMessageToKafka/__init__.py
-
-## Known Issues
-
-- **By Design:** In out-of-proc model, supoort for POCO model isn't available as of now, so, all the payloads must send Json data and these data should be used as JsonElement type in Azure Functions. Please look at the Note section to find out required values for each bindings and triggers.
+[dotnet-out-of-proc]: ./docs/dotnet-out-of-proc.md#Note
 
 
-## Note
-
-- Dapr extension uses System.Text.Json, so it is advisable to use STJ library to avoid data conversion issues.
