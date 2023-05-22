@@ -195,7 +195,7 @@ spec:
 
 ## Known Issues
 
-- **By Design:** In out-of-proc model, support for POCO model isn't available for output bindings and triggers as of now, so, all the payloads must send Json data and these data should be used as JsonElement type in Azure Functions. Please look at the [Note section][dotnet-out-of-proc] to find out required values for each bindings and triggers.
+- **By Design:** In out-of-proc model, support for POCO model isn't available for output bindings and triggers, all the payloads must send JSON data and these data should be used as JsonElement type in Azure Functions. Please look at the [Note section][dotnet-out-of-proc] to find out required values for each bindings and triggers.
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
