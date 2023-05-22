@@ -61,31 +61,19 @@ jobs:
           path: coverage
       - name: Analyze code coverage
         run: |
-            # Find the coverage summary file dynamically
-            coverageSummary=$(find coverage -name Summary.txt -print -quit)
-        
-            # Check if the coverage summary file exists
-            if [ -z "$coverageSummary" ]; then
-              echo "Coverage summary file not found."
-              exit 1
-            fi
-        
-            # Extract the coverage percentage using grep
-            coveragePercentage=$(grep -oP 'Total\s+\K\d+' "$coverageSummary")
-        
-            # Convert the coverage percentage to an integer
-            coveragePercentage=$((coveragePercentage))
-        
-            # Set the desired coverage threshold
-            coverageThreshold=70
-        
-            # Check if the coverage percentage meets the threshold
-            if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
-              echo "Code coverage is below the threshold of $coverageThreshold%."
-              exit 1
-            else
-              echo "Code coverage meets the threshold of $coverageThreshold%."
-            fi
+          # Extract the line coverage percentage from the Summary.txt file
+          line_coverage=$(cat coverage/Summary.txt | awk '/Line coverage:/ {print substr($NF, 1, length($NF)-1)}')
+          
+          # Define the minimum required code coverage threshold (e.g., 70%)
+          threshold=70
+          
+          # Compare the line coverage with the threshold
+          if (( $(echo "$line_coverage < $threshold" | bc -l) )); then
+            echo "Code coverage is below the threshold. Line coverage: $line_coverage%"
+            exit 1  # Fail the build
+          else
+            echo "Code coverage meets the threshold. Line coverage: $line_coverage%"
+          fi
 
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
