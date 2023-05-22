@@ -62,24 +62,24 @@ jobs:
       - name: Analyze code coverage
         run: |
           # Read the coverage summary from the generated report
-          $coverageSummary = Get-Content coverage/Summary.txt | Select-String 'Total'
+          coverageSummary=$(cat coverage/Summary.txt)
       
-          # Extract the coverage percentage
-          $coveragePercentage = ($coverageSummary -split '\s+')[1]
+          # Extract the coverage percentage using grep
+          coveragePercentage=$(echo "$coverageSummary" | grep -oP 'Total\s+\K\d+')
       
           # Convert the coverage percentage to an integer
-          $coveragePercentage = [int]$coveragePercentage
+          coveragePercentage=$((coveragePercentage))
       
           # Set the desired coverage threshold
-          $coverageThreshold = 70
+          coverageThreshold=70
       
           # Check if the coverage percentage meets the threshold
-          if ($coveragePercentage -lt $coverageThreshold) {
-            Write-Host "Code coverage is below the threshold of $coverageThreshold%."
+          if [ "$coveragePercentage" -lt "$coverageThreshold" ]; then
+            echo "Code coverage is below the threshold of $coverageThreshold%."
             exit 1
-          } else {
-            Write-Host "Code coverage meets the threshold of $coverageThreshold%."
-          }
+          else
+            echo "Code coverage meets the threshold of $coverageThreshold%."
+          fi
 
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
