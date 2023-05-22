@@ -70,7 +70,11 @@ You can run through a quickstart of developing some JavaScript Azure Functions t
 
 ### .NET Functions
 
-[Install the NuGet package](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr) for this extension into your function app project. For dotnet out-of-proc please use [this nuget](https://www.nuget.org/packages/Microsoft.Azure.Functions.Worker.Extensions.Dapr) package.
+<pre>
+dotnet add package Microsoft.Azure.WebJobs.Extensions.Dapr
+</pre>
+
+For dotnet out-of-proc (isolated) projects, use [Microsoft.Azure.Functions.Worker.Extensions.Dapr](https://www.nuget.org/packages/Microsoft.Azure.Functions.Worker.Extensions.Dapr)
 
 ### Non-.NET Functions
 
