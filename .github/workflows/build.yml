@@ -42,11 +42,23 @@ jobs:
           dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
       # - name: Codecov
       #   uses: codecov/codecov-action@v3
+      # - name: Publish code coverage report
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: Code Coverage
+      #     path: /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests/
+
+      - name: Install report generator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate code coverage report
+        run: reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
+
       - name: Publish code coverage report
         uses: actions/upload-artifact@v2
         with:
           name: Code Coverage
-          path: **/TestResults
+          path: coverage
 
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
