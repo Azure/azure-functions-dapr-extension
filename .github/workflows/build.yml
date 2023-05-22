@@ -46,7 +46,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Code Coverage
-          path: /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests/
+          path: **/TestResults
 
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
