@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_PATH }}
-      CONFIGURATION: Debug
+      CONFIGURATION: Release
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
@@ -38,15 +38,15 @@ jobs:
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: |
-          cd ./test/DaprExtensionTests
-          dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+          #dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+          dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
       # - name: Codecov
       #   uses: codecov/codecov-action@v3
-      # - name: Publish code coverage report
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: Code Coverage
-      #     path: /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests/
+      - name: Publish code coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: Code Coverage
+          path: /home/runner/work/azure-functions-dapr-extension/azure-functions-dapr-extension/test/DaprExtensionTests/
 
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
