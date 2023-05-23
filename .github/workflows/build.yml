@@ -26,7 +26,6 @@ jobs:
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
-      COVERAGE_THRESHOLD: 70
     steps:
       - uses: actions/checkout@v2
       - name: Parse release version
