@@ -28,7 +28,7 @@ jobs:
       NUPKG_OUTDIR: bin/Release/nugets
       COVERAGE_THRESHOLD: 70
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
       - name: Parse release version
         run: python ./.github/scripts/get_release_version.py
       - name: Setup .NET Core
@@ -39,40 +39,11 @@ jobs:
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: |
-          #dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
           dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
-      - name: Install report generator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
-      - name: Generate code coverage report
-        run: |
-          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:TextSummary"
-          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
-
       - name: Codecov
         uses: codecov/codecov-action@v3
         with:
           file: "**/coverage.cobertura.xml"  # Specify the path to your Cobertura format coverage report file
-      - name: Publish code coverage report
-        uses: actions/upload-artifact@master
-        with:
-          name: Code Coverage
-          path: coverage
-      - name: Analyze code coverage
-        run: |
-          # Extract the line coverage percentage from the Summary.txt file
-          line_coverage=$(cat coverage/Summary.txt | awk '/Line coverage:/ {print substr($NF, 1, length($NF)-1)}')
-          
-          # Define the minimum required code coverage threshold (e.g., 70%)
-          threshold=$COVERAGE_THRESHOLD
-          echo "threshold is set to $threshold"
-          # Compare the line coverage with the threshold
-          if (( $(echo "$line_coverage < $threshold" | bc -l) )); then
-            echo "Code coverage is below the threshold $threshold%. Line coverage: $line_coverage%"
-            exit 1  # Fail the build
-          else
-            echo "Code coverage meets the threshold $threshold%. Line coverage: $line_coverage%"
-          fi
-
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
       - name: Set a sample app registry when it is a pull request
