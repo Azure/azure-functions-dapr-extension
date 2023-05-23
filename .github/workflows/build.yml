@@ -49,10 +49,9 @@ jobs:
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
 
       - name: Codecov
-        uses: codecov/codecov-action@v1
-        # with:
-        #   file: coverage/*.txt  # Specify the path to your Cobertura format coverage report file
-        #   flags: unittests
+        uses: codecov/codecov-action@v3
+        with:
+          file: "**/coverage.cobertura.xml"  # Specify the path to your Cobertura format coverage report file
       - name: Publish code coverage report
         uses: actions/upload-artifact@master
         with:
