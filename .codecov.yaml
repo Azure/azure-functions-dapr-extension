@@ -5,5 +5,4 @@ coverage:
         # basic
         target: 90%
         threshold: 0%
-        paths: 
-          - "src"
+        if_ci_failed: error

@@ -41,7 +41,7 @@ jobs:
         run: |
           dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
       - name: Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v1
         with:
           file: "**/coverage.cobertura.xml"  # Specify the path to your Cobertura format coverage report file
       # The docker image is not pushed for pull requests,
