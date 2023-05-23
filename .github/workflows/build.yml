@@ -37,7 +37,12 @@ jobs:
       - name: Build solution - ${{ env.CONFIGURATION }}
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
-        run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal
+        run: |
+          dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
+      - name: Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: "**/coverage.cobertura.xml"  # Specify the path to your Cobertura format coverage report file
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
       - name: Set a sample app registry when it is a pull request

@@ -265,3 +265,6 @@ __pycache__/
 
 # Local packages folder
 ./local-packages/
+
+# Coverage files
+coverage.cobertura.xml
