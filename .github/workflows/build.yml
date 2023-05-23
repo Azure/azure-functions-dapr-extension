@@ -47,16 +47,17 @@ jobs:
         run: |
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:TextSummary"
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1
+        # with:
+        #   file: coverage/*.txt  # Specify the path to your Cobertura format coverage report file
+        #   flags: unittests
       - name: Publish code coverage report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@master
         with:
           name: Code Coverage
           path: coverage
-      - name: Upload code coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          file: coverage/*.txt  # Specify the path to your Cobertura format coverage report file
-          flags: unittests
       - name: Analyze code coverage
         run: |
           # Extract the line coverage percentage from the Summary.txt file
