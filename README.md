@@ -3,6 +3,7 @@
 ![Build and Test](https://github.com/dapr/azure-functions-extension/workflows/Build%20and%20Test/badge.svg)
 [![Gitter](https://badges.gitter.im/Dapr/community.svg)](https://gitter.im/Dapr/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/azure/azure-functions-dapr-extension/branch/master/graph/badge.svg?token=pEqChbNLFi)](https://codecov.io/gh/azure/azure-functions-dapr-extension)
 
 - [dapr.io](https://dapr.io)
 - [@DaprDev](https://twitter.com/DaprDev)
