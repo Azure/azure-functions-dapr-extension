@@ -6,6 +6,7 @@ coverage:
         target: 90%
         threshold: 0%
         if_ci_failed: error
+        fail_ci_if_error: true
     patch:
       default:
         informational: true
