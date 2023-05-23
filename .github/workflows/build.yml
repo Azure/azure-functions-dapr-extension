@@ -29,7 +29,6 @@ jobs:
       COVERAGE_THRESHOLD: 70
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@master
       - name: Parse release version
         run: python ./.github/scripts/get_release_version.py
       - name: Setup .NET Core
@@ -50,7 +49,7 @@ jobs:
           reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:HtmlInline_AzurePipelines"
 
       - name: Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           file: "**/coverage.cobertura.xml"  # Specify the path to your Cobertura format coverage report file
       - name: Publish code coverage report
