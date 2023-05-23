@@ -37,15 +37,5 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
         {
             return $"Host.Triggers.Dapr.{triggerType}";
         }
-
-        /// <summary>
-        /// Creates a category name for Dapr triggers to be used in logging.
-        /// </summary>
-        /// <param name="triggerType">The type of the trigger.</param>
-        /// <returns>A category name for Dapr triggers.</returns>
-        public static string TestMethod(string triggerType)
-        {
-            return $"Host.Triggers.Dapr.{triggerType}";
-        }
     }
 }
