@@ -43,7 +43,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: "**/coverage.cobertura.xml"  # Specify the path to your Cobertura format coverage report file
+          file: "**/coverage.cobertura.xml,./.github/codecov.yml"  # Specify the path to your Cobertura format coverage report file
           fail_ci_if_error: true # optional (default = false)
       # The docker image is not pushed for pull requests,
       # but the image is built to ensure that the Dockerfile and the sample app are valid.
