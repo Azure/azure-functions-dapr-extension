@@ -1,16 +1,16 @@
-namespace Tests
+namespace EndToEndTests
 {
-    public class StateInputBindingTests
-    {
-        const string API_URL = "http://localhost:7071";
+    using Xunit;
 
+    public class StateInputBindingTests : TestBase
+    {
         [Theory]
         [MemberData(nameof(GetStateInputBindingTestData))]
         public async Task RetrieveData(string key, string expectedValue)
         {
             // Arrange
             var client = new HttpClient();
-            var url = $"{API_URL}/api/state/{key}";
+            var url = $"{base.FUNCTIONS_APP_URI}/api/state/{key}";
 
             // Act
             var response = await client.GetAsync(url);
