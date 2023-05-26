@@ -10,7 +10,7 @@ namespace EndToEndTests
         {
             // Arrange
             var client = new HttpClient();
-            var url = $"{base.FUNCTIONS_APP_URI}/api/state/{key}";
+            var url = $"{base.FunctionsAppUri}/api/state/{key}";
 
             // Act
             var response = await client.GetAsync(url);

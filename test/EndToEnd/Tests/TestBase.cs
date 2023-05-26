@@ -2,13 +2,35 @@ namespace EndToEndTests
 {
     public class TestBase
     {
-        protected const string DEFAULT_FUNCTIONS_APP_URI = "http://localhost:7071";
+        private const string DEFAULT_HOST_URI = "http://localhost";
+        private const string DEFAULT_APP_PORT = "7071";
+        private const string DEFAULT_DAPR_HTTP_PORT = "3500";
 
-        protected string FUNCTIONS_APP_URI;
+        private string hostUri;
+        private string appPort;
+        private string daprHttpPort;
+
+        public string FunctionsAppUri
+        {
+            get
+            {
+                return $"{hostUri}:{appPort}";
+            }
+        }
+
+        public string DaprHttpUri
+        {
+            get
+            {
+                return $"{hostUri}:{daprHttpPort}";
+            }
+        }
 
         public TestBase()
         {
-            FUNCTIONS_APP_URI = Environment.GetEnvironmentVariable("FUNCTIONS_APP_URI") ?? DEFAULT_FUNCTIONS_APP_URI;
+            hostUri = Environment.GetEnvironmentVariable(Constants.ENVKEY_HOST_URI) ?? DEFAULT_HOST_URI;
+            appPort = Environment.GetEnvironmentVariable(Constants.ENVKEY_APP_PORT) ?? DEFAULT_APP_PORT;
+            daprHttpPort = Environment.GetEnvironmentVariable(Constants.ENVKEY_DAPR_HTTP_PORT) ?? DEFAULT_DAPR_HTTP_PORT;
         }
     }
 }
