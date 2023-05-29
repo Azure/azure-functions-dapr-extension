@@ -1,5 +1,9 @@
 # EndToEnd Tests
 
+## Scratch
+
+- cross platform build support in makefile
+
 ## Overview
 
 The e2e tests are designed to test the extension in a real environment, and consist of the following components:
@@ -9,5 +13,22 @@ The e2e tests are designed to test the extension in a real environment, and cons
 1. Infrastructure setup: The infrastructure setup is a set of scripts that can be used to deploy the test apps to an environment, and run the test cases against the test apps. It is also responsible for provisioning the environment, and cleaning up after the tests are done.
 
 ## Running the tests
+
+### Prepare the test app images
+
+```bash
+# Set the required environment variables.
+export E2E_TEST_APP_REGISTRY=myregistry.azurecr.io
+export E2E_TEST_APP_TAG=dev
+
+# Build and push the test apps.
+# You can also build and push individual test apps.
+# make build-e2e-app-csharpapp
+# make push-e2e-app-csharpapp
+make build-e2e-app-all
+make push-e2e-app-all
+```
+
+### Run the tests locally
 
 ## Adding a new test
