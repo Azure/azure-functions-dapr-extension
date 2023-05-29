@@ -2,6 +2,18 @@ namespace EndToEndTests.Tester
 {
     public abstract class TestEnvironmentBase
     {
+        protected string TestAppRegistry;
+        protected string TestAppTag;
+
+        protected TestEnvironmentBase()
+        {
+            TestAppRegistry = Environment.GetEnvironmentVariable(Constants.ENVKEY_TEST_APP_REGISTRY) ??
+                throw new ArgumentException($"Environment variable {Constants.ENVKEY_TEST_APP_REGISTRY} is not set.");
+
+            TestAppTag = Environment.GetEnvironmentVariable(Constants.ENVKEY_TEST_APP_TAG) ??
+                throw new ArgumentException($"Environment variable {Constants.ENVKEY_TEST_APP_TAG} is not set.");
+        }
+
         /// <summary>
         /// Sets up the test environment.
         /// Any resources that are needed for the test environment should be created here.

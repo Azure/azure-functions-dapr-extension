@@ -12,6 +12,10 @@ The e2e tests are designed to test the extension in a real environment, and cons
 1. Test cases: Test cases are written in dotnet, and are designed to run against test apps of different languages. The tests can be run locally or in a CI pipeline, and just need to know the test app's URL (which is injected as an environment variable).
 1. Infrastructure setup: The infrastructure setup is a set of scripts that can be used to deploy the test apps to an environment, and run the test cases against the test apps. It is also responsible for provisioning the environment, and cleaning up after the tests are done.
 
+## Pre-requisites
+
+- [Docker](https://docs.docker.com/get-docker/) (with buildx support) to build and run the test apps
+ 
 ## Running the tests
 
 ### Prepare the test app images
