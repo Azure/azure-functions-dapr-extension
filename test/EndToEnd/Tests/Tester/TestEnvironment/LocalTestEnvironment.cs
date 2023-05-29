@@ -13,6 +13,7 @@ namespace EndToEndTests.Tester
         private DockerClient dockerClient;
         private Dictionary<string, string> runningContainers;
 
+        // TODO: add logger
         LocalTestEnvironment() : base()
         {
             dockerClient = new DockerClientConfiguration().CreateClient();
@@ -49,7 +50,11 @@ namespace EndToEndTests.Tester
 
         public override void Stop(TestApp app)
         {
-            throw new NotImplementedException();
+            foreach (var containerName in runningContainers.Keys)
+            {
+                Console.WriteLine($"Stopping container {containerName}...");
+                dockerClient.Containers.StopContainerAsync(containerName, new Docker.DotNet.Models.ContainerStopParameters());
+            }
         }
 
         public override void TearDown()
