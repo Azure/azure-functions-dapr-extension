@@ -2,7 +2,7 @@ namespace EndToEndTests
 {
     public static class Constants
     {
-        public const int DefaultDaprHttpPort = 3500;
+        public const string DaprSidecarImage = "ghcr.io/dapr/daprd:edge";
 
         public static class EnvironmentKeys
         {

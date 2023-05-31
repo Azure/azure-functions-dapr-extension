@@ -15,6 +15,7 @@ The e2e tests are designed to test the extension in a real environment, and cons
 ## Pre-requisites
 
 - [Docker](https://docs.docker.com/get-docker/) (with buildx support) to build and run the test apps
+- TODO: infrastructure setup pre-requisites (including Dapr components)
  
 ## Running the tests
 

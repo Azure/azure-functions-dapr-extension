@@ -11,6 +11,8 @@ namespace EndToEndTests.Tester
     {
         private readonly ILogger<AppFixture> logger;
 
+        private readonly ITestEnvironment testEnvironment;
+
         public AppFixture()
         {
             string environmentType = GetEnvironmentVariable(Constants.EnvironmentKeys.TEST_APP_ENVIRONMENT);
@@ -25,7 +27,6 @@ namespace EndToEndTests.Tester
             logger = loggerFactory.CreateLogger<AppFixture>();
 
             // Get the right test environment
-            ITestEnvironment testEnvironment;
             switch (environmentType)
             {
                 case "local":
@@ -38,12 +39,13 @@ namespace EndToEndTests.Tester
 
             // Start the test app
             // TODO: Make this configurable, so we can test different apps.
-            TestApp = testEnvironment.StartAsync("csharpapp", 5000).Result;
+            TestApp = testEnvironment.StartAsync("csharpapp").Result;
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // TODO: Make this configurable, so we can test different apps.
+            testEnvironment.StopAsync("csharpapp").Wait();
         }
 
         /// <summary>
