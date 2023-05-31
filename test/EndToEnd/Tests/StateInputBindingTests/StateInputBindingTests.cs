@@ -29,13 +29,14 @@ namespace EndToEndTests
             // Assert
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
+
             Assert.Equal(expectedValue, responseString);
         }
 
         public static IEnumerable<string[]> GetStateInputBindingTestData() =>
             new List<string[]>
             {
-                new string[] { "key1", "value1" },
+                new string[] { "key1", "\"value1\"" },
             };
     }
 }

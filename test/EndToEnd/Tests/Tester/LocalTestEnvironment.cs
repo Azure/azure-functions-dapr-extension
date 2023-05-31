@@ -11,6 +11,7 @@ namespace EndToEndTests.Tester
         private string containerRegistry;
         private string containerTag;
         private DockerClient dockerClient;
+        private int daprPid;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalTestEnvironment"/> class.
@@ -37,7 +38,12 @@ namespace EndToEndTests.Tester
 
             // Start the Dapr sidecar
             this.logger.LogInformation($"Starting Dapr sidecar for test app {appName} on port {daprPortOnHost}.");
-            await StartDaprContainerAsync(daprPortOnHost, appPortOnHost, appName);
+            daprPid = StartDaprProcess(daprPortOnHost, appName, null);
+
+            // Wait for the application to be ready
+            // Figure out a better way to do this!
+            this.logger.LogInformation($"Waiting for test app {appName} to be ready.");
+            await Task.Delay(5000);
 
             return new TestApp("http://localhost", appPortOnHost);
         }
@@ -48,12 +54,15 @@ namespace EndToEndTests.Tester
 
             // Stop and delete the application container
             // TODO: save logs from the container before deleting it for debugging purposes
-            // await dockerClient.Containers.StopContainerAsync(appName, new DockerModels.ContainerStopParameters());
-            // await dockerClient.Containers.RemoveContainerAsync(appName, new DockerModels.ContainerRemoveParameters());
+            await dockerClient.Containers.StopContainerAsync(appName, new DockerModels.ContainerStopParameters());
+            await dockerClient.Containers.RemoveContainerAsync(appName, new DockerModels.ContainerRemoveParameters());
 
-            // Stop and delete the Dapr sidecar container
-            // await dockerClient.Containers.StopContainerAsync(this.GetDaprdContainerName(appName), new DockerModels.ContainerStopParameters());
-            // await dockerClient.Containers.RemoveContainerAsync(this.GetDaprdContainerName(appName), new DockerModels.ContainerRemoveParameters());
+            // Stop the Dapr process
+            if (daprPid != 0)
+            {
+                this.logger.LogInformation($"Stopping Dapr sidecar for test app {appName}.");
+                Process.GetProcessById(daprPid).Kill();
+            }
         }
 
         /// <summary>
@@ -64,9 +73,21 @@ namespace EndToEndTests.Tester
         /// <param name="daprPortOnHost">The port where the Dapr sidecar should listen on the host.</param>
         private async Task<string> StartAppContainerAsync(string appName, int appPortOnHost, int daprPortOnHost)
         {
+            var imageName = $"{containerRegistry}/{appName}:{containerTag}";
+
+            // Pull the image
+            await dockerClient.Images.CreateImageAsync(
+                new DockerModels.ImagesCreateParameters
+                {
+                    FromImage = imageName
+                },
+                null,
+                new Progress<DockerModels.JSONMessage>((m) => logger.LogInformation($"{m.Status}: {m.Progress}, {m.ProgressMessage}"))
+            );
+
             var containerParams = new DockerModels.CreateContainerParameters
             {
-                Image = $"{containerRegistry}/{appName}:{containerTag}",
+                Image = imageName,
                 Name = appName,
                 ExposedPorts = new Dictionary<string, DockerModels.EmptyStruct>
                 {
@@ -74,83 +95,20 @@ namespace EndToEndTests.Tester
                 },
                 HostConfig = new DockerModels.HostConfig
                 {
-                    NetworkMode = "host", // App needs to be on the same network as host to talk to Dapr sidecar
+                    PortBindings = new Dictionary<string, IList<DockerModels.PortBinding>>
+                    {
+                        { $"{appPortOnHost}", new List<DockerModels.PortBinding> { new DockerModels.PortBinding { HostPort = $"{appPortOnHost}" } } }
+                    }
                 },
                 Env = new List<string>
                 {
+                    $"DAPR_HTTP_HOST=host.docker.internal",
                     $"DAPR_HTTP_PORT={daprPortOnHost}",
-                    $"ASPNETCORE_URLS=http://localhost:{appPortOnHost}",
+                    $"ASPNETCORE_URLS=http://*:{appPortOnHost}",
                 }
             };
 
-            return await CreateAndStartContainerAsync(containerParams);
-        }
-
-        /// <summary>
-        /// Starts the Dapr sidecar in a container.
-        /// </summary>
-        /// <param name="daprPortOnHost">The port where the Dapr sidecar should listen on the host.</param>
-        /// <param name="appPortOnHost">The port where the application listens on the host.</param>
-        /// <param name="appName">The name of the application.</param>
-        private async Task<string> StartDaprContainerAsync(int daprPortOnHost, int appPortOnHost, string appName)
-        {
-            var containerParams = new DockerModels.CreateContainerParameters
-            {
-                Image = Constants.DaprSidecarImage,
-                Name = this.GetDaprdContainerName(appName),
-                ExposedPorts = new Dictionary<string, DockerModels.EmptyStruct>
-                {
-                    { $"{daprPortOnHost}", new DockerModels.EmptyStruct() }
-                },
-                HostConfig = new DockerModels.HostConfig
-                {
-                    NetworkMode = "host", // Dapr sidecar needs to be on the same network as host to talk to components
-                    Mounts = new List<DockerModels.Mount>
-                    {
-                        new DockerModels.Mount
-                        {
-                            Source = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dapr", "components"),
-                            Target = "/components",
-                            Type = "bind"
-                        },
-                    },
-                },
-                Cmd = new List<string>
-                {
-                    "./daprd",
-                    "--app-id", appName,
-                    // "--app-port", $"{appPortOnHost}", // TODO: enable when using triggers
-                    "--dapr-http-port", $"{daprPortOnHost}",
-                    "--resources-path", "./components"
-                }
-            };
-            return await CreateAndStartContainerAsync(containerParams);
-        }
-
-        private string StartDaprProcess(string appName, int appPort)
-        {
-            var process = new Process();
-            process.StartInfo.FileName = "daprd";
-            process.StartInfo.Arguments = $"--app-id {appName} --app-port {appPort} --dapr-http-port {appPort} --log-level debug";
-            process.StartInfo.UseShellExecute = false;
-
-            process.Start();
-
-            return process.Id.ToString();
-        }
-
-        private async Task<string> CreateAndStartContainerAsync(DockerModels.CreateContainerParameters containerParams)
-        {
-            // TODO: Check if image exists, if not pull it
-            await dockerClient.Images.CreateImageAsync(
-                new DockerModels.ImagesCreateParameters
-                {
-                    FromImage = containerParams.Image
-                },
-                null,
-                new Progress<DockerModels.JSONMessage>((m) => logger.LogInformation($"{m.Status}: {m.Progress}, {m.ProgressMessage}"))
-            );
-
+            // Create the container
             var response = await dockerClient.Containers.CreateContainerAsync(containerParams);
 
             if (response.Warnings != null)
@@ -161,6 +119,7 @@ namespace EndToEndTests.Tester
                 }
             }
 
+            // Start the container
             var started = await dockerClient.Containers.StartContainerAsync(response.ID, new DockerModels.ContainerStartParameters());
             if (!started)
             {
@@ -170,9 +129,33 @@ namespace EndToEndTests.Tester
             return response.ID;
         }
 
-        private string GetDaprdContainerName(string appName)
+        /// <summary>
+        /// Starts the Daprd process.
+        /// </summary>
+        /// <param name="daprHttpPort">The port where the Dapr sidecar should listen.</param>
+        /// <param name="appName">The name of the application.</param>
+        /// <param name="appPort">The port where the application is listening.</param>
+        private int StartDaprProcess(int daprHttpPort, string appName, int? appPort)
         {
-            return $"daprd-{appName}";
+            var componentsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dapr", "components");
+
+            var args = $"--app-id {appName} --dapr-http-port {daprHttpPort} --resources-path {componentsPath}";
+            if (appPort.HasValue)
+            {
+                args += $" --app-port {appPort.Value}";
+            }
+
+            var process = new Process();
+            process.StartInfo.FileName = "daprd";
+            process.StartInfo.Arguments = args;
+            process.StartInfo.UseShellExecute = false;
+
+            // TODO: write logs to a file for debugging purposes
+            process.StartInfo.RedirectStandardOutput = true;
+
+            process.Start();
+
+            return process.Id;
         }
     }
 }
