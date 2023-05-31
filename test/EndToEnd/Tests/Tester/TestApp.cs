@@ -2,13 +2,13 @@ namespace EndToEndTests.Tester
 {
     public class TestApp
     {
-        public string Name { get; private set; }
+        public string Host { get; private set; }
 
         public int Port { get; private set; }
 
-        public TestApp(string name, int port)
+        public TestApp(string host, int port)
         {
-            Name = name;
+            Host = host;
             Port = port;
         }
     }

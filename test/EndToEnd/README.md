@@ -22,8 +22,8 @@ The e2e tests are designed to test the extension in a real environment, and cons
 
 ```bash
 # Set the required environment variables.
-export E2E_TEST_APP_REGISTRY=myregistry.azurecr.io
-export E2E_TEST_APP_TAG=dev
+export DAPR_E2E_TEST_APP_REGISTRY=myregistry.azurecr.io
+export DAPR_E2E_TEST_APP_TAG=dev
 
 # Build and push the test apps.
 # You can also build and push individual test apps.
@@ -34,5 +34,9 @@ make push-e2e-app-all
 ```
 
 ### Run the tests locally
+
+```bash
+DAPR_E2E_TEST_APP_ENVIRONMENT=local dotnet test
+```
 
 ## Adding a new test
