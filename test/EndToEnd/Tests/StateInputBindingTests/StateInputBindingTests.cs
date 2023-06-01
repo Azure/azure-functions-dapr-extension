@@ -1,19 +1,12 @@
 namespace EndToEndTests
 {
-    using EndToEndTests.Tester;
+    using EndToEndTests.Infrastructure;
     using Xunit;
 
-    [Collection("AppCollection")]
-    public class StateInputBindingTests
+    public class StateInputBindingTests : TestBase
     {
-        AppFixture appFixture;
-
-        public StateInputBindingTests(AppFixture appFixture)
-        {
-            this.appFixture = appFixture;
-        }
-
-        private string FunctionsAppUri => $"{appFixture.TestApp.Host}:{appFixture.TestApp.Port}";
+        public StateInputBindingTests(AppFixture appFixture) : base(appFixture)
+        { }
 
         [Theory]
         [MemberData(nameof(GetStateInputBindingTestData))]
@@ -21,7 +14,7 @@ namespace EndToEndTests
         {
             // Arrange
             var client = new HttpClient();
-            var url = $"{FunctionsAppUri}/api/state/{key}";
+            var url = $"{base.FunctionsAppUri}/api/state/{key}";
 
             // Act
             var response = await client.GetAsync(url);

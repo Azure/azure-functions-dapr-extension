@@ -1,3 +1,5 @@
+# This file contains the make targets for building and pushing e2e test app images.
+
 E2E_TEST_APPS_DIR := ./test/EndToEnd/Apps
 
 # E2E_TEST_APPS contains a list of all e2e test apps.

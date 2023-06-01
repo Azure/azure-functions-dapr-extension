@@ -1,17 +1,21 @@
-namespace EndToEndTests.Tester
+namespace EndToEndTests.Infrastructure
 {
     using Docker.DotNet;
     using DockerModels = Docker.DotNet.Models;
     using Microsoft.Extensions.Logging;
     using System.Diagnostics;
 
+    /// <summary>
+    /// Represents a local test environment.
+    /// Runs the test app in a container and the Dapr sidecar as a process.
+    /// </summary>
     class LocalTestEnvironment : ITestEnvironment
     {
         private ILogger logger;
         private string containerRegistry;
         private string containerTag;
         private DockerClient dockerClient;
-        private int daprPid;
+        private Dictionary<string, int> daprPids;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalTestEnvironment"/> class.
@@ -25,6 +29,7 @@ namespace EndToEndTests.Tester
             this.containerRegistry = containerRegistry;
             this.containerTag = containerTag;
             this.dockerClient = new DockerClientConfiguration().CreateClient();
+            this.daprPids = new Dictionary<string, int>();
         }
 
         public async Task<TestApp> StartAsync(string appName)
@@ -32,19 +37,20 @@ namespace EndToEndTests.Tester
             int appPortOnHost = Utils.FreeTcpPort();
             int daprPortOnHost = Utils.FreeTcpPort();
 
-            // Start the application
-            this.logger.LogInformation($"Starting test app {appName} on port {appPortOnHost}.");
+            // Start the application container
+            this.logger.LogInformation($"Starting test app '{appName}' container on port {appPortOnHost}.");
             await StartAppContainerAsync(appName, appPortOnHost, daprPortOnHost);
 
-            // Start the Dapr sidecar
-            this.logger.LogInformation($"Starting Dapr sidecar for test app {appName} on port {daprPortOnHost}.");
-            daprPid = StartDaprProcess(daprPortOnHost, appName, null);
+            // Start the Dapr sidecar process
+            this.logger.LogInformation($"Starting Dapr sidecar process for test app '{appName}' on port {daprPortOnHost}.");
+            daprPids.Add(appName, StartDaprProcess(daprPortOnHost, appName, null));
 
             // Wait for the application to be ready
             // Figure out a better way to do this!
-            this.logger.LogInformation($"Waiting for test app {appName} to be ready.");
+            this.logger.LogInformation($"Waiting for test app '{appName}' to be ready.");
             await Task.Delay(5000);
 
+            // The test app is available at http://localhost:{appPortOnHost}
             return new TestApp("http://localhost", appPortOnHost);
         }
 
@@ -58,7 +64,7 @@ namespace EndToEndTests.Tester
             await dockerClient.Containers.RemoveContainerAsync(appName, new DockerModels.ContainerRemoveParameters());
 
             // Stop the Dapr process
-            if (daprPid != 0)
+            if (daprPids.TryGetValue(appName, out int daprPid))
             {
                 this.logger.LogInformation($"Stopping Dapr sidecar for test app {appName}.");
                 Process.GetProcessById(daprPid).Kill();

@@ -1,5 +1,8 @@
-namespace EndToEndTests.Tester
+namespace EndToEndTests.Infrastructure
 {
+    /// <summary>
+    /// A test environment where test apps can be started and stopped.
+    /// </summary>
     public interface ITestEnvironment
     {
         /// <summary>

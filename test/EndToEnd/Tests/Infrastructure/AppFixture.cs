@@ -1,4 +1,4 @@
-namespace EndToEndTests.Tester
+namespace EndToEndTests.Infrastructure
 {
     using Microsoft.Extensions.Logging;
 
