@@ -34,8 +34,8 @@ namespace EndToEndTests.Infrastructure
 
         public async Task<TestApp> StartAsync(string appName)
         {
-            int appPortOnHost = Utils.FreeTcpPort();
-            int daprPortOnHost = Utils.FreeTcpPort();
+            int appPortOnHost = Utils.GetFreeTcpPort();
+            int daprPortOnHost = Utils.GetFreeTcpPort();
 
             // Start the application container
             this.logger.LogInformation($"Starting test app '{appName}' container on port {appPortOnHost}.");
@@ -129,7 +129,8 @@ namespace EndToEndTests.Infrastructure
             var started = await dockerClient.Containers.StartContainerAsync(response.ID, new DockerModels.ContainerStartParameters());
             if (!started)
             {
-                throw new SystemException($"Failed to start container {response.ID}");
+                this.logger.LogError($"Failed to start container {response.ID}, appName: {appName}, appPortOnHost: {appPortOnHost}, daprPortOnHost: {daprPortOnHost}");
+                throw new SystemException($"Failed to start container {response.ID}, appName: {appName}, appPortOnHost: {appPortOnHost}, daprPortOnHost: {daprPortOnHost}");
             }
 
             return response.ID;
