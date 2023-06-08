@@ -18,3 +18,6 @@ clean:
 
 # Phony targets
 .PHONY: all build test clean
+
+# Includes
+include test/EndToEnd/e2e_tests.mk

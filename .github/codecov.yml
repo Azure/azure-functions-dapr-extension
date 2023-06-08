@@ -8,3 +8,6 @@ coverage:
     patch:
       default:
         informational: true
+ignore:
+  - "samples/*"
+  - "test/*"
