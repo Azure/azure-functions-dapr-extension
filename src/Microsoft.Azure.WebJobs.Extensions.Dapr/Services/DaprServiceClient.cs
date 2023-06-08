@@ -53,6 +53,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 this.logger.LogDebug("DAPR_HTTP_PORT environment variable not found. Using port {daprPort} as default.", daprPort);
             }
 
+            // This can be overriden when running the Dapr sidecar remotely.
+            // Also used by the local end-to-end tests to point to docker host.
             var daprHost = resolver.Resolve("DAPR_HTTP_HOST");
             if (!string.IsNullOrEmpty(daprHost))
             {

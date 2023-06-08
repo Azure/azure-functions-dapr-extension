@@ -8,7 +8,7 @@ namespace EndToEndTests.Infrastructure
         /// <summary>
         /// Finds a free TCP port.
         /// </summary>
-        public static int FreeTcpPort()
+        public static int GetFreeTcpPort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();

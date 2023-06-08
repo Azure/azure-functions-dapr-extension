@@ -1,5 +1,10 @@
 # EndToEnd Tests
 
+## TODO
+
+Must be addressed before merging the code to master
+1. In local environment, allow saving logs from app and dapr to a local folder.
+
 ## Overview
 
 The e2e tests are designed to test the extension in a real environment, and consist of the following components:
