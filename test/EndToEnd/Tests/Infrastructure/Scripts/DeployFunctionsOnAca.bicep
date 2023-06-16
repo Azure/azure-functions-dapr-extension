@@ -7,6 +7,7 @@ var envResourceNamePrefix = toLower(resourceNamePrefix)
 @description('Resource location')
 param location string = resourceGroup().location
 
+// Storage account is a prerequisite for functions app
 resource azStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   name: '${envResourceNamePrefix}storage'
   location: location
@@ -35,14 +36,8 @@ resource azfunctionapp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'AzureWebJobsStorage'
           value: azStorageAccount.properties.ConnectionString
         }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
       ]
-
     }
-
   }
 }
 
