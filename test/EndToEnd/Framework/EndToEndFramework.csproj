@@ -25,8 +25,4 @@
   <ItemGroup>
     <PackageReference Include="Docker.DotNet" Version="3.125.15" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Framework\EndToEndFramework.csproj" />
-  </ItemGroup>
 </Project>

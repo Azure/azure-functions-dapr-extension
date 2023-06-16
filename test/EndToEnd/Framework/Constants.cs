@@ -1,4 +1,4 @@
-namespace EndToEndTests
+namespace EndToEndTests.Framework
 {
     public static class Constants
     {

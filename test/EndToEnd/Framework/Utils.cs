@@ -1,4 +1,4 @@
-namespace EndToEndTests.Infrastructure
+namespace EndToEndTests.Framework
 {
     using System.Net;
     using System.Net.Sockets;

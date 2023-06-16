@@ -1,6 +1,6 @@
-namespace EndToEndTests
+namespace EndToEndTests.Tests
 {
-    using EndToEndTests.Infrastructure;
+    using EndToEndTests.Framework;
     using Xunit;
 
     public class StateInputBindingTests : TestBase

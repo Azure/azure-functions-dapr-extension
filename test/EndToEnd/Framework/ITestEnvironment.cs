@@ -1,4 +1,4 @@
-namespace EndToEndTests.Infrastructure
+namespace EndToEndTests.Framework
 {
     /// <summary>
     /// A test environment where test apps can be started and stopped.

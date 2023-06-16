@@ -1,4 +1,4 @@
-namespace EndToEndTests.Infrastructure
+namespace EndToEndTests.Framework
 {
     using Docker.DotNet;
     using DockerModels = Docker.DotNet.Models;
