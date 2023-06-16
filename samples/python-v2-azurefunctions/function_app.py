@@ -85,7 +85,7 @@ def main(triggerData: str) -> None:
 
 # Dapr topic trigger
 @dapp.function_name(name="PrintTopicMessage")
-@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="B", route="B")
+@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="B")
 def main(subEvent) -> None:
     logging.info('Python function processed a PrintTopicMessage request from the Dapr Runtime.')
     subEvent_json = json.loads(subEvent)
@@ -94,7 +94,7 @@ def main(subEvent) -> None:
 # Dapr publish output
 # Dapr topic trigger with dapr_publish_output
 @dapp.function_name(name="TransferEventBetweenTopics")
-@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="A", route="A")
+@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="A")
 @dapp.dapr_publish_output(arg_name="pubEvent", pub_sub_name="%PubSubName%", topic="B")
 def main(subEvent, pubEvent: func.Out[bytes]) -> None:
     logging.info('Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
