@@ -237,6 +237,8 @@ Here, `daprTopicTrigger` is used to subscribe to topic `A`, so whenever a messag
 
 > **Note**: Alternatively, any other JSON-serializable datatype binds directly to the data field of the cloud event. For example, int, double, and custom “POCO” types can be used as the trigger type and will be deserialized from the event’s data field.
 
+> **Note**: route is not a mandatory parameter, however, currently it is being passed due to a bug in python library where it considers route as HttpTrigger parameter, once this issue is fixed, route will be optional parameter. For now, it must be passed.
+
 Then, `daprPublish` *output binding* is used to publish a new event to topic `B`.
 
 
