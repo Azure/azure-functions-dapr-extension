@@ -11,44 +11,84 @@ show_help() {
     echo "Arguments:"
     echo "  init                      Initialize the Azure resources required for e2e tests using a bicep template."
     echo "  cleanup                   Delete the Azure resources created for e2e tests."
-    echo "  deploy                    Set the container configuration to a specified Azure Function App image."
+    echo "  deploy <appname>          Set the container configuration to a specified Azure Function App image."
     echo "  geturl                    Get the URL of the specified Azure Function App."
     echo ""
+}
+
+# Function to initialize the Azure resources required for e2e tests using a bicep template.
+azfunc_init() {
+    AZURE_RESOURCE_GROUP="e2e$(openssl rand -hex 3)"
+    AZURE_LOCATION="eastus"
+    TEMPLATE_FILE="$(dirname "${BASH_SOURCE[0]}")/DeployFunctionsOnAca.bicep"
+
+    echo "Creating the resource group $AZURE_RESOURCE_GROUP using template file $TEMPLATE_FILE..."
+    az group create --name $AZURE_RESOURCE_GROUP --location $AZURE_LOCATION
+    echo "Initializing the Azure resources required for e2e tests using a bicep template in the resource group $AZURE_RESOURCE_GROUP..."
+    az deployment group create --resource-group $AZURE_RESOURCE_GROUP --template-file $TEMPLATE_FILE --parameters resourceNamePrefix=$AZURE_RESOURCE_GROUP
+    echo "The Azure resources required for e2e tests have been created, and the resource group name is $AZURE_RESOURCE_GROUP"
+
+    # Set the required environment variables for the e2e test.
+    echo "Run the following commands to set the required environment variables for the e2e test:"
+    echo "export DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP"
+    echo "export DAPR_E2E_TEST_FUNCCAPPS_NAME=$AZURE_RESOURCE_GROUP-funcapp"
+}
+
+# Function to delete the Azure resources created for e2e tests.
+azfunc_cleanup() {
+    if [[ -z $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP ]]; then
+        echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP is not set"
+        exit 1
+    fi
+
+    echo "Cleaning up the Azure resources created for e2e tests in the resource group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP..."
+    az deployment group delete --resource-group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP --name DeployFunctionsOnAca --no-wait
+    az group delete --name $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP --yes --no-wait
+    echo "The Azure resources created for e2e tests and the resource group $2 have been deleted"
+}
+
+# Function to deploy the Azure Functions container image.
+azfunc_deploy() {
+    if [[ -z $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP ]]; then
+        echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP is not set"
+        exit 1
+    fi
+    if [[ -z $DAPR_E2E_TEST_FUNCCAPPS_NAME ]]; then
+        echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_NAME is not set"
+        exit 1
+    fi
+    if [[ -z $DAPR_E2E_TEST_APP_REGISTRY ]]; then
+        echo "The environment variable DAPR_E2E_TEST_APP_REGISTRY is not set"
+        exit 1
+    fi
+    if [[ -z $DAPR_E2E_TEST_APP_TAG ]]; then
+        echo "The environment variable DAPR_E2E_TEST_APP_TAG is not set"
+        exit 1
+    fi
+    if [[ -z $2 ]]; then
+        echo "appname is not specified"
+        exit 1
+    fi
+
+    AZURE_FUNCTION_APP_NAME=$DAPR_E2E_TEST_APP_REGISTRY/$2:$DAPR_E2E_TEST_APP_TAG
+
+    echo "Setting the container configuration to $AZURE_FUNCTION_APP_NAME..."
+    az functionapp config container set --resource-group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP \
+    --name $DAPR_E2E_TEST_FUNCCAPPS_NAME --image $AZURE_FUNCTION_APP_NAME \
+    --max-replicas 3 --min-replicas 1
 }
 
 # Function to handle the main functionality
 main_function() {
     case $1 in
         init )
-            # Create a random resource group name, also used as the prefix for all resources created.
-            AZURE_RESOURCE_GROUP="e2e$(openssl rand -hex 3)"
-            AZURE_LOCATION="eastus"
-            TEMPLATE_FILE="$(dirname "${BASH_SOURCE[0]}")/DeployFunctionsOnAca.bicep"
-
-            echo "Creating the resource group $AZURE_RESOURCE_GROUP..."
-            az group create --name $AZURE_RESOURCE_GROUP --location $AZURE_LOCATION
-            echo "Initializing the Azure resources required for e2e tests using a bicep template in the resource group $AZURE_RESOURCE_GROUP..."
-            az deployment group create --resource-group $AZURE_RESOURCE_GROUP --template-file $TEMPLATE_FILE --parameters resourceNamePrefix=$AZURE_RESOURCE_GROUP
-            echo "The Azure resources required for e2e tests have been created, and the resource group name is $AZURE_RESOURCE_GROUP"
-
-            # Set the required environment variables for the e2e test.
-            export DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP
-            export DAPR_E2E_TEST_FUNCCAPPS_NAME=$AZURE_RESOURCE_GROUP-funcapp
+            azfunc_init
             ;;
         cleanup )
-            if [[ -z $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP ]]; then
-                echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP is not set"
-                exit 1
-            fi
-
-            echo "Cleaning up the Azure resources created for e2e tests in the resource group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP..."
-            az deployment group delete --resource-group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP --name DeployFunctionsOnAca
-            az group delete --name $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP --yes
-            echo "The Azure resources created for e2e tests and the resource group $2 have been deleted"
+            azfunc_cleanup
             ;;
         deploy )
-            echo "Setting the container configuration to a specified Azure Function App image..."
-            az functionapp config container set --resource-group $AZURE_RESOURCE_GROUP --name $AZURE_FUNCTION_APP_NAME --docker-custom-image-name $AZURE_FUNCTION_APP_IMAGE
+            azfunc_deploy "$@"
             ;;
         geturl )
             echo "Getting the URL of the specified Azure Function App..."
