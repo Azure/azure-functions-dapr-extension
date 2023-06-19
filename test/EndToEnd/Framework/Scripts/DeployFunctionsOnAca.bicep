@@ -1,5 +1,5 @@
 @minLength(3)
-@maxLength(10)
+@maxLength(14)
 @description('Resource name prefix')
 param resourceNamePrefix string
 var envResourceNamePrefix = toLower(resourceNamePrefix)

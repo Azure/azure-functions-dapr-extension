@@ -46,13 +46,14 @@ DAPR_E2E_TEST_APP_ENVIRONMENT=local dotnet test
 ### Run the tests on Functions on CApps
 
 ```bash
-# See https://learn.microsoft.com/en-us/azure/azure-functions/functions-how-to-custom-container?tabs=acr%2Cazure-cli&pivots=container-apps
-export DAPR_E2E_TEST_APP_REGISTRY=myregistry.azurecr.io
-export DAPR_E2E_TEST_APP_TAG=dev
-export DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP=myresourcegroup
-export DAPR_E2E_TEST_FUNCCAPPS_NAME=myfunccapps
+# Initializes the test environment and sets the required environment variables.
+./Framework/Scripts/manage-azfunc.sh init
 
+# Runs the tests.
 DAPR_E2E_TEST_APP_ENVIRONMENT=funccapps dotnet test
+
+# Cleans up the test environment.
+./Framework/Scripts/manage-azfunc.sh clean
 ```
 
 ## Adding a new test
