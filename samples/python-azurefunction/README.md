@@ -132,13 +132,14 @@ import logging
 import json
 import azure.functions as func
 
+
 def main(payload,
-         order: func.Out[bytes]) -> None:
+         order: func.Out[str]) -> None:
     logging.info(
-        'Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
-    subEvent_json = json.loads(subEvent)
-    payload = "Transfer from Topic A: " + str(subEvent_json["data"])
-    pubEvent.set(json.dumps({"payload": payload}).encode('utf-8'))
+        'Python function processed a CreateNewOrder request from the Dapr Runtime.')
+    payload_json = json.loads(payload)
+    logging.info(payload_json["data"])
+    order.set(json.dumps({"value": payload_json["data"]}))
 ```
 
 ```json
@@ -217,7 +218,7 @@ In your terminal window, you should see logs indicating that the message was rec
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
-In order to confirm the state is now persisted.], you can move to the next function:
+In order to confirm the state is now persisted, you can move to the next function:
 
 ```python
 def main(payload, data: str) -> None:

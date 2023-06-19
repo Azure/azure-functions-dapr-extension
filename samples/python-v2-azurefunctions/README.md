@@ -1,6 +1,6 @@
-# Python Azure Function Sample
+# Python V2 Azure Function Sample
 
-This tutorial will demonstrate how to use Azure Functions Python programming model to integrate with multiple Dapr components.  Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-python) to familiarize with function programming model.
+This tutorial will demonstrate how to use Azure Functions Python V2 programming model to integrate with multiple Dapr components.  Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-python) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
 1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
@@ -11,18 +11,18 @@ This sample requires you to have the following installed on your machine:
 - [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - Install Python on your machine
-    - This sample uses Python 3.7.6. Some nuance or issue is expected if using other version
+    - This sample uses Python 3.8.0. Some nuance or issue is expected if using other version
 - [Set up Python Environment in Visual Studio Code](https://code.visualstudio.com/docs/python/python-tutorial)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download), used for install Dapr Extension for non .NET language
 - [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
 
 # Step 1 - Understand the Settings 
 
-Now that we've locally set up Dapr, clone the repo, then navigate to the python-azurefunction sample: 
+Now that we've locally set up Dapr, clone the repo, then navigate to the python-v2-azurefunction sample: 
 
 ```bash
 git clone https://github.com/dapr/azure-functions-extension.git
-cd samples/python-azurefunction
+cd samples/python-v2-azurefunction
 ```
 In this folder, you will find `local.settings.json`, which lists a few app settings used in the trigger/binding attributes.
 
@@ -32,14 +32,8 @@ In this folder, you will find `local.settings.json`, which lists a few app setti
 
 The `%` denotes an app setting value, for the following binding as an example:
 
-```json 
-{
-    "type": "daprState",
-    "stateStore": "%StateStoreName%",
-    "direction": "out",
-    "name": "order",
-    "key": "order"
-}
+```python
+@dapp.dapr_state_output(arg_name="state", state_store="%StateStoreName%", key="order")
 ```
 
  In the runtime, the binding will check the `local.settings.json` file and resolve `%StateStoreName%` into `statestore`. The function will then make a call into the state store named as `statestore`.
@@ -128,56 +122,41 @@ You're up and running! Both Dapr and your app logs will appear here.
 Please read [Azure Functions Python programming guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings) for basic knowledge on triggers/bindings, logging, file structure and so on. Also, familiarize yourself with `function.json` and `__init__.py` files.
 
 ```python
-import logging
 import json
 import azure.functions as func
+import logging
 
-def main(payload,
-         order: func.Out[bytes]) -> None:
-    logging.info(
-        'Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
-    subEvent_json = json.loads(subEvent)
-    payload = "Transfer from Topic A: " + str(subEvent_json["data"])
-    pubEvent.set(json.dumps({"payload": payload}).encode('utf-8'))
+dapp = func.DaprFunctionApp()
+
+@dapp.function_name(name="CreateNewOrder")
+@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="CreateNewOrder")
+@dapp.dapr_state_output(arg_name="state", state_store="statestore", key="order")
+def main(payload: str, state: func.Out[str] ) :
+    # request body must be passed this way '{\"value\": { \"key\": \"some value\" } }'
+    logging.info('Python function processed a CreateNewOrder request from the Dapr Runtime.')
+    if payload is not None:
+        logging.info(payload)
+        state.set(payload)
+    else:
+        logging.info('payload is none')
 ```
-
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "type": "daprServiceInvocationTrigger",
-      "name": "payload",
-      "direction": "in"
-    },
-    {
-      "type": "daprState",
-      "stateStore": "%StateStoreName%",
-      "direction": "out",
-      "name": "order",
-      "key": "order"
-    }
-  ]
-}
-
-```
-Data from triggers and bindings is bound to the function via method attributes using the name property defined in the function.json file. The function.json file describes uses a `daprServiceInvocationTrigger` trigger named as `payload` and a `daprState` output binding named as `order`.  This function will be invoke when the function host receive a `CreateNewOrder` request from Dapr runtime. The actual payload content will be bound to this `payload` parameter when passing into the function. In the function, [azure.functions.Out](https://docs.microsoft.com/en-us/python/api/azure-functions/azure.functions.out?view=azure-python) interface is used to explicitly declare the attribute types of `order`. Then the content of `data` property is bound to the `order` binding by calling `set()`. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
+Data from triggers and bindings is bound to the function via method attributes using the name property defined in the decorator. The decorator describes a `daprServiceInvocationTrigger` trigger wit argument named as `payload` and a `daprState` output binding with key named as `order`. This function will be invoke when the function host receive a `CreateNewOrder` request from Dapr runtime. The actual payload content will be bound to this `payload` parameter when passing into the function. In the function, [azure.functions.Out](https://docs.microsoft.com/en-us/python/api/azure-functions/azure.functions.out?view=azure-python) interface is used to explicitly declare the attribute types of `order`. Then the content of `data` property is bound to the `order` binding by calling `set()`. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
 
 You can invoke this function by using the Dapr cli in a new command line terminal.  
 
 Windows Command Prompt
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"data\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"value\": { \"orderId\": \"41\" } }"
 ```
 
 Windows PowerShell
 ```powershell
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{\"data\": { \"orderId\": \"41\" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{\"value\": { \"orderId\": \"41\" } }'
 ```
 
 Linux or MacOS
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{"data": { "orderId": "41" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{"value": { "orderId": "41" } }'
 ```
 
 You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
@@ -186,28 +165,13 @@ You can also do this using the Visual Studio Code [Rest Client Plugin](https://m
 POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 
 {
-    "data": {
+    "value": {
         "orderId": "42"
     } 
 }
 ```
 
-**Note**: in this sample, `daprServiceInvocationTrigger` binding in the function.json does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `methodName` field to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
-
-```json
-// function.json
-    {
-      "type": "daprServiceInvocationTrigger",
-      "name": "payload",
-      "methodName": "newOrder",
-      "direction": "in"
-    }
-
-```
-
-```powershell
-dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
-```
+**Note**: in this sample, `daprServiceInvocationTrigger` binding specifies the method name, if it is not specified then it will default to use the FunctionName.
 
 In your terminal window, you should see logs indicating that the message was received and state was updated:
 
@@ -217,37 +181,21 @@ In your terminal window, you should see logs indicating that the message was rec
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
-In order to confirm the state is now persisted.], you can move to the next function:
+In order to confirm the state is now persisted, you can move to the next function:
 
 ```python
-def main(payload, data: str) -> None:
+@dapp.function_name(name="RetrieveOrder")
+@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="RetrieveOrder")
+@dapp.dapr_state_input(arg_name="data", state_store="statestore", key="order")
+def main(payload, data: str) :
+    # Function should be invoked with this command: dapr invoke --app-id functionapp --method RetrieveOrder  --data '{}'
     logging.info('Python function processed a RetrieveOrder request from the Dapr Runtime.')
     logging.info(data)
 ```
 
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "type": "daprServiceInvocationTrigger",
-      "name": "payload",
-      "direction": "in"
-    },
-    {
-      "type": "daprState",
-      "direction": "in",
-      "key": "order",
-      "stateStore": "%StateStoreName%",
-      "name": "data"
-    }
-  ]
-}
-```
-
 Similarly, the function will be triggered by any `RetrieveOrder` service invocation request such as:
 ```
-dapr invoke --app-id functionapp --method RetrieveOrder --data {}
+dapr invoke --app-id functionapp --method RetrieveOrder --data '{}'
 ```
 
 .Here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data` before exectuing the function block.
@@ -265,36 +213,24 @@ In your terminal window, you should see logs to confirm the expected result:
 ## 2. Pub/Sub: TransferEventBetweenTopics and PrintTopicMessage
 
 ```python
-def main(subEvent,
-         pubEvent: func.Out[str]) -> None:
+# Dapr topic trigger
+@dapp.function_name(name="PrintTopicMessage")
+@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="B", route="B")
+def main(subEvent) -> None:
+    logging.info('Python function processed a PrintTopicMessage request from the Dapr Runtime.')
+    subEvent_json = json.loads(subEvent)
+    logging.info("Topic B received a message: " + subEvent_json["data"])
+
+# Dapr publish output
+# Dapr topic trigger with dapr_publish_output
+@dapp.function_name(name="TransferEventBetweenTopics")
+@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="A", route="A")
+@dapp.dapr_publish_output(arg_name="pubEvent", pub_sub_name="%PubSubName%", topic="B")
+def main(subEvent, pubEvent: func.Out[bytes]) -> None:
     logging.info('Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
     subEvent_json = json.loads(subEvent)
     payload = "Transfer from Topic A: " + str(subEvent_json["data"])
-    pubEvent.set(json.dumps({"payload": payload }))
-
-```
-
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "type": "daprTopicTrigger",
-      "pubsubname": "%PubsubName%",
-      "topic": "A",
-      "name": "subEvent",
-      "direction": "in",
-      "dataType": "string"
-    },
-    {
-      "type": "daprPublish",
-      "direction": "out",
-      "name": "pubEvent",
-      "pubsubname": "%PubsubName%",
-      "topic": "B"
-    }
-  ]
-}
+    pubEvent.set(json.dumps({"payload": payload}).encode('utf-8'))
 ```
 
 Here, `daprTopicTrigger` is used to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details.
@@ -327,50 +263,25 @@ The Dapr logs should show the following:
 This sections describes how this extension integrates with Dapr Binding component. Here Kafka binding is used as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `daprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```python
+# Dapr binding trigger
+@dapp.function_name(name="ConsumeMessageFromKafka")
+@dapp.dapr_binding_trigger(arg_name="triggerData", binding_name="%KafkaBindingName%")
 def main(triggerData: str) -> None:
-    logging.info(
-        'Python function processed a ConsumeMessageFromKafka request from the Dapr Runtime.')
+    logging.info('Python function processed a ConsumeMessageFromKafka request from the Dapr Runtime.')
     logging.info('Trigger data: ' + triggerData)
-```
-```json
-{
-  "scriptFile": "__init__.py",
-  "bindings": [
-    {
-      "type": "daprBindingTrigger",
-      "bindingName": "%KafkaBindingName%",
-      "name": "triggerData",
-      "direction": "in"
-    }
-  ]
-}
 ```
 
 Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance. In the function.json, it sepcifies the `operation` and `bindingName` required for this **output binding**.
 
 ```python
-def main(args, messages: func.Out[bytes]) -> None:
+# Dapr binding output
+# Dapr state output binding with http dapr_service_invocation_trigger
+@dapp.function_name(name="SendMessageToKafka")
+@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="SendMessageToKafka")
+@dapp.dapr_binding_output(arg_name="messages", binding_name="%KafkaBindingName%", operation="create")
+def main(payload: str, messages: func.Out[bytes]) -> None:
     logging.info('Python processed a SendMessageToKafka request from the Dapr Runtime.')
-    messages.set(json.dumps({"data": args}))
-```
-
-```json
-{
-  "bindings": [
-    {
-      "type": "daprServiceInvocationTrigger",
-      "name": "args",
-      "direction": "in"
-    },
-    {
-      "type": "daprBinding",
-      "direction": "out",
-      "bindingName": "%KafkaBindingName%",
-      "operation": "create",
-      "name": "messages"
-    }
-  ]
-}
+    messages.set(json.dumps({"data": payload}).encode('utf-8'))
 ```
 
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding.
@@ -407,39 +318,25 @@ This section demonstrates how `DaprSecret` **input binding** integrates with Dap
 Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
 
 ```python
-def main (payload, secret) -> None:
+# Dapr secret input binding with http dapr_service_invocation_trigger
+@dapp.function_name(name="RetrieveSecret")
+@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="RetrieveSecret")
+@dapp.dapr_secret_input(arg_name="secret", secret_store_name="localsecretstore", key="my-secret", metadata="metadata.namespace=default")
+def main(payload, secret: str) :
+    # Function should be invoked with this command: dapr invoke --app-id functionapp --method RetrieveSecret  --data '{}'
     logging.info('Python function processed a RetrieveSecret request from the Dapr Runtime.')
     secret_dict = json.loads(secret)
 
     for key in secret_dict:
-        logging.info("Stored secret: Key = " + key + ', Value = '+ secret_dict[key])
-```
-
-```json
-{
-  "bindings": [
-    {
-      "type": "daprServiceInvocationTrigger",
-      "name": "payload",
-      "direction": "in"
-    },
-    {
-      "type": "daprSecret",
-      "direction": "in",
-      "name": "secret",
-      "key": "my-secret",
-      "secretStoreName": "localsecretstore",
-      "metadata": "metadata.namespace=default"
-    }
-  ]
-}
+        logging.info("Stored secret: Key = " + key +
+                     ', Value = ' + secret_dict[key])
 ```
 
 `DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
 
 You can retrieve the secret by invoking the RetrieveSecret function using the command:-
 ```
-dapr invoke --app-id functionapp --method RetrieveSecret --data {}
+dapr invoke --app-id functionapp --method RetrieveSecret --data '{}'
 ```
 
 Some secret stores need a metadata string to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example.
