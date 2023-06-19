@@ -88,7 +88,7 @@ azfunc_geturl() {
         echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_NAME is not set"
         exit 1
     fi
-    az functionapp show --name $DAPR_E2E_TEST_FUNCCAPPS_NAME --resource-group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP | jq -r '.defaultHostName'   
+    az functionapp show --name $DAPR_E2E_TEST_FUNCCAPPS_NAME --resource-group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP --query defaultHostName -otsv
 }
 
 # Function to handle the main functionality
