@@ -58,7 +58,7 @@ export DAPR_E2E_TEST_FUNCCAPPS_NAME=e2eb3bf5e-funcapp
 DAPR_E2E_TEST_APP_ENVIRONMENT=funccapps dotnet test
 
 # 4. Clean up the test environment.
-./Framework/Scripts/manage-azfunc.sh clean
+./Framework/Scripts/manage-azfunc.sh cleanup
 ```
 
 ## Adding a new test
