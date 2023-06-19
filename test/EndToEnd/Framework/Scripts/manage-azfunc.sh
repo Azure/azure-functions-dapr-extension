@@ -78,6 +78,19 @@ azfunc_deploy() {
     --max-replicas 3 --min-replicas 1
 }
 
+# Function to get the URL of the specified Azure Function App.
+azfunc_geturl() {
+    if [[ -z $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP ]]; then
+        echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP is not set"
+        exit 1
+    fi
+    if [[ -z $DAPR_E2E_TEST_FUNCCAPPS_NAME ]]; then
+        echo "The environment variable DAPR_E2E_TEST_FUNCCAPPS_NAME is not set"
+        exit 1
+    fi
+    az functionapp show --name $DAPR_E2E_TEST_FUNCCAPPS_NAME --resource-group $DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP | jq -r '.defaultHostName'   
+}
+
 # Function to handle the main functionality
 main_function() {
     case $1 in
@@ -91,8 +104,7 @@ main_function() {
             azfunc_deploy "$@"
             ;;
         geturl )
-            echo "Getting the URL of the specified Azure Function App..."
-            az functionapp show --resource-group $AZURE_RESOURCE_GROUP --name $AZURE_FUNCTION_APP_NAME --query "defaultHostName" --output tsv
+            azfunc_geturl
             ;;
         * )
             echo "Invalid command: $1"

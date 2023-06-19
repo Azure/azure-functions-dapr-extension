@@ -43,10 +43,6 @@ resource azfunctionapp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${azStorageAccount.listKeys().keys[0].value}'
         }
-        {
-          name: 'AzureWebJobsSecretStorageType'
-          value: 'Files'
-        }
       ]
     }
   }
