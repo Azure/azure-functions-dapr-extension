@@ -23,23 +23,28 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
     sealed class DaprServiceListener : IDisposable, IDaprServiceListener
     {
+        private const string MetadataApiUrl = "";
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
         readonly HashSet<DaprTopicSubscription> topics = new HashSet<DaprTopicSubscription>(new DaprTopicSubscriptionComparer());
         readonly string appAddress;
+        readonly string daprAddress;
         readonly ILogger logger;
+        private readonly IDaprClient daprClient;
 
         IWebHost? host;
         int serverStarted;
 
-        public DaprServiceListener(ILoggerFactory loggerFactory, INameResolver resolver)
+        public DaprServiceListener(ILoggerFactory loggerFactory, IDaprClient daprClient, INameResolver resolver)
         {
             this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
-            this.appAddress = GetDefaultAppAddress(resolver);
+            this.appAddress = GetAppAddress(resolver);
+            this.daprAddress = DaprServiceClient.GetDaprHttpAddress(this.logger, resolver);
+            this.daprClient = daprClient;
         }
 
         public void Dispose() => this.host?.Dispose();
 
-        static string GetDefaultAppAddress(INameResolver resolver)
+        static string GetAppAddress(INameResolver resolver)
         {
             if (!int.TryParse(resolver.Resolve("DAPR_APP_PORT"), out int appPort))
             {
@@ -78,6 +83,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 this.logger.LogInformation($"Starting Dapr HTTP listener on {this.appAddress} with {this.listeners.Count} function listener(s) registered.");
                 await this.host.StartAsync(cancellationToken);
                 this.logger.LogInformation("Dapr HTTP host started successfully.");
+
+                await this.WarnIfSidecarMisconfigured();
             }
         }
 
@@ -118,6 +125,63 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             string topicListJson = JsonSerializer.Serialize(this.topics, JsonUtils.DefaultSerializerOptions);
             context.Response.ContentType = "application/json";
             return context.Response.WriteAsync(topicListJson);
+        }
+
+        /// <summary>
+        /// Warns if any sidecar settings are misconfigured.
+        /// </summary>
+        private async Task WarnIfSidecarMisconfigured()
+        {
+            var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
+
+            var res = await this.daprClient.GetAsync($"{this.daprAddress}/v1.0/metadata", cancellationToken);
+            var resBody = await res.Content.ReadAsStringAsync();
+
+            if (res.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                this.logger.LogWarning($"Failed to query the Metadata API, received status code {res.StatusCode}, response body: {resBody}");
+                return;
+            }
+
+            var metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(resBody, JsonUtils.DefaultSerializerOptions);
+            if (metadata == null)
+            {
+                this.logger.LogWarning($"Failed to deserialize the Metadata API response body: {resBody}");
+                return;
+            }
+
+            if (metadata.TryGetValue("appConnectionProperties", out var appConnectionProperties))
+            {
+                var appConnectionPropertiesDict = appConnectionProperties as Dictionary<string, object>;
+                if (appConnectionPropertiesDict != null)
+                {
+                    // We set the appAddress, so it's safe to assume it's in the format we expect.
+                    string[] appAddressParts = this.appAddress.Split(':');
+                    string appChannelAddress = appAddressParts[0];
+                    int appPort = int.Parse(appAddressParts[1]);
+
+                    if (appConnectionPropertiesDict.TryGetValue("port", out var port))
+                    {
+                        if (port is int portInt && portInt != appPort)
+                        {
+                            this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {portInt}, but the app is listening on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
+                        }
+                    }
+
+                    if (appConnectionPropertiesDict.TryGetValue("channelAddress", out var channelAddress))
+                    {
+                        if (channelAddress is string channelAddressString && channelAddressString != appChannelAddress)
+                        {
+                            this.logger.LogWarning($"The Dapr sidecar is configured to listen on channel address {channelAddressString}, but the app is listening on channel address {appChannelAddress}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.logger.LogDebug("appConnectionProperties not found in metadata API, skipping sidecar configuration check.");
+                return;
+            }
         }
 
         /// <summary>

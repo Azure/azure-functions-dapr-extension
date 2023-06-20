@@ -29,7 +29,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         private const int DefaultDaprPort = 3500;
 
         readonly ILogger logger;
-        readonly string defaultDaprAddress;
+        readonly string daprAddress;
         readonly IDaprClient daprClient;
 
         /// <summary>
@@ -42,15 +42,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         {
             this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory());
             this.daprClient = daprClient;
-            this.defaultDaprAddress = this.GetDefaultDaprAddress(nameResolver);
+            this.daprAddress = DaprServiceClient.GetDaprHttpAddress(this.logger, nameResolver);
         }
 
-        private string GetDefaultDaprAddress(INameResolver resolver)
+        /// <summary>
+        /// Gets the Dapr HTTP address.
+        /// </summary>
+        /// <param name="logger">Logger instance.</param>
+        /// <param name="resolver">Name resolver.</param>
+        /// <returns>Dapr HTTP address.</returns>
+        public static string GetDaprHttpAddress(ILogger logger, INameResolver resolver)
         {
             if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
             {
                 daprPort = DefaultDaprPort;
-                this.logger.LogDebug("DAPR_HTTP_PORT environment variable not found. Using port {daprPort} as default.", daprPort);
+                logger.LogDebug("DAPR_HTTP_PORT environment variable not found. Using port {daprPort} as default.", daprPort);
             }
 
             return $"http://localhost:{daprPort}";
@@ -280,7 +286,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
         private void EnsureDaprAddress(ref string? daprAddress)
         {
-            (daprAddress ??= this.defaultDaprAddress).TrimEnd('/');
+            (daprAddress ??= this.daprAddress).TrimEnd('/');
         }
     }
 }
