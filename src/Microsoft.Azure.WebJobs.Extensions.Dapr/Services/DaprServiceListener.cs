@@ -181,6 +181,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 catch (Exception e)
                 {
                     this.logger.LogError($"Failed to parse appConnectionProperties in Metadata API response body, exception: {e}");
+                    return;
                 }
             }
             else
