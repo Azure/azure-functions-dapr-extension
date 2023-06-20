@@ -143,37 +143,47 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 return;
             }
 
-            var metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(resBody, JsonUtils.DefaultSerializerOptions);
-            if (metadata == null)
+            Dictionary<string, object> metadata;
+
+            try
             {
-                this.logger.LogWarning($"Failed to deserialize the Metadata API response body: {resBody}");
+                metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(resBody, JsonUtils.DefaultSerializerOptions)
+                ?? throw new ArgumentNullException(nameof(metadata));
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogWarning($"Failed to deserialize the Metadata API response body: {resBody}, exception: {ex}");
                 return;
             }
 
             if (metadata.TryGetValue("appConnectionProperties", out var appConnectionProperties))
             {
-                var appConnectionPropertiesDict = appConnectionProperties as Dictionary<string, object>;
-                if (appConnectionPropertiesDict != null)
+                var appConnectionPropertiesDict = JsonSerializer.Deserialize<Dictionary<string, object>>(appConnectionProperties.ToString(), JsonUtils.DefaultSerializerOptions);
+                if (appConnectionPropertiesDict == null)
                 {
-                    // We set the appAddress, so it's safe to assume it's in the format we expect.
-                    string[] appAddressParts = this.appAddress.Split(':');
-                    string appChannelAddress = appAddressParts[0];
-                    int appPort = int.Parse(appAddressParts[1]);
+                    this.logger.LogWarning($"The appConnectionProperties value is not a Dictionary<string, object>, it's a {appConnectionProperties.GetType().Name}.");
+                    return;
+                }
 
-                    if (appConnectionPropertiesDict.TryGetValue("port", out var port))
+                // We set the appAddress, so it's safe to assume it's in the format we expect.
+                // appAddress is in the format "http://localhost:8080"
+                string[] appAddressParts = this.appAddress.Substring("http://".Length).Split(':');
+                string appChannelAddress = appAddressParts[0];
+                string appPort = appAddressParts[1];
+
+                if (appConnectionPropertiesDict.TryGetValue("port", out var port))
+                {
+                    if (port is string portString && !portString.Equals(appPort))
                     {
-                        if (port is int portInt && portInt != appPort)
-                        {
-                            this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {portInt}, but the app is listening on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
-                        }
+                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {portString}, but the app is listening on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
                     }
+                }
 
-                    if (appConnectionPropertiesDict.TryGetValue("channelAddress", out var channelAddress))
+                if (appConnectionPropertiesDict.TryGetValue("channelAddress", out var channelAddress))
+                {
+                    if (channelAddress is string channelAddressString && !channelAddressString.Equals(appChannelAddress))
                     {
-                        if (channelAddress is string channelAddressString && channelAddressString != appChannelAddress)
-                        {
-                            this.logger.LogWarning($"The Dapr sidecar is configured to listen on channel address {channelAddressString}, but the app is listening on channel address {appChannelAddress}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
-                        }
+                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on channel address {channelAddressString}, but the app is listening on channel address {appChannelAddress}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
                     }
                 }
             }
