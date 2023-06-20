@@ -65,7 +65,7 @@ namespace DaprExtensionTests.UnitTests.Services
 
         [Theory]
         [MemberData(nameof(GetWarnIfSidecarMisconfiguredTestData))]
-        public async Task WarnIfSidecarMisconfigured_MetadataApiReturnsInvalidJson(string responseBody, LogLevel logLevel, string logMessageStartMatch)
+        public async Task WarnIfSidecarMisconfigured_Scenarios(string responseBody, LogLevel logLevel, string logMessageStartMatch)
         {
             // Arrange
             var mockResponse = new HttpResponseMessage(HttpStatusCode.OK)
@@ -92,18 +92,29 @@ namespace DaprExtensionTests.UnitTests.Services
         public static IEnumerable<object[]> GetWarnIfSidecarMisconfiguredTestData()
         {
             // When Metadata API does not return a valid JSON
-            yield return new object[] { "invalidJson", LogLevel.Warning, "Failed to deserialize the Metadata API response" };
+            yield return new object[] { "invalidJson", LogLevel.Error, "Failed to deserialize the Metadata API response" };
 
             // When Metadata API returns a valid JSON but does not contain appConnectionProperties
             yield return new object[] { "{\"id\": \"test-id\"}", LogLevel.Debug, "appConnectionProperties not found in metadata API" };
 
+            // When Metadata API returns appConnectionProperties but it is not a JSON object
+            yield return new object[] { "{\"appConnectionProperties\": \"test\"}", LogLevel.Error, "Failed to parse appConnectionProperties" };
+
+            // When Metadata API return appConnectionProperties but it does not have port
+            yield return new object[] { "{\"appConnectionProperties\": { \"channelAddress\": \"127.0.0.1\" } }", LogLevel.Error,
+                "Failed to parse appConnectionProperties" };
+
+            // When Metadata API return appConnectionProperties but it does not have channelAddress
+            yield return new object[] { "{\"appConnectionProperties\": { \"port\": 3001 } }", LogLevel.Error,
+                "Failed to parse appConnectionProperties" };
+
             // When Metadata API return appConnectionProperties with invalid port
-            yield return new object[] { "{\"appConnectionProperties\": { \"port\": 3002 } }", LogLevel.Warning,
-                "The Dapr sidecar is configured to listen on port 3002, but the app is listening on port 3001." };
+            yield return new object[] { "{\"appConnectionProperties\": { \"port\": 3002, \"channelAddress\": \"127.0.0.1\" } }", LogLevel.Warning,
+                "The Dapr sidecar is configured to listen on port 3002, but the app server is running on port 3001." };
 
             // When Metadata API return appConnectionProperties with invalid channelAddress
             yield return new object[] { "{\"appConnectionProperties\": { \"port\": 3001, \"channelAddress\": \"127.0.0.2\" } }", LogLevel.Warning,
-                "The Dapr sidecar is configured to listen on 127.0.0.1, but the app is listening on 127.0.0.2." };
+                "The Dapr sidecar is configured to listen on host 127.0.0.2, but the app server is running on host 127.0.0.1." };
         }
     }
 }

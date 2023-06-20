@@ -139,52 +139,48 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
             if (res.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                this.logger.LogWarning($"Failed to query the Metadata API, received status code {res.StatusCode}, response body: {resBody}");
+                this.logger.LogError($"Failed to query the Metadata API, received status code {res.StatusCode}, response body: {resBody}");
                 return;
             }
 
-            Dictionary<string, object> metadata;
+            JsonDocument jsonDocument;
 
             try
             {
-                metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(resBody, JsonUtils.DefaultSerializerOptions)
-                ?? throw new ArgumentNullException(nameof(metadata));
+                jsonDocument = JsonDocument.Parse(resBody);
             }
             catch (Exception ex)
             {
-                this.logger.LogWarning($"Failed to deserialize the Metadata API response body: {resBody}, exception: {ex}");
+                this.logger.LogError($"Failed to deserialize the Metadata API response body: {resBody}, exception: {ex}");
                 return;
             }
 
-            if (metadata.TryGetValue("appConnectionProperties", out var appConnectionProperties))
+            JsonElement root = jsonDocument.RootElement;
+            if (root.TryGetProperty("appConnectionProperties", out JsonElement appConnectionProperties))
             {
-                var appConnectionPropertiesDict = JsonSerializer.Deserialize<Dictionary<string, object>>(appConnectionProperties.ToString(), JsonUtils.DefaultSerializerOptions);
-                if (appConnectionPropertiesDict == null)
-                {
-                    this.logger.LogWarning($"The appConnectionProperties value is not a Dictionary<string, object>, it's a {appConnectionProperties.GetType().Name}.");
-                    return;
-                }
-
                 // We set the appAddress, so it's safe to assume it's in the format we expect.
-                // appAddress is in the format "http://localhost:8080"
+                // appAddress is in the format "http://127.0.0.1:3001"
                 string[] appAddressParts = this.appAddress.Substring("http://".Length).Split(':');
                 string appChannelAddress = appAddressParts[0];
-                string appPort = appAddressParts[1];
+                int appPort = int.Parse(appAddressParts[1]);
 
-                if (appConnectionPropertiesDict.TryGetValue("port", out var port))
+                try
                 {
-                    if (port is string portString && !portString.Equals(appPort))
+                    int port = appConnectionProperties.GetProperty("port").GetInt32();
+                    if (port != appPort)
                     {
-                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {portString}, but the app is listening on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
+                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {port}, but the app server is running on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
+                    }
+
+                    string address = appConnectionProperties.GetProperty("channelAddress").GetRawText().Trim('"');
+                    if (address != appChannelAddress)
+                    {
+                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on host {address}, but the app server is running on host {appChannelAddress}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
                     }
                 }
-
-                if (appConnectionPropertiesDict.TryGetValue("channelAddress", out var channelAddress))
+                catch (Exception e)
                 {
-                    if (channelAddress is string channelAddressString && !channelAddressString.Equals(appChannelAddress))
-                    {
-                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on channel address {channelAddressString}, but the app is listening on channel address {appChannelAddress}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
-                    }
+                    this.logger.LogError($"Failed to parse appConnectionProperties in Metadata API response body, exception: {e}");
                 }
             }
             else
