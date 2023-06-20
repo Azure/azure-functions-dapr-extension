@@ -28,6 +28,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         readonly HashSet<DaprTopicSubscription> topics = new HashSet<DaprTopicSubscription>(new DaprTopicSubscriptionComparer());
         readonly string appAddress;
         readonly string daprAddress;
+        readonly bool enableSidecarCheckOnHostStartup;
         readonly ILogger logger;
         private readonly IDaprClient daprClient;
 
@@ -37,9 +38,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         public DaprServiceListener(ILoggerFactory loggerFactory, IDaprClient daprClient, INameResolver resolver)
         {
             this.logger = loggerFactory.CreateLogger(LogCategories.CreateTriggerCategory("Dapr"));
+            this.daprClient = daprClient;
+
             this.appAddress = GetAppAddress(resolver);
             this.daprAddress = DaprServiceClient.GetDaprHttpAddress(this.logger, resolver);
-            this.daprClient = daprClient;
+            this.enableSidecarCheckOnHostStartup = EnableSidecarCheckOnHostStartup(resolver);
         }
 
         public void Dispose() => this.host?.Dispose();
@@ -52,6 +55,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             }
 
             return $"http://127.0.0.1:{appPort}";
+        }
+
+        static bool EnableSidecarCheckOnHostStartup(INameResolver resolver)
+        {
+            if (!bool.TryParse(resolver.Resolve("DAPR_ENABLE_SIDECAR_METADATA_CHECK"), out bool enableSidecarCheck))
+            {
+                enableSidecarCheck = false; // default
+            }
+
+            return enableSidecarCheck;
         }
 
         public async Task EnsureStartedAsync(CancellationToken cancellationToken)
@@ -84,7 +97,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 await this.host.StartAsync(cancellationToken);
                 this.logger.LogInformation("Dapr HTTP host started successfully.");
 
-                await this.WarnIfSidecarMisconfigured();
+                if (this.enableSidecarCheckOnHostStartup)
+                {
+                    await this.WarnIfSidecarMisconfigured();
+                }
             }
         }
 
