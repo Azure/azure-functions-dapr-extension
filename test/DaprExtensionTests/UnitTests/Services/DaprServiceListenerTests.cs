@@ -54,7 +54,7 @@ namespace DaprExtensionTests.UnitTests.Services
 
             // Assert
             this.loggerMock.Verify(x => x.Log(
-                LogLevel.Warning,
+                LogLevel.Error,
                 It.IsAny<EventId>(),
                 It.Is<It.IsAnyType>((o, t) => (o.ToString() ?? string.Empty).StartsWith("Failed to query the Metadata API")),
                 It.IsAny<Exception>(),
