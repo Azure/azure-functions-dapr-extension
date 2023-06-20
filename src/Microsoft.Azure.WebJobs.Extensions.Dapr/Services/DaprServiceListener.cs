@@ -21,7 +21,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
-    sealed class DaprServiceListener : IDisposable, IDaprServiceListener
+    internal sealed class DaprServiceListener : IDisposable, IDaprServiceListener
     {
         private const string MetadataApiUrl = "";
         readonly HashSet<DaprListenerBase> listeners = new HashSet<DaprListenerBase>();
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         /// <summary>
         /// Warns if any sidecar settings are misconfigured.
         /// </summary>
-        private async Task WarnIfSidecarMisconfigured()
+        internal async Task WarnIfSidecarMisconfigured()
         {
             var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
 
