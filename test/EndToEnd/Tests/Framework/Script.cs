@@ -44,6 +44,14 @@ namespace EndToEndTests.Framework
                     StdErr = process.StandardError.ReadToEnd(),
                 };
             }
+            catch (System.Exception ex)
+            {
+                return new InvokeScriptResult
+                {
+                    ExitCode = -1,
+                    StdErr = ex.ToString(),
+                };
+            }
             finally
             {
                 process.Dispose();

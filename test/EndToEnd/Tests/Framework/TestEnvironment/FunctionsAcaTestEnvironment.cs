@@ -33,7 +33,26 @@ namespace EndToEndTests.Framework
             this.azFunctionsApp = Utils.GetEnvironmentVariable(Constants.EnvironmentKeys.TEST_FUNCCAPPS_NAME);
         }
 
-        public Task<TestApp> StartAsync(string appName)
+        /// <summary>
+        /// Waits for the function app to be ready.
+        /// TODO: Instead of waiting a fixed amount of time, we should poll the function app until it is ready.
+        /// </summary>
+        private static async Task WaitForFunctionAppAsync()
+        {
+            var functionAppWaitTimeSeconds = 10;
+            try
+            {
+                functionAppWaitTimeSeconds = int.Parse(Utils.GetEnvironmentVariable(Constants.EnvironmentKeys.TEST_FUNCCAPPS_APP_WAIT_TIME));
+            }
+            catch (System.Exception)
+            {
+                // Ignore
+            }
+
+            await Task.Delay(functionAppWaitTimeSeconds * 1000);
+        }
+
+        public async Task<TestApp> StartAsync(string appName)
         {
             try
             {
@@ -48,14 +67,13 @@ namespace EndToEndTests.Framework
                 var res = Script.InvokeScript(scriptPath, new string[] { "deploy", appName });
                 if (res.ExitCode != 0)
                 {
-                    throw new System.Exception($"Failed to deploy function app {appName} to Azure Container Apps.");
+                    throw new System.Exception($"Failed to deploy function app {appName} to Azure Container Apps, stderr: {res.StdErr}");
                 }
 
                 this.logger.LogInformation($"Successfully deployed function app {appName} to Azure Container Apps.");
 
-                // Wait for 10 seconds for the function app to be ready
                 this.logger.LogInformation("Waiting for function app to be ready (10s)...");
-                System.Threading.Thread.Sleep(10000);
+                await WaitForFunctionAppAsync();
 
                 this.logger.LogInformation($"Getting URL for function app {appName}.");
 
@@ -63,16 +81,16 @@ namespace EndToEndTests.Framework
                 res = Script.InvokeScript(scriptPath, new string[] { "geturl" });
                 if (res.ExitCode != 0)
                 {
-                    throw new System.Exception($"Failed to get URL for function app {appName}.");
+                    this.logger.LogError($"Failed to get URL for function app {appName}, stderr: {res.StdErr}");
+                    throw new System.Exception($"Failed to get URL for function app {appName}, stderr: {res.StdErr}");
                 }
 
                 string url = res.StdOut?.Trim() ?? new System.Exception($"Failed to get URL for function app {appName}.").ToString();
-                return Task.FromResult(new TestApp("https://" + url, 443));
+                return new TestApp("https://" + url, 443);
             }
             catch (System.Exception e)
             {
-                this.logger.LogError($"Failed to deploy function app {appName} to Azure Container Apps.");
-                this.logger.LogError(e.Message);
+                this.logger.LogError($"Failed to deploy function app {appName} to Azure Container Apps, exception: {e.Message}");
                 throw;
             }
         }

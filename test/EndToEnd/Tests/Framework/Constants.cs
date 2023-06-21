@@ -15,6 +15,8 @@ namespace EndToEndTests.Framework
             public const string TEST_FUNCCAPPS_RESOURCE_GROUP = "DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP";
 
             public const string TEST_FUNCCAPPS_NAME = "DAPR_E2E_TEST_FUNCCAPPS_NAME";
+
+            public const string TEST_FUNCCAPPS_APP_WAIT_TIME = "DAPR_E2E_TEST_FUNCCAPPS_APP_WAIT_TIME";
         }
     }
 }

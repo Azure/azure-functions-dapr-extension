@@ -29,10 +29,10 @@ namespace EndToEndTests.Framework
             // Get the right test environment
             switch (environmentType)
             {
-                case "local":
+                case "local":     // Local developer machine
                     testEnvironment = new LocalTestEnvironment(logger, containerRegistry, containerTag);
                     break;
-                case "funccapps":
+                case "funccapps": // Functions on Container Apps
                     testEnvironment = new FunctionsAcaTestEnvironment(logger, containerRegistry, containerTag);
                     break;
                 default:
