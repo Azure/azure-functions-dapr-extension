@@ -187,12 +187,22 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
                 try
                 {
-                    int port = appConnectionProperties.GetProperty("port").GetInt32();
-                    if (port != appPort)
+                    if (appConnectionProperties.TryGetProperty("port", out var port))
                     {
-                        this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {port}, but the app server is running on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
+                        // port is an int in the Metadata API response.
+                        var portInt = port.GetInt32();
+                        if (portInt != appPort)
+                        {
+                            this.logger.LogWarning($"The Dapr sidecar is configured to listen on port {portInt}, but the app server is running on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
+                        }
+                    }
+                    else
+                    {
+                        // Daprd sidecar does not have port configured.
+                        this.logger.LogWarning($"The Dapr sidecar is not configured to listen on a port, but the app server is running on port {appPort}. This may cause unexpected behavior, see https://aka.ms/azfunc-dapr-app-config-error.");
                     }
 
+                    // channelAddress is always present in appConnectionProperties.
                     string address = appConnectionProperties.GetProperty("channelAddress").GetRawText().Trim('"');
                     if (address != appChannelAddress)
                     {

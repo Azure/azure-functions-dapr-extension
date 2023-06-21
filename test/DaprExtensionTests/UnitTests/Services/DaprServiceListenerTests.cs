@@ -104,8 +104,8 @@ namespace DaprExtensionTests.UnitTests.Services
             yield return new object[] { "{\"appConnectionProperties\": \"test\"}", LogLevel.Error, "Failed to parse appConnectionProperties" };
 
             // When Metadata API return appConnectionProperties but it does not have port
-            yield return new object[] { "{\"appConnectionProperties\": { \"channelAddress\": \"127.0.0.1\" } }", LogLevel.Error,
-                "Failed to parse appConnectionProperties" };
+            yield return new object[] { "{\"appConnectionProperties\": { \"channelAddress\": \"127.0.0.1\" } }", LogLevel.Warning,
+                "The Dapr sidecar is not configured to listen on a port, but the app server is running on port 3001." };
 
             // When Metadata API return appConnectionProperties but it does not have channelAddress
             yield return new object[] { "{\"appConnectionProperties\": { \"port\": 3001 } }", LogLevel.Error,
