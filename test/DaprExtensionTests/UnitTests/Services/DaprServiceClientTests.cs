@@ -241,6 +241,23 @@ namespace DaprExtensionTests.UnitTests.Services
             Assert.Equal(expectedSecretPayload, actual.RootElement.GetRawText());
             this.daprClientMock.Verify(client => client.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()));
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(3501)]
+        public void GetDaprHttpAddress(int? daprPort)
+        {
+            var nameResolverMock = new Mock<INameResolver>();
+            if (daprPort.HasValue)
+            {
+                nameResolverMock.Setup(r => r.Resolve("DAPR_HTTP_PORT")).Returns(daprPort.Value.ToString());
+            }
+
+            var actual = DaprServiceClient.GetDaprHttpAddress(new Mock<ILogger>().Object, nameResolverMock.Object);
+            var expected = daprPort.HasValue ? $"http://localhost:{daprPort.Value}" : "http://localhost:3500";
+
+            Assert.Equal(expected, actual);
+        }
     }
 }
 
