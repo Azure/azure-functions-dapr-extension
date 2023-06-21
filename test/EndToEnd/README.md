@@ -43,6 +43,24 @@ make push-e2e-app-all
 DAPR_E2E_TEST_APP_ENVIRONMENT=local dotnet test
 ```
 
+### Run the tests on Functions on CApps
+
+```bash
+# 1. Initializes the test environment.
+./Framework/Scripts/manage-azfunc.sh init
+
+# 2. Run the commands from the output of the previous command to set the required environment variables.
+# For example:
+export DAPR_E2E_TEST_FUNCCAPPS_RESOURCE_GROUP=e2eb3bf5e
+export DAPR_E2E_TEST_FUNCCAPPS_NAME=e2eb3bf5e-funcapp
+
+# 3. Runs the tests.
+DAPR_E2E_TEST_APP_ENVIRONMENT=funccapps dotnet test
+
+# 4. Clean up the test environment.
+./Framework/Scripts/manage-azfunc.sh cleanup
+```
+
 ## Adding a new test
 
 TODO

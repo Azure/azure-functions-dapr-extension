@@ -1,4 +1,4 @@
-namespace EndToEndTests.Infrastructure
+namespace EndToEndTests.Framework
 {
     public class TestApp
     {
