@@ -19,9 +19,9 @@ namespace EndToEndTests.Framework
         /// </summary>
         public static InvokeScriptResult InvokeScript(string scriptName, string[] args)
         {
-            var process = new Process
+            using (var process = new Process())
             {
-                StartInfo = new ProcessStartInfo
+                process.StartInfo = new ProcessStartInfo
                 {
                     FileName = scriptName,
                     Arguments = string.Join(" ", args),
@@ -29,33 +29,29 @@ namespace EndToEndTests.Framework
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                },
+                };
+
+                try
+                {
+                    process.Start();
+                    process.WaitForExit();
+
+                    return new InvokeScriptResult
+                    {
+                        ExitCode = process.ExitCode,
+                        StdOut = process.StandardOutput.ReadToEnd(),
+                        StdErr = process.StandardError.ReadToEnd(),
+                    };
+                }
+                catch (System.Exception ex)
+                {
+                    return new InvokeScriptResult
+                    {
+                        ExitCode = -1,
+                        StdErr = ex.ToString(),
+                    };
+                }
             };
-
-            try
-            {
-                process.Start();
-                process.WaitForExit();
-
-                return new InvokeScriptResult
-                {
-                    ExitCode = process.ExitCode,
-                    StdOut = process.StandardOutput.ReadToEnd(),
-                    StdErr = process.StandardError.ReadToEnd(),
-                };
-            }
-            catch (System.Exception ex)
-            {
-                return new InvokeScriptResult
-                {
-                    ExitCode = -1,
-                    StdErr = ex.ToString(),
-                };
-            }
-            finally
-            {
-                process.Dispose();
-            }
         }
     }
 }
