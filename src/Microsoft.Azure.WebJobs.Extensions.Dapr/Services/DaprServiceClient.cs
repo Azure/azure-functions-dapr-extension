@@ -53,10 +53,10 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         /// <returns>Dapr HTTP address.</returns>
         public static string GetDaprHttpAddress(ILogger logger, INameResolver resolver)
         {
-            if (!int.TryParse(resolver.Resolve("DAPR_HTTP_PORT"), out int daprPort))
+            if (!int.TryParse(resolver.Resolve(Constants.EnvironmentKeys.SidecarHttpPort), out int daprPort))
             {
                 daprPort = DefaultDaprPort;
-                logger.LogDebug("DAPR_HTTP_PORT environment variable not found. Using port {daprPort} as default.", daprPort);
+                logger.LogDebug($"{Constants.EnvironmentKeys.SidecarHttpPort} environment variable not found. Using port {daprPort} as default.", daprPort);
             }
 
             return $"http://localhost:{daprPort}";

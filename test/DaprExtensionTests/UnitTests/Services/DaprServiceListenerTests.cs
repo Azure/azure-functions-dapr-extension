@@ -12,6 +12,7 @@ namespace DaprExtensionTests.UnitTests.Services
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
     using Microsoft.Extensions.Logging;
     using Moq;
@@ -31,9 +32,9 @@ namespace DaprExtensionTests.UnitTests.Services
             loggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(this.loggerMock.Object);
 
             this.nameResolverMock = new Mock<INameResolver>();
-            this.nameResolverMock.Setup(x => x.Resolve("DAPR_APP_PORT")).Returns("3001");
-            this.nameResolverMock.Setup(x => x.Resolve("DAPR_HTTP_PORT")).Returns("3500"); // Set to suppress any logs
-            this.nameResolverMock.Setup(x => x.Resolve("DAPR_ENABLE_SIDECAR_METADATA_CHECK")).Returns("true"); // Set to suppress any logs
+            this.nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.AppPort)).Returns("3001");
+            this.nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.SidecarHttpPort)).Returns("3500"); // Set to suppress any logs
+            this.nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.EnableSidecarMetadataCheck)).Returns("true"); // Set to suppress any logs
 
             this.daprClientMock = new Mock<IDaprClient>();
 
@@ -73,6 +74,7 @@ namespace DaprExtensionTests.UnitTests.Services
             {
                 Content = new StringContent(responseBody),
             };
+
             this.daprClientMock.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).
                 Returns(Task.FromResult(mockResponse));
 

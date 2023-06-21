@@ -49,7 +49,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
         static string GetAppAddress(INameResolver resolver)
         {
-            if (!int.TryParse(resolver.Resolve("DAPR_APP_PORT"), out int appPort))
+            if (!int.TryParse(resolver.Resolve(Constants.EnvironmentKeys.AppPort), out int appPort))
             {
                 appPort = 3001;
             }
@@ -59,12 +59,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
         static bool EnableSidecarCheckOnHostStartup(INameResolver resolver)
         {
-            if (!bool.TryParse(resolver.Resolve("DAPR_ENABLE_SIDECAR_METADATA_CHECK"), out bool enableSidecarCheck))
-            {
-                enableSidecarCheck = false; // default
-            }
-
-            return enableSidecarCheck;
+            return bool.TryParse(resolver.Resolve(Constants.EnvironmentKeys.EnableSidecarMetadataCheck), out bool enableSidecarCheck)
+                ? enableSidecarCheck
+                : false; // default
         }
 
         public async Task EnsureStartedAsync(CancellationToken cancellationToken)
@@ -150,12 +147,20 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         {
             var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
 
-            var res = await this.daprClient.GetAsync($"{this.daprAddress}/v1.0/metadata", cancellationToken);
-            var resBody = await res.Content.ReadAsStringAsync();
+            string resBody;
 
-            if (res.StatusCode != System.Net.HttpStatusCode.OK)
+            try
             {
-                this.logger.LogError($"Failed to query the Metadata API, received status code {res.StatusCode}, response body: {resBody}");
+                var res = await this.daprClient.GetAsync($"{this.daprAddress}/v1.0/metadata", cancellationToken);
+                resBody = await res.Content.ReadAsStringAsync();
+                if (res.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new Exception($"Failed to query the Metadata API, received status code {res.StatusCode}, response body: {resBody}");
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError($"Failed to query the Metadata API, exception: {ex}");
                 return;
             }
 
@@ -167,7 +172,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             }
             catch (Exception ex)
             {
-                this.logger.LogError($"Failed to deserialize the Metadata API response body: {resBody}, exception: {ex}");
+                this.logger.LogError($"Failed to deserialize the Metadata API response, exception: {ex}");
                 return;
             }
 
