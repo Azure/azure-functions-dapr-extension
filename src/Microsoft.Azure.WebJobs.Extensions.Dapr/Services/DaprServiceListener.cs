@@ -28,7 +28,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         readonly HashSet<DaprTopicSubscription> topics = new HashSet<DaprTopicSubscription>(new DaprTopicSubscriptionComparer());
         readonly string appAddress;
         readonly string daprAddress;
-        readonly bool enableSidecarCheckOnHostStartup;
+        readonly bool shouldCheckSidecarMetadataOnHostStartup;
         readonly ILogger logger;
         private readonly IDaprClient daprClient;
 
@@ -42,7 +42,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
             this.appAddress = GetAppAddress(resolver);
             this.daprAddress = DaprServiceClient.GetDaprHttpAddress(this.logger, resolver);
-            this.enableSidecarCheckOnHostStartup = EnableSidecarCheckOnHostStartup(resolver);
+            this.shouldCheckSidecarMetadataOnHostStartup = !IsSidecarMetadataCheckOnHostStartupDisabled(resolver);
         }
 
         public void Dispose() => this.host?.Dispose();
@@ -57,11 +57,11 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return $"http://127.0.0.1:{appPort}";
         }
 
-        static bool EnableSidecarCheckOnHostStartup(INameResolver resolver)
+        static bool IsSidecarMetadataCheckOnHostStartupDisabled(INameResolver resolver)
         {
-            return bool.TryParse(resolver.Resolve(Constants.EnvironmentKeys.EnableSidecarMetadataCheck), out bool enableSidecarCheck)
-                ? enableSidecarCheck
-                : false; // default
+            return bool.TryParse(resolver.Resolve(Constants.EnvironmentKeys.DisableSidecarMetadataCheck), out bool disableSidecarCheck)
+                ? disableSidecarCheck
+                : false; // do not disable by default
         }
 
         public async Task EnsureStartedAsync(CancellationToken cancellationToken)
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                 await this.host.StartAsync(cancellationToken);
                 this.logger.LogInformation("Dapr HTTP host started successfully.");
 
-                if (this.enableSidecarCheckOnHostStartup)
+                if (this.shouldCheckSidecarMetadataOnHostStartup)
                 {
                     await this.WarnIfSidecarMisconfigured();
                 }

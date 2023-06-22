@@ -34,7 +34,6 @@ namespace DaprExtensionTests.UnitTests.Services
             this.nameResolverMock = new Mock<INameResolver>();
             this.nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.AppPort)).Returns("3001");
             this.nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.SidecarHttpPort)).Returns("3500"); // Set to suppress any logs
-            this.nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.EnableSidecarMetadataCheck)).Returns("true"); // Set to suppress any logs
 
             this.daprClientMock = new Mock<IDaprClient>();
 

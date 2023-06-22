@@ -10,7 +10,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         public class EnvironmentKeys
         {
             public const string AppPort = "DAPR_APP_PORT";
-            public const string EnableSidecarMetadataCheck = "DAPR_ENABLE_SIDECAR_METADATA_CHECK";
+            public const string DisableSidecarMetadataCheck = "DAPR_DISABLE_SIDECAR_METADATA_CHECK";
             public const string SidecarHttpPort = "DAPR_HTTP_PORT";
         }
     }
