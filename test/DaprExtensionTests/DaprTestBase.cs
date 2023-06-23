@@ -35,7 +35,8 @@ namespace DaprExtensionTests
 
         static readonly IDictionary<string, string> DefaultEnvironmentVariables = new Dictionary<string, string>()
         {
-            { "DAPR_HTTP_PORT", DaprPort.ToString() }
+            { "DAPR_HTTP_PORT", DaprPort.ToString() },
+            { "DAPR_DISABLE_SIDECAR_METADATA_CHECK", "true" } // Disable metadata API calls during tests
         };
 
         readonly IHost functionsHost;
