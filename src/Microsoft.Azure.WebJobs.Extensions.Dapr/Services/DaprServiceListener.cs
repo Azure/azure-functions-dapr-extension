@@ -57,7 +57,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return $"http://127.0.0.1:{appPort}";
         }
 
-        static bool IsSidecarMetadataCheckOnHostStartupDisabled(INameResolver resolver)
+        internal static bool IsSidecarMetadataCheckOnHostStartupDisabled(INameResolver resolver)
         {
             return bool.TryParse(resolver.Resolve(Constants.EnvironmentKeys.DisableSidecarMetadataCheck), out bool disableSidecarCheck)
                 ? disableSidecarCheck

@@ -91,6 +91,26 @@ namespace DaprExtensionTests.UnitTests.Services
             this.loggerMock.VerifyNoOtherCalls();
         }
 
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        [InlineData(null, false)] // Default value
+        public void IsSidecarMetadataCheckOnHostStartupDisabled_Test(bool? environmentVariableValue, bool expectedReturn)
+        {
+            // Arrange
+            var nameResolverMock = new Mock<INameResolver>();
+            if (environmentVariableValue != null)
+            {
+                nameResolverMock.Setup(x => x.Resolve(Constants.EnvironmentKeys.DisableSidecarMetadataCheck)).Returns(environmentVariableValue?.ToString() ?? string.Empty);
+            }
+
+            // Act
+            var result = DaprServiceListener.IsSidecarMetadataCheckOnHostStartupDisabled(nameResolverMock.Object);
+
+            // Assert
+            Assert.Equal(expectedReturn, result);
+        }
+
         public static IEnumerable<object[]> GetWarnIfSidecarMisconfiguredTestData()
         {
             // When Metadata API does not return a valid JSON
