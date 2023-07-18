@@ -268,3 +268,6 @@ __pycache__/
 
 # Coverage files
 coverage.cobertura.xml
+
+#Java target files
+target/

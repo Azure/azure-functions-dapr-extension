@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "java",
+    "StateStoreName": "statestore", // should be same as metatdata.name in components/statestore.yaml
+    "KafkaBindingName": "sample-topic", // should be same as metatdata.name in components/kafka_binding.yaml
+    "AzureWebJobsSecretStorageType": "files",
+    "JAVA_HOME": "/Library/Java/JavaVirtualMachines/microsoft-11.jdk/Contents/Home"
+  }
+}

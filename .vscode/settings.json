@@ -1,0 +1,10 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "azureFunctions.javaBuildTool": "maven",
+    "azureFunctions.deploySubpath": "samples/java-sample-func/target/azure-functions/java-sample-func-1689674409626",
+    "azureFunctions.projectLanguage": "Java",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.projectSubpath": "samples/java-sample-func",
+    "azureFunctions.preDeployTask": "package (functions)"
+}
