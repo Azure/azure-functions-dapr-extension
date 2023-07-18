@@ -34,11 +34,11 @@ public class CreateNewOrder {
                 methods = {HttpMethod.GET, HttpMethod.POST},
                 authLevel = AuthorizationLevel.ANONYMOUS)
                 HttpRequestMessage<Optional<String>> request,
-                @DaprStateOutput(
-                    name = "state",
-                    stateStore = "statestore",
-                    key = "product")
-                OutputBinding<String> product,
+            @DaprStateOutput(
+                name = "state",
+                stateStore = "statestore",
+                key = "product")
+            OutputBinding<String> product,
             final ExecutionContext context) {
         context.getLogger().info("Java HTTP trigger processed a request.");
 
