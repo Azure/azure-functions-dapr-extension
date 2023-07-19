@@ -5,16 +5,19 @@
  */
 
 package com.microsoft.azure.functions.dapr.annotation;
+
+import com.microsoft.azure.functions.annotation.CustomBinding;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.ElementType;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
 /**
  *  Attribute to specify parameters for the Dapr invoke output binding.
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@CustomBinding(direction = "out", name = "", type = "daprInvoke")
 public @interface DaprInvokeOutput {
     /**
      * The variable name used in function.json.
@@ -29,15 +32,15 @@ public @interface DaprInvokeOutput {
     /**
      * Dapr app name to invoke.
      */
-    String AppId() default "";
+    String appId() default "";
 
     /**
      * Method name of the app to invoke.
      */
-    String MethodName() default "";
+    String methodName() default "";
 
     /**
      * Zhttp verb of the app to invoke.
      */
-    String HttpVerb() default "POST";
+    String httpVerb() default "POST";
 }

@@ -13,6 +13,9 @@ import java.lang.annotation.ElementType;
 
 import com.microsoft.azure.functions.annotation.CustomBinding;
 
+/**
+ * Attribute to specify parameters for the dapr-state output binding.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.PARAMETER, ElementType.METHOD })
 @CustomBinding(direction = "out", name = "", type = "daprState")

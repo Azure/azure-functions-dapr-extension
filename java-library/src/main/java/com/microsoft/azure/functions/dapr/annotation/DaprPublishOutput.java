@@ -5,16 +5,19 @@
  */
 
 package com.microsoft.azure.functions.dapr.annotation;
+
+import com.microsoft.azure.functions.annotation.CustomBinding;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.ElementType;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
 /**
  *  Attribute to specify parameters for the Dapr publish output binding.
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+@CustomBinding(direction = "out", name = "", type = "daprPublish")
 public @interface DaprPublishOutput {
     /**
      * The variable name used in function.json.

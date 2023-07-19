@@ -11,11 +11,14 @@ import java.lang.annotation.Target;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.ElementType;
 
-//import com.microsoft.azure.functions.annotation.CustomBinding;
+import com.microsoft.azure.functions.annotation.CustomBinding;
 
+/**
+ * Attribute to specify parameters for the dapr-state input binding.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-//@CustomBinding(direction = "in", name = "", type = "daprState")
+@CustomBinding(direction = "in", name = "", type = "daprState")
 public @interface DaprStateInput {
     /**
      * The variable name used in function.json.

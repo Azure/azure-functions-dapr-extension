@@ -5,16 +5,19 @@
  */
 
 package com.microsoft.azure.functions.dapr.annotation;
+
+import com.microsoft.azure.functions.annotation.CustomBinding;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.ElementType;
 
+/**
+ *  Attribute to specify parameters for the Dapr secret input binding.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-/**
-* Parameter attribute for the Dapr secret input binding.
-*/
+@CustomBinding(direction = "in", name = "", type = "daprSecret")
 public @interface DaprSecretInput {
     /**
      * The variable name used in function.json.

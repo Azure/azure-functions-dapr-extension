@@ -8,12 +8,19 @@ package com.microsoft.azure.functions.dapr.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import com.microsoft.azure.functions.annotation.CustomBinding;
+
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.ElementType;
 
+/**
+ *  Attribute to specify parameters for the Dapr service invocation trigger.
+ */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface DaprServiceInvocationTrigger {
+@Target({ ElementType.PARAMETER, ElementType.METHOD })
+@CustomBinding(direction = "in", name = "", type = "daprServiceInvocationTrigger")
+public @interface  DaprServiceInvocationTrigger {
     /**
      * The variable name used in function.json.
      */
