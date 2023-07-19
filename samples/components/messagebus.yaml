@@ -6,6 +6,6 @@ spec:
   type: pubsub.redis
   metadata:
   - name: redisHost
-    value: 0.tcp.in.ngrok.io:19904
+    value: localhost:6379
   - name: redisPassword
     value: ""

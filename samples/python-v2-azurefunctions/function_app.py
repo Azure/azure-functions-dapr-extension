@@ -15,11 +15,16 @@
 import json
 import azure.functions as func
 import logging
+import json
+import azure.functions as func
+import logging
+from dapr_blueprint_app import app
 
 dapp = func.DaprFunctionApp()
+dapp.register_blueprint(app)
 
 # Dapr state output binding with http trigger
-@dapp.function_name(name="HttpTrigger1")
+@dapp.function_name(name="HttpTriggerFunc")
 @dapp.route(route="req", auth_level=dapp.auth_level.ANONYMOUS)
 @dapp.dapr_state_output(arg_name="state", state_store="statestore", key="newOrder")
 def main(req: func.HttpRequest, state: func.Out[str] ) -> str:
