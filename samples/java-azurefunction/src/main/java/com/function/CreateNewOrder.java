@@ -13,41 +13,35 @@ import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.microsoft.azure.functions.dapr.annotation.DaprServiceInvocationTrigger;
 import com.microsoft.azure.functions.dapr.annotation.DaprStateOutput;
 import com.microsoft.azure.functions.OutputBinding;
 
 import java.util.Optional;
 
 /**
- * Azure Functions with HTTP Trigger.
+ * Azure Functions with Dapr service invocation trigger.
  */
 public class CreateNewOrder {
     /**
-     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
-     * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
+     * This function gets invoked by dapr runtime:
+     * dapr invoke --app-id functionapp --method CreateNewOrder --data '{"value": { "orderId": "41" } }'
      */
     @FunctionName("CreateNewOrder")
     public String run(
-            @HttpTrigger(
-                name = "req",
-                methods = {HttpMethod.GET, HttpMethod.POST},
-                authLevel = AuthorizationLevel.ANONYMOUS)
-                HttpRequestMessage<Optional<String>> request,
+            @DaprServiceInvocationTrigger(
+                name = "payload", 
+                methodName = "CreateNewOrder") 
+            String payload,
             @DaprStateOutput(
                 name = "state",
-                stateStore = "statestore",
-                key = "product")
+                stateStore = "%StateStoreName%",
+                key = "order")
             OutputBinding<String> product,
             final ExecutionContext context) {
-        context.getLogger().info("Java HTTP trigger processed a request.");
+        context.getLogger().info("'Java function processed a CreateNewOrder request from the Dapr Runtime.'");
+        product.setValue(payload);
 
-        // Parse query parameter
-        final String query = request.getQueryParameters().get("name");
-        final String name = request.getBody().orElse(query);
-
-        product.setValue("{\"value\":{\"orderId\":\"42\"}}");
-
-        return "{\"value\":{\"orderId\":\"42\"}}";
+        return payload;
     }
 }

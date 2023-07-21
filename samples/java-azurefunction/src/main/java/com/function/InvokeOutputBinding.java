@@ -24,16 +24,15 @@ import java.util.Optional;
  */
 public class InvokeOutputBinding {
     /**
-     * This function listens at endpoint "/api/HttpExample". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
-     * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
+     * TODO: Add description to method
      */
     @FunctionName("InvokeOutputBinding")
     public String run(
             @HttpTrigger(
                 name = "req",
-                methods = {HttpMethod.GET, HttpMethod.POST},
-                authLevel = AuthorizationLevel.ANONYMOUS)
+                methods = {HttpMethod.GET},
+                authLevel = AuthorizationLevel.ANONYMOUS,
+                route = "invoke/{appId}/{methodName}")
                 HttpRequestMessage<Optional<String>> request,
             @DaprInvokeOutput(
                 name = "payload",
@@ -48,8 +47,10 @@ public class InvokeOutputBinding {
         final String query = request.getQueryParameters().get("name");
         final String name = request.getBody().orElse(query);
 
-        payload.setValue("{\"value\":{\"orderId\":\"42\"}}");
+        String jsoString = String.format("{\"body\":\"%s\"}", name);
 
-        return "{\"value\":{\"orderId\":\"42\"}}";
+        payload.setValue(jsoString);
+
+        return jsoString;
     }
 }

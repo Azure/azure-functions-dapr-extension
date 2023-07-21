@@ -14,37 +14,38 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import com.microsoft.azure.functions.dapr.annotation.DaprServiceInvocationTrigger;
-import com.microsoft.azure.functions.dapr.annotation.DaprStateInput;
 import com.microsoft.azure.functions.dapr.annotation.DaprStateOutput;
+import com.microsoft.azure.functions.dapr.annotation.DaprTopicTrigger;
+import com.microsoft.azure.functions.dapr.annotation.DaprPublishOutput;
 import com.microsoft.azure.functions.OutputBinding;
 
 import java.util.Optional;
-import java.util.logging.Logger;
 
 /**
- * Azure Functions with HTTP Trigger.
+ * Azure Functions with Dapr service invocation trigger.
  */
-public class RetrieveOrder {
+public class TransferEventBetweenTopics {
     /**
-     * This function gets invoked by dapr runtime:
-     * dapr invoke --app-id functionapp --method RetrieveOrder
+     * TODO: Add description to method
      */
-    @FunctionName("RetrieveOrder")
+    @FunctionName("TransferEventBetweenTopics")
     public String run(
-            @DaprServiceInvocationTrigger(
-                name = "payload", 
-                methodName = "RetrieveOrder") 
-            String payload,
-            @DaprStateInput(
+            @DaprTopicTrigger(
+                name = "topicMessage",
+                pubSubName = "%PubSubName%",
+                topic = "A")
+            String topicMessage,
+            @DaprPublishOutput(
                 name = "state",
-                stateStore = "%StateStoreName%",
-                key = "product")
-            String product,
+                pubSubName = "%PubSubName%",
+                topic = "B")
+            OutputBinding<String> payload,
             final ExecutionContext context) {
-        Logger logger = context.getLogger();
-        logger.info("Java function processed a RetrieveOrder request from the Dapr Runtime.");
-        logger.info(product);
+        context.getLogger().info("Java function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
 
-        return product;
+
+        payload.setValue("Transfer from Topic A: " + topicMessage);
+
+        return topicMessage;
     }
 }

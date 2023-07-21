@@ -32,10 +32,10 @@ public @interface DaprPublishOutput {
     /**
      * Pub/sub name to publish to.
      */
-    String PubSubName() default "";
+    String pubSubName() default "";
 
     /**
      * Name of the topic to publish to.
      */
-    String Topic() default "";
+    String topic() default "";
 }
