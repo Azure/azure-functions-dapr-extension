@@ -30,12 +30,17 @@ public @interface DaprSecretInput {
     String daprAddress() default "";
 
     /**
-     * Name of the state store to retrieve or store state.
+     * Name of the secret store to get the secret from.
      */
-    String stateStore() default "";
+    String secretStoreName() default "";
 
     /**
-     * Key name to get or set state.
+     * Key identifying the name of the secret to get.
      */
     String key() default "";
+
+    /**
+     * An array of metadata properties in the form "key1=value1&amp;key2=value2".
+     */
+    String metadata() default "";
 }

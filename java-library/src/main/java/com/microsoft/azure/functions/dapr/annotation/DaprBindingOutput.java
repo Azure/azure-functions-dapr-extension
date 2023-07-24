@@ -30,17 +30,12 @@ public @interface DaprBindingOutput {
     String daprAddress() default "";
 
     /**
-     * Secret store to get the secret from.
+     * Configured name of the binding.
      */
-    String secretStoreName();
+    String bindingName() default "";
 
     /**
-     * Identifying the name of the secret to get.
+     * Configured operation.
      */
-    String key() default "";
-
-    /**
-     * An array of metadata properties in the form "key1=value1&amp;key2=value2".
-     */
-    String metadata() default "";
+    String operation() default "";
 }

@@ -5,6 +5,9 @@
  */
 
 package main.java.com.function;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -23,11 +26,11 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
- * Azure Functions with HTTP Trigger.
+ * Azure Functions with DaprTopicTrigger.
  */
 public class PrintTopicMessage {
     /**
-     * TODO: Add description to method
+     * This function gets invoked by dapr runtime, when a message is published to topic B.
      */
     @FunctionName("PrintTopicMessage")
     public String run(
@@ -36,11 +39,18 @@ public class PrintTopicMessage {
                 pubSubName = "%PubSubName%",
                 topic = "B")
             String payload,
-            final ExecutionContext context) {
+            final ExecutionContext context) throws JsonProcessingException {
         Logger logger = context.getLogger();
         logger.info("Java function processed a PrintTopicMessage request from the Dapr Runtime.");
-        logger.info("Topic B received a message: " + payload);
 
-        return payload;
+        // Get the CloudEvent data from the request body as a JSON string
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(payload);
+
+        String data = jsonNode.get("data").asText();
+
+        logger.info("Topic B received a message: " + data);
+
+        return data;
     }
 }

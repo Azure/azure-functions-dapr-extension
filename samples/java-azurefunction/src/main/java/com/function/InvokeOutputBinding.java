@@ -20,11 +20,22 @@ import com.microsoft.azure.functions.OutputBinding;
 import java.util.Optional;
 
 /**
- * Azure Functions with HTTP Trigger.
+ * This function uses Dapr Invoke Output Binding to invoke another Dapr enabled function.
+ * This function can be invoked by http trigger.
  */
 public class InvokeOutputBinding {
     /**
-     * TODO: Add description to method
+     * This function listens at endpoint "/api/invoke/{appId}/{methodName}". Curl command to invoke it:
+     * curl -X POST \                                                         ─╯
+            http://localhost:7071/api/invoke/functionapp/CreateNewOrder \
+            -H 'Content-Type: application/json' \
+            -d '{
+                "body":{
+                    "value": {
+                        "orderId": "45"
+                    }
+                }
+            }'
      */
     @FunctionName("InvokeOutputBinding")
     public String run(
@@ -45,9 +56,10 @@ public class InvokeOutputBinding {
 
         // Parse query parameter
         final String query = request.getQueryParameters().get("name");
-        final String name = request.getBody().orElse(query);
+        final String body = request.getBody().orElse(query);
 
-        String jsoString = String.format("{\"body\":\"%s\"}", name);
+        //request body must be passed this way "{\"body\":{\"value\":{\"key\":\"some value\"}}}" to use the InvokeOutputBinding, all the data must be enclosed in body property.
+        String jsoString = String.format("{\"body\":\"%s\"}", body);
 
         payload.setValue(jsoString);
 

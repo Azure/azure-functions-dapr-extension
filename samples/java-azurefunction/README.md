@@ -1,6 +1,6 @@
 # Java Azure Function Sample
 
-This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
+This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-java) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
 1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
@@ -215,17 +215,34 @@ In your terminal window, you should see logs to confirm the expected result:
 
 ## 2. Pub/Sub: TransferEventBetweenTopics and PrintTopicMessage
 
-```csharp
-[FunctionName("TransferEventBetweenTopics")]
-public static void Run(
-    [DaprTopicTrigger("%PubSubName%", Topic = "A")] CloudEvent subEvent,
-    [DaprPublish(PubSubName = "%PubSubName%", Topic = "B")] out DaprPubSubEvent pubEvent,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
+```java
+@FunctionName("TransferEventBetweenTopics")
+public String run(
+        @DaprTopicTrigger(
+            name = "topicMessage",
+            pubSubName = "%PubSubName%",
+            topic = "A")
+            String request,
+        @DaprPublishOutput(
+            name = "state",
+            pubSubName = "%PubSubName%",
+            topic = "B")
+        OutputBinding<String> payload,
+        final ExecutionContext context) throws JsonProcessingException {
+    context.getLogger().info("Java function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
 
+    // Get the CloudEvent data from the request body as a JSON string
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode jsonNode = objectMapper.readTree(request);
 
-    pubEvent = new DaprPubSubEvent("Transfer from Topic A: " + subEvent.Data);
+    String data = jsonNode.get("data").asText();
+
+    context.getLogger().info("Printing Topic A received a message: " + data);
+
+    String pubsubPayload = String.format("{\"payload\":\" Transfer from Topic A: %s \"}", data);      
+    payload.setValue(pubsubPayload);
+
+    return data;
 }
 ```
 
@@ -236,20 +253,33 @@ Here, `DaprTopicTrigger` is used to subscribe to topic `A`, so whenever a messag
 
 Then, `DaprPublish` *output binding* is used to publish a new event to topic `B` using the strongly-typed `DaprPubSubEvent` class, or it can be written using the attribute `[DaprPublish(Topic = "B")] out object pubEvent`:
 
-```csharp
+```java
     pubEvent = "Transfer from Topic A:" + subEvent.Data;
 ```
 
 The function below subscribes to topic `B`, and it simply prints the message content when an event arrives.
 
-```csharp
-[FunctionName("PrintTopicMessage")]
-public static void Run(
-    [DaprTopicTrigger("%PubSubName%", Topic = "B")] CloudEvent subEvent,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a PrintTopicMessage request from the Dapr Runtime.");
-    log.LogInformation($"Topic B received a message: {subEvent.Data}.");
+```java
+@FunctionName("PrintTopicMessage")
+public String run(
+        @DaprTopicTrigger(
+            name = "payload",
+            pubSubName = "%PubSubName%",
+            topic = "B")
+        String payload,
+        final ExecutionContext context) throws JsonProcessingException {
+    Logger logger = context.getLogger();
+    logger.info("Java function processed a PrintTopicMessage request from the Dapr Runtime.");
+
+    // Get the CloudEvent data from the request body as a JSON string
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode jsonNode = objectMapper.readTree(payload);
+
+    String data = jsonNode.get("data").asText();
+
+    logger.info("Topic B received a message: " + data);
+
+    return data;
 }
 ```
 
@@ -273,33 +303,44 @@ The Dapr logs should show the following:
 ## 3. Dapr Binding: 
 This section demonstrates the integration of this extension with Dapr Binding component. A Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
-```csharp
-[FunctionName("ConsumeMessageFromKafka")]
-public static void Run(
-    // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
-    [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JsonElement triggerData,
-    ILogger log)
-{
-    log.LogInformation("Hello from Kafka!");
+```java
+@FunctionName("ConsumeMessageFromKafka")
+public String run(
+        @DaprBindingTrigger(
+            name = "triggerData", 
+            bindingName = "%KafkaBindingName%") 
+        String triggerData,
+        final ExecutionContext context) {
+    context.getLogger().info("'Java function processed a ConsumeMessageFromKafka request from the Dapr Runtime.'");
+    context.getLogger().info("Hello from Kafka!");
 
-    log.LogInformation($"Trigger data: {triggerData}");
+    context.getLogger().info(String.format("Trigger data: %s", triggerData));
+
+    return triggerData;
 }
 ```
 Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance.
 
-```csharp
-[FunctionName("SendMessageToKafka")]
-public static async void Run(
-    [DaprServiceInvocationTrigger] JsonElement payload,
-    [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<JsonElement> messages,
-    ILogger log)
-{
-    log.LogInformation("C# HTTP trigger function processed a request.");
+```java
+@FunctionName("SendMessageToKafka")
+public String run(
+        @DaprServiceInvocationTrigger(
+            name = "payload", 
+            methodName = "SendMessageToKafka") 
+        String payload,
+        @DaprBindingOutput(
+            name = "state",
+            bindingName = "%KafkaBindingName%", 
+            operation = "create")
+        OutputBinding<String> product,
+        final ExecutionContext context) {
+    context.getLogger().info("Java  function processed a SendMessageToKafka request.");
+    product.setValue(payload);
 
-    await messages.AddAsync(payload);
+    return payload;
 }
 ```
-`DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. `IAsyncCollector<object>` allows you to send multiple message by calling `AddAsync` with different payloads. 
+`DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. 
 
 You can use service invocation to invoke this function:
 
@@ -333,21 +374,29 @@ This section demonstrates how `DaprSecret` **input binding** integrates with Dap
 
 Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to set up other supported secret stores.
 
-```csharp
-[FunctionName("RetrieveSecretLocal")]
-public static void Run(
-    [DaprServiceInvocationTrigger] object args,
-    [DaprSecret("localsecretstore", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");
-      
-    foreach (var kvp in secret)
-    {
-        log.LogInformation("Stored secret: Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-    }
+```java
+    @FunctionName("RetrieveSecretLocal")
+    public void run(
+        @DaprServiceInvocationTrigger(
+            name = "args", 
+            methodName = "RetrieveSecretLocal") Object args,
+        @DaprSecretInput(
+            name = "secret", 
+            secretStoreName = "localsecretstore",
+            key = "my-secret", 
+            metadata = "metadata.namespace=default") 
+            Map<String, String> secret,
+        final ExecutionContext context) {
 
-}
+        context.getLogger().info("Java function processed a RetrieveSecret request from the Dapr Runtime.");
+
+        // Print the fetched secret value
+        // This is only for demo purpose
+        // Please do not log any real secret in your production code
+        for (Map.Entry<String, String> entry : secret.entrySet()) {
+            context.getLogger().info(String.format("Stored secret: Key = %s, Value = %s", entry.getKey(), entry.getValue()));
+        }
+    }
 ```
 
 `DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
@@ -358,8 +407,8 @@ dapr invoke --app-id functionapp --method RetrieveSecretLocal my-secret
 ```
 
 Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example.
-```csharp
-[DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
+```java
+[DaprSecretInput(secretStoreName = "vault", key = "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
 
 ## 5. Dapr Invoke output binding:

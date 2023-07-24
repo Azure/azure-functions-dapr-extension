@@ -5,6 +5,9 @@
  */
 
 package main.java.com.function;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -19,14 +22,16 @@ import com.microsoft.azure.functions.dapr.annotation.DaprTopicTrigger;
 import com.microsoft.azure.functions.dapr.annotation.DaprPublishOutput;
 import com.microsoft.azure.functions.OutputBinding;
 
+import java.net.URI;
 import java.util.Optional;
 
 /**
- * Azure Functions with Dapr service invocation trigger.
+ * Azure Functions with DaprTopicTrigger and DaprPublishOutput binding.
  */
 public class TransferEventBetweenTopics {
     /**
-     * TODO: Add description to method
+     * This function gets invoked by dapr runtime:
+     * dapr publish  --publish-app-id functionapp --pubsub messagebus --topic A --data 'This is a test' 
      */
     @FunctionName("TransferEventBetweenTopics")
     public String run(
@@ -34,18 +39,26 @@ public class TransferEventBetweenTopics {
                 name = "topicMessage",
                 pubSubName = "%PubSubName%",
                 topic = "A")
-            String topicMessage,
+                String request,
             @DaprPublishOutput(
                 name = "state",
                 pubSubName = "%PubSubName%",
                 topic = "B")
             OutputBinding<String> payload,
-            final ExecutionContext context) {
+            final ExecutionContext context) throws JsonProcessingException {
         context.getLogger().info("Java function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
 
+        // Get the CloudEvent data from the request body as a JSON string
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(request);
 
-        payload.setValue("Transfer from Topic A: " + topicMessage);
+        String data = jsonNode.get("data").asText();
 
-        return topicMessage;
+        context.getLogger().info("Printing Topic A received a message: " + data);
+
+        String pubsubPayload = String.format("{\"payload\":\" Transfer from Topic A: %s \"}", data);      
+        payload.setValue(pubsubPayload);
+
+        return data;
     }
 }
