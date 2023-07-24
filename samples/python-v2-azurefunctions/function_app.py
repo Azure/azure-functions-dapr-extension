@@ -30,6 +30,7 @@ dapp.register_blueprint(app)
 def main(req: func.HttpRequest, state: func.Out[str] ) -> str:
     # request body must be passed this way '{\"value\": { \"key\": \"some value\" } }'
     body = req.get_body()
+    logging.info(body.decode('utf-8'))
     if body is not None:
         state.set(body.decode('utf-8'))
         logging.info(body.decode('utf-8'))
@@ -44,8 +45,8 @@ def main(req: func.HttpRequest, state: func.Out[str] ) -> str:
 def main(payload: str, state: func.Out[str] ) :
     # request body must be passed this way '{\"value\": { \"key\": \"some value\" } }'
     logging.info('Python function processed a CreateNewOrder request from the Dapr Runtime.')
+    logging.info(payload)
     if payload is not None:
-        logging.info(payload)
         state.set(payload)
     else:
         logging.info('payload is none')
@@ -106,3 +107,19 @@ def main(subEvent, pubEvent: func.Out[bytes]) -> None:
     subEvent_json = json.loads(subEvent)
     payload = "Transfer from Topic A: " + str(subEvent_json["data"])
     pubEvent.set(json.dumps({"payload": payload}).encode('utf-8'))
+
+# Dapr invoke output binding with http trigger
+@dapp.function_name(name="InvokeOutputBinding")
+@dapp.route(route="invoke/{appId}/{methodName}", auth_level=dapp.auth_level.ANONYMOUS)
+@dapp.dapr_invoke_output(arg_name = "payload", app_id = "{appId}", method_name = "{methodName}", http_verb = "post")
+def main(req: func.HttpRequest, payload: func.Out[str] ) -> str:
+    # request body must be passed this way "{\"body\":{\"value\":{\"key\":\"some value\"}}}" to use the InvokeOutputBinding, all the data must be enclosed in body property.
+    logging.info('Python function processed a InvokeOutputBinding request from the Dapr Runtime.')
+
+    body = req.get_body()
+    logging.info(body)
+    if body is not None:
+        payload.set(body)
+    else:
+        logging.info('req body is none')
+    return 'ok'
