@@ -201,6 +201,26 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         static DaprBindingMessage CreateBindingMessage(JsonElement jsonElement)
         {
+            if (jsonElement.ValueKind == JsonValueKind.String)
+            {
+                byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonElement.GetString());
+                Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+
+                if (JsonElement.TryParseValue(ref reader, out JsonElement? jsonElementObj) && jsonElementObj != null)
+                {
+                    return GetDaprBindingMessageObj(jsonElementObj.Value);
+                }
+                else
+                {
+                    throw new ArgumentException("Could not read jsonElement parameter.", nameof(jsonElement));
+                }
+            }
+
+            return GetDaprBindingMessageObj(jsonElement);
+        }
+
+        private static DaprBindingMessage GetDaprBindingMessageObj(JsonElement jsonElement)
+        {
             if (!jsonElement.TryGetProperty("data", out JsonElement data))
             {
                 throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(jsonElement));
