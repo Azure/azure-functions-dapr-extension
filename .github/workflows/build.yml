@@ -74,7 +74,39 @@ jobs:
       - name: Clean up development Nuget packages
         if: startswith(github.ref, 'refs/tags/v')
         run: rm -rf $NUPKG_OUTDIR/*${DEV_VERSION_SUFFIX}.*{nupkg,snupkg}
-      - name: Upload artifacts
+        # Building java-library
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+      - name: Build with Maven
+        run: mvn package
+      - name: Set library version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
+        working-directory: src/java-library
+      - name: Build Java Annotations
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: mvn --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
+        working-directory: src/java-library
+      - name: Copy Java Annotations to staging directory
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          prefix="azure-functions-java-library-dapr-${{ env.REL_VERSION }}"
+          source="src/java-library"
+          destination=${{ env.MAVEN_OUTDIR }}  
+          mkdir -p $destination
+          cp "$source/pom.xml" "$destination/$prefix.pom"
+          cp "$source/target/$prefix.jar" "$destination/$prefix.jar"
+          cp "$source/target/$prefix-javadoc.jar" "$destination/$prefix-javadoc.jar"
+          cp "$source/target/$prefix-sources.jar" "$destination/$prefix-sources.jar"
+        shell: bash
+      - name: Generate SBOM manifest
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          ./ManifestGeneratorTask --buildDropPath "build/java/${{ env.REL_VERSION }}" --packageName "Azure Functions Dapr Java Triggers and Bindings" --packageVersion "${{ env.REL_VERSION }}"
+        working-directory: src/java-library
+      - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
         if: startswith(github.ref, 'refs/tags/v')
         with:
@@ -91,7 +123,7 @@ jobs:
           --repo "${GITHUB_REPOSITORY}" \
           --title "Azure Functions Dapr Extension v${REL_VERSION}" \
           --notes "Release Azure Functions Dapr Extension v${REL_VERSION}"
-      - name: Upload NuGet packages to Azure blob storage
+      - name: Upload NuGet and Maven packages to Azure blob storage
         if: |
           startsWith(github.ref, 'refs/tags/v') &&
           !(endsWith(github.ref, '-rc') || endsWith(github.ref, '-dev') || endsWith(github.ref, '-prerelease')) &&
@@ -104,49 +136,4 @@ jobs:
           export AZCOPY_SPA_CLIENT_SECRET=${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
           ./azcopy login --service-principal --application-id ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           ./azcopy copy "${{ env.NUPKG_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/dotnet/${{ env.REL_VERSION }}/"
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-      - name: Build with Maven
-        run: mvn package
-      - name: Set library version
-        if: env.IS_RELEASE_BUILD == 'true'
-        run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
-        working-directory: src/java-library
-  
-      - name: Build Java Annotations
-        if: env.IS_RELEASE_BUILD == 'true'
-        run: mvn --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
-        working-directory: src/java-library
-  
-      - name: Copy Java Annotations to staging directory
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          prefix="azure-functions-java-library-dapr-${{ env.REL_VERSION }}"
-          source="src/java-library"
-          destination="build/java/${{ env.REL_VERSION }}"
-  
-          mkdir -p $destination
-          cp "$source/pom.xml" "$destination/$prefix.pom"
-          cp "$source/target/$prefix.jar" "$destination/$prefix.jar"
-          cp "$source/target/$prefix-javadoc.jar" "$destination/$prefix-javadoc.jar"
-          cp "$source/target/$prefix-sources.jar" "$destination/$prefix-sources.jar"
-        shell: bash
-  
-      - name: Generate SBOM manifest
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          ./ManifestGeneratorTask --buildDropPath "build/java/${{ env.REL_VERSION }}" --packageName "Azure Functions Dapr Java Triggers and Bindings" --packageVersion "${{ env.REL_VERSION }}"
-        working-directory: src/java-library
-      - name: Upload Maven packages to Azure blob storage
-        if: |
-          startsWith(github.ref, 'refs/tags/v') &&
-          !(endsWith(github.ref, '-rc') || endsWith(github.ref, '-dev') || endsWith(github.ref, '-prerelease')) &&
-          github.repository == 'Azure/azure-functions-dapr-extension'
-        run: |
-          # Upload maven packages to Azure blob storage
-          export AZCOPY_SPA_CLIENT_SECRET=${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
-          ./azcopy login --service-principal --application-id ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           ./azcopy copy "${{ env.MAVEN_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/java/${{ env.REL_VERSION }}/"
-      
