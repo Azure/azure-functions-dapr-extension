@@ -1,0 +1,10 @@
+{
+  "bindings": [
+    {
+      "type": "daprBindingTrigger",
+      "bindingName": "%KafkaBindingName%",
+      "name": "triggerData",
+      "direction": "in"
+    }
+  ]
+}

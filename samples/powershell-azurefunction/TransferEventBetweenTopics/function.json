@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "type": "daprTopicTrigger",
+      "pubsubname": "%PubSubName%",
+      "topic": "A",
+      "name": "subEvent",
+      "direction": "in",
+      "dataType": "string"
+    },
+    {
+      "type": "daprPublish",
+      "direction": "out",
+      "name": "pubEvent",
+      "pubsubname": "%PubSubName%",
+      "topic": "B"
+    }
+  ]
+}

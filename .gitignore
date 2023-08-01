@@ -264,7 +264,7 @@ __pycache__/
 .ionide
 
 # Local packages folder
-./local-packages/
+local-packages/
 
 # Coverage files
 coverage.cobertura.xml

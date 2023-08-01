@@ -6,18 +6,13 @@ using namespace Newtonsoft.Json.Linq
 
 # Example to use Dapr Service Invocation Trigger and Dapr State Output binding to persist a new state into statestore
 param (
-    $payload
+    $payload, $order
 )
 
 # C# function processed a CreateNewOrder request from the Dapr Runtime.
-Write-Host "PowerShell function processed a CreateNewOrder request from the Dapr Runtime."
-
-# Payload must be of the format { "data": { "value": "some value" } }
+Write-Host "PowerShell function processed a RetrieveOrder request from the Dapr Runtime."
 
 # Convert the object to a JSON-formatted string with ConvertTo-Json
-$jsonString = $payload| ConvertTo-Json
+$jsonString = $order | ConvertTo-Json
 
-Write-Host "hello $jsonString"
-
-# Associate values to output bindings by calling 'Push-OutputBinding'.
-Push-OutputBinding -Name order -Value $payload["data"]
+Write-Host "$jsonString"
