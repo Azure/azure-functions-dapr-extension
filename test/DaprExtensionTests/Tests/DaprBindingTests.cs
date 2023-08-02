@@ -9,7 +9,6 @@ namespace DaprExtensionTests
     using System.Collections.Generic;
     using System.Text.Json;
     using System.Threading.Tasks;
-    using DaprExtensionTests.Logging;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
@@ -75,11 +74,12 @@ namespace DaprExtensionTests
             Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
         }
 
-        [Fact]
-        public async Task SendMessage_JsonElementValueKindStringAsyncCollector()
+        [Theory]
+        [MemberData(nameof(GetObjectAsyncCollectorInputs))]
+        public async Task SendMessage_JsonElementValueKindStringAsyncCollector(object message)
         {
             string stringInput = $@"{{
-                        ""data"": ""Hello World"",
+                        ""data"": {JsonSerializer.Serialize(message)},
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
@@ -91,12 +91,11 @@ namespace DaprExtensionTests
             stringInput = stringInput.Replace("\n", string.Empty);
             stringInput = stringInput.Replace("\"", "\\\"");
             stringInput = "\"" + stringInput + "\"";
-
             JsonDocument input = JsonDocument.Parse(stringInput);
 
             JsonDocument expectedPayload = JsonDocument.Parse(
                 $@"{{
-                        ""data"": ""Hello World"",
+                        ""data"": {JsonSerializer.Serialize(message)},
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
