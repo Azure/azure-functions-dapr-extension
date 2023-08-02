@@ -9,6 +9,7 @@ namespace DaprExtensionTests
     using System.Collections.Generic;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using DaprExtensionTests.Logging;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
@@ -87,10 +88,9 @@ namespace DaprExtensionTests
                    }}";
 
             stringInput = stringInput.Replace("\r\n", string.Empty);
+            stringInput = stringInput.Replace("\n", string.Empty);
             stringInput = stringInput.Replace("\"", "\\\"");
             stringInput = "\"" + stringInput + "\"";
-
-            Console.WriteLine(stringInput);
 
             JsonDocument input = JsonDocument.Parse(stringInput);
 
