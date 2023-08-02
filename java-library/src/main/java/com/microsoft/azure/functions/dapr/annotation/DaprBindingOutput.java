@@ -20,7 +20,7 @@ import java.lang.annotation.ElementType;
 @CustomBinding(direction = "out", name = "", type = "daprBinding")
 public @interface DaprBindingOutput {
     /**
-     * The variable name used in function.json.
+     * Name of the dapr binding
      */
     String name();
 
