@@ -8,7 +8,6 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Generic;
     using System.Text.Json;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
