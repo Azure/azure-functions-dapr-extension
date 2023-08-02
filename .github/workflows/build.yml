@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '8'
-      - name: Build with Maven
+      - name: Build Java library with Maven
         run: mvn package
       - name: Set library version
         if: startsWith(github.ref, 'refs/tags/v')
