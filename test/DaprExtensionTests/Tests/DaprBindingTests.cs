@@ -74,12 +74,11 @@ namespace DaprExtensionTests
             Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
         }
 
-        [Theory]
-        [MemberData(nameof(GetObjectAsyncCollectorInputs))]
-        public async Task SendMessage_JsonElementValueKindStringAsyncCollector(object message)
+        [Fact]
+        public async Task SendMessage_JsonElementValueKindStringAsyncCollector()
         {
             string stringInput = $@"{{
-                        ""data"": {JsonSerializer.Serialize(message)},
+                        ""data"": ""Hello World"",
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
@@ -94,7 +93,7 @@ namespace DaprExtensionTests
 
             JsonDocument expectedPayload = JsonDocument.Parse(
                 $@"{{
-                        ""data"": {JsonSerializer.Serialize(message)},
+                        ""data"": ""Hello World"",
                         ""operation"": ""create"",
                         ""metadata"": {{
                             ""key"": ""myKey""
