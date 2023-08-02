@@ -89,6 +89,9 @@ namespace DaprExtensionTests
             stringInput = stringInput.Replace("\r\n", string.Empty);
             stringInput = stringInput.Replace("\"", "\\\"");
             stringInput = "\"" + stringInput + "\"";
+
+            Console.WriteLine(stringInput);
+
             JsonDocument input = JsonDocument.Parse(stringInput);
 
             JsonDocument expectedPayload = JsonDocument.Parse(
