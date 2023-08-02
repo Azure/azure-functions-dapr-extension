@@ -350,7 +350,7 @@ Invoke the above function (InvokeOutputBinding) with a HTTP GET request.
   http://localhost:7071/api/invoke/functionapp/RetrieveOrder
   ```
 
-Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure fucntion and the output will look like as shown below.
+Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure function and the output will look like as shown below.
 
 ```
 == APP == [TIMESTAMP] Executing 'InvokeOutputBinding' (Reason='This function was programmatically called via the host APIs.', Id=<ExecutionId>)
