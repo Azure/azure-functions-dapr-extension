@@ -81,7 +81,7 @@ jobs:
           java-version: '8'
       - name: Build Java library with Maven
         run: mvn package
-      - name: Set library version
+      - name: Set Java library version
         if: startsWith(github.ref, 'refs/tags/v')
         run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: src/java-library
