@@ -27,6 +27,7 @@ jobs:
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
       MAVEN_OUTDIR: bin/Release/maven
+      JAVA_LIB_WORKING_DIRECTORY: src/java-library
     steps:
       - uses: actions/checkout@v2
       - name: Parse release version
@@ -84,16 +85,16 @@ jobs:
       - name: Set Java library version
         if: startsWith(github.ref, 'refs/tags/v')
         run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
-        working-directory: src/java-library
+        working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Build Java Annotations
         if: startsWith(github.ref, 'refs/tags/v')
         run: mvn --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
-        working-directory: src/java-library
+        working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Copy Java Annotations to staging directory
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           prefix="azure-functions-java-library-dapr-${{ env.REL_VERSION }}"
-          source="src/java-library"
+          source="${{ env.JAVA_LIB_WORKING_DIRECTORY }}"
           destination=${{ env.MAVEN_OUTDIR }}  
           mkdir -p $destination
           cp "$source/pom.xml" "$destination/$prefix.pom"
@@ -105,7 +106,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           ./ManifestGeneratorTask --buildDropPath "build/java/${{ env.REL_VERSION }}" --packageName "Azure Functions Dapr Java Triggers and Bindings" --packageVersion "${{ env.REL_VERSION }}"
-        working-directory: src/java-library
+        working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
         if: startswith(github.ref, 'refs/tags/v')
