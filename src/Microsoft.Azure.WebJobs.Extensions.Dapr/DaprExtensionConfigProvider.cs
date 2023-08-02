@@ -203,23 +203,29 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             if (jsonElement.ValueKind == JsonValueKind.String)
             {
+                return GetBindingMessageFromValueKindString(jsonElement);
+            }
+
+            return GetDaprBindingMessageFromValueKindObject(jsonElement);
+        }
+
+        private static DaprBindingMessage GetBindingMessageFromValueKindString(JsonElement jsonElement)
+        {
+            try
+            {
                 byte[] jsonBytes = Encoding.UTF8.GetBytes(jsonElement.GetString());
                 Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
 
-                if (JsonElement.TryParseValue(ref reader, out JsonElement? jsonElementObj) && jsonElementObj != null)
-                {
-                    return GetDaprBindingMessageObj(jsonElementObj.Value);
-                }
-                else
-                {
-                    throw new ArgumentException("Could not read jsonElement parameter.", nameof(jsonElement));
-                }
+                var jsonElementObj = JsonElement.ParseValue(ref reader);
+                return GetDaprBindingMessageFromValueKindObject(jsonElementObj);
             }
-
-            return GetDaprBindingMessageObj(jsonElement);
+            catch (Exception ex)
+            {
+                throw new ArgumentException("Could not parse jsonElement parameter.", nameof(jsonElement), ex);
+            }
         }
 
-        private static DaprBindingMessage GetDaprBindingMessageObj(JsonElement jsonElement)
+        private static DaprBindingMessage GetDaprBindingMessageFromValueKindObject(JsonElement jsonElement)
         {
             if (!jsonElement.TryGetProperty("data", out JsonElement data))
             {

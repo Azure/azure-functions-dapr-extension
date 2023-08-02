@@ -87,8 +87,10 @@ namespace DaprExtensionTests
                         ""bindingName"": ""myBinding""
                    }}";
 
-            stringInput = stringInput.Replace("\r\n", string.Empty);
-            stringInput = stringInput.Replace("\n", string.Empty);
+            // Below string replacement is done to create a Json string with proper
+            // escaping which should result in JsonElement of ValueKind String on parsing.
+            stringInput = stringInput.Replace("\r\n", string.Empty); // This is done for windows as windows adds \r\n for new line.
+            stringInput = stringInput.Replace("\n", string.Empty); // This is done for Linux as Linux adds \n for new line.
             stringInput = stringInput.Replace("\"", "\\\"");
             stringInput = "\"" + stringInput + "\"";
             JsonDocument input = JsonDocument.Parse(stringInput);
@@ -107,6 +109,21 @@ namespace DaprExtensionTests
 
             Assert.Equal("/v1.0/bindings/myBinding", req.Path);
             Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
+        }
+
+        [Fact]
+        public async Task SendMessage_JsonElementValueKindStringAsyncCollectorThrowsExceptionTest()
+        {
+            JsonDocument input = JsonDocument.Parse("\"Hello\"");
+
+            try
+            {
+                await this.CallFunctionAsync(nameof(Functions.JsonElementAsyncCollector), "input", input.RootElement);
+            }
+            catch (Exception ex)
+            {
+                Assert.Equal("Could not parse jsonElement parameter. (Parameter 'jsonElement')", ex.InnerException?.Message);
+            }
         }
 
         [Theory]
