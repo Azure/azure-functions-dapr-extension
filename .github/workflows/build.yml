@@ -27,7 +27,7 @@ jobs:
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       NUPKG_OUTDIR: bin/Release/nugets
       MAVEN_OUTDIR: bin/Release/maven
-      JAVA_LIB_WORKING_DIRECTORY: src/java-library
+      JAVA_LIB_WORKING_DIRECTORY: java-library/
     steps:
       - uses: actions/checkout@v2
       - name: Parse release version
