@@ -8,6 +8,7 @@ namespace DaprExtensionTests
     using System;
     using System.Collections.Generic;
     using System.Text.Json;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.WebJobs;
@@ -57,6 +58,40 @@ namespace DaprExtensionTests
                         }},
                         ""bindingName"": ""myBinding""
                    }}");
+
+            JsonDocument expectedPayload = JsonDocument.Parse(
+                $@"{{
+                        ""data"": {JsonSerializer.Serialize(message)},
+                        ""operation"": ""create"",
+                        ""metadata"": {{
+                            ""key"": ""myKey""
+                        }}
+                   }}");
+
+            await this.CallFunctionAsync(nameof(Functions.JsonElementAsyncCollector), "input", input.RootElement);
+            SavedHttpRequest req = this.GetSingleSendMessageRequest();
+
+            Assert.Equal("/v1.0/bindings/myBinding", req.Path);
+            Assert.Equal(JsonSerializer.Serialize(expectedPayload, Utils.DefaultSerializerOptions), req.ContentAsString);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetObjectAsyncCollectorInputs))]
+        public async Task SendMessage_JsonElementValueKindStringAsyncCollector(object message)
+        {
+            string stringInput = $@"{{
+                        ""data"": {JsonSerializer.Serialize(message)},
+                        ""operation"": ""create"",
+                        ""metadata"": {{
+                            ""key"": ""myKey""
+                        }},
+                        ""bindingName"": ""myBinding""
+                   }}";
+
+            stringInput = stringInput.Replace("\r\n", string.Empty);
+            stringInput = stringInput.Replace("\"", "\\\"");
+            stringInput = "\"" + stringInput + "\"";
+            JsonDocument input = JsonDocument.Parse(stringInput);
 
             JsonDocument expectedPayload = JsonDocument.Parse(
                 $@"{{
