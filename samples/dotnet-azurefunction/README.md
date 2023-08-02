@@ -344,7 +344,7 @@ public static async Task<IActionResult> Run(
 }
 ```
 
-Invoke the above function (InvokeOutputBinding) with http get call
+Invoke the above function (InvokeOutputBinding) with a HTTP GET request.
 
   ```
   http://localhost:7071/api/invoke/functionapp/RetrieveOrder
