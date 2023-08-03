@@ -28,7 +28,7 @@ public @interface DaprTopicTrigger {
     String pubSubName();
 
     /**
-     * Topic name. If unspecified the function name will be used.
+     * Topic name. If unspecified, the function name will be used.
      */
     String topic() default "";
 
