@@ -17,13 +17,8 @@ import java.lang.annotation.ElementType;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@CustomBinding(direction = "in", name = "", type = "daprSecret")
+@CustomBinding(direction = "in", name = "daprSecretInputMessage", type = "daprSecret")
 public @interface DaprSecretInput {
-    /**
-     * The variable name used in function.json.
-     */
-    String name();
-
     /**
      * Dapr runtime endpoint.
      */

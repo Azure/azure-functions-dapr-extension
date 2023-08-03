@@ -11,10 +11,8 @@ public class RetrieveSecret {
         @FunctionName("RetrieveSecret")
     public void run(
         @DaprServiceInvocationTrigger(
-            name = "args", 
             methodName = "RetrieveSecret") Object args,
         @DaprSecretInput(
-            name = "secret",
             secretStoreName = "kubernetes", 
             key = "my-secret", 
             metadata = "metadata.namespace=default") 

@@ -14,14 +14,13 @@ public class ConsumeMessageFromKafka {
     @FunctionName("ConsumeMessageFromKafka")
     public String run(
             @DaprBindingTrigger(
-                name = "triggerData", 
                 bindingName = "%KafkaBindingName%") 
             String triggerData,
             final ExecutionContext context) {
         context.getLogger().info("'Java function processed a ConsumeMessageFromKafka request from the Dapr Runtime.'");
         context.getLogger().info("Hello from Kafka!");
 
-        context.getLogger().info(String.format("Trigger data: %s", triggerData));
+        context.getLogger().info(String.format("Triggered data: %s", triggerData));
 
         return triggerData;
     }

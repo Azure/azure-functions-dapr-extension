@@ -17,13 +17,8 @@ import java.lang.annotation.ElementType;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@CustomBinding(direction = "in", name = "", type = "daprBindingTrigger")
+@CustomBinding(direction = "in", name = "daprBindingTriggerMessage", type = "daprBindingTrigger")
 public @interface DaprBindingTrigger {
-    /**
-     * The variable name used in function.json.
-     */
-    String name();
-
     /**
      * Name of the Dapr trigger.
      */

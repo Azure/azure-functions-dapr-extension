@@ -46,7 +46,6 @@ public class InvokeOutputBinding {
                 route = "invoke/{appId}/{methodName}")
                 HttpRequestMessage<Optional<String>> request,
             @DaprInvokeOutput(
-                name = "payload",
                 appId = "{appId}", 
                 methodName = "{methodName}", 
                 httpVerb = "post")
@@ -59,8 +58,8 @@ public class InvokeOutputBinding {
         final String body = request.getBody().orElse(query);
 
         //request body must be passed this way "{\"body\":{\"value\":{\"key\":\"some value\"}}}" to use the InvokeOutputBinding, all the data must be enclosed in body property.
-        String jsoString = String.format("{\"body\":\"%s\"}", body);
-
+        String jsoString = String.format("{\"body\":%s}", body);
+        context.getLogger().info(jsoString);
         payload.setValue(jsoString);
 
         return jsoString;

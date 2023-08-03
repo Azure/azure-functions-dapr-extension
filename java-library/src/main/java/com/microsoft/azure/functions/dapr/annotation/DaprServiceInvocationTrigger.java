@@ -19,13 +19,8 @@ import java.lang.annotation.ElementType;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.PARAMETER, ElementType.METHOD })
-@CustomBinding(direction = "in", name = "", type = "daprServiceInvocationTrigger")
+@CustomBinding(direction = "in", name = "daprServiceInvocationTriggerMessage", type = "daprServiceInvocationTrigger")
 public @interface  DaprServiceInvocationTrigger {
-    /**
-     * The variable name used in function.json.
-     */
-    String name();
-
     /**
      * Name of the method on a remote Dapr App.
      */

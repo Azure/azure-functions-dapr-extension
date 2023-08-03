@@ -20,13 +20,8 @@ import java.lang.annotation.ElementType;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@CustomBinding(direction = "in", name = "", type = "daprTopicTrigger")
+@CustomBinding(direction = "in", name = "daprTopicTriggerMessage", type = "daprTopicTrigger")
 public @interface DaprTopicTrigger {
-    /**
-     * The variable name used in function.json.
-     */
-    String name();
-
     /**
      * Pub/Sub name.
      */

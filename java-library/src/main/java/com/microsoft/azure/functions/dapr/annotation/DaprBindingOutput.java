@@ -17,13 +17,8 @@ import java.lang.annotation.ElementType;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@CustomBinding(direction = "out", name = "", type = "daprBinding")
+@CustomBinding(direction = "out", name = "daprBindingOutputMessage", type = "daprBinding")
 public @interface DaprBindingOutput {
-    /**
-     * The variable name used in function.json.
-     */
-    String name();
-
     /**
      * Dapr runtime endpoint.
      */

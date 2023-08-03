@@ -11,10 +11,8 @@ public class RetrieveSecretLocal {
     @FunctionName("RetrieveSecretLocal")
     public void run(
         @DaprServiceInvocationTrigger(
-            name = "args", 
             methodName = "RetrieveSecretLocal") Object args,
         @DaprSecretInput(
-            name = "secret", 
             secretStoreName = "localsecretstore",
             key = "my-secret", 
             metadata = "metadata.namespace=default") 

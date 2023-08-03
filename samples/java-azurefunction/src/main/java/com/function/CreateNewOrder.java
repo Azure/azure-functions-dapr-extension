@@ -30,11 +30,9 @@ public class CreateNewOrder {
     @FunctionName("CreateNewOrder")
     public String run(
             @DaprServiceInvocationTrigger(
-                name = "payload", 
                 methodName = "CreateNewOrder") 
             String payload,
             @DaprStateOutput(
-                name = "state",
                 stateStore = "%StateStoreName%",
                 key = "order")
             OutputBinding<String> product,

@@ -32,13 +32,11 @@ public class RetrieveOrder {
     @FunctionName("RetrieveOrder")
     public String run(
             @DaprServiceInvocationTrigger(
-                name = "payload", 
                 methodName = "RetrieveOrder") 
             String payload,
             @DaprStateInput(
-                name = "state",
                 stateStore = "%StateStoreName%",
-                key = "product")
+                key = "order")
             String product,
             final ExecutionContext context) {
         Logger logger = context.getLogger();

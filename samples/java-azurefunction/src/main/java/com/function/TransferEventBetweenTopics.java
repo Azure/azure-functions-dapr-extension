@@ -36,12 +36,10 @@ public class TransferEventBetweenTopics {
     @FunctionName("TransferEventBetweenTopics")
     public String run(
             @DaprTopicTrigger(
-                name = "topicMessage",
                 pubSubName = "%PubSubName%",
                 topic = "A")
                 String request,
             @DaprPublishOutput(
-                name = "state",
                 pubSubName = "%PubSubName%",
                 topic = "B")
             OutputBinding<String> payload,

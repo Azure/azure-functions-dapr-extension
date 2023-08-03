@@ -15,11 +15,9 @@ public class SendMessageToKafka {
     @FunctionName("SendMessageToKafka")
     public String run(
             @DaprServiceInvocationTrigger(
-                name = "payload", 
                 methodName = "SendMessageToKafka") 
             String payload,
             @DaprBindingOutput(
-                name = "state",
                 bindingName = "%KafkaBindingName%", 
                 operation = "create")
             OutputBinding<String> product,

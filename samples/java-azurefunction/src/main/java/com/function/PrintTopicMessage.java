@@ -35,7 +35,6 @@ public class PrintTopicMessage {
     @FunctionName("PrintTopicMessage")
     public String run(
             @DaprTopicTrigger(
-                name = "payload",
                 pubSubName = "%PubSubName%",
                 topic = "B")
             String payload,

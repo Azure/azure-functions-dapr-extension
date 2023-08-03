@@ -18,13 +18,8 @@ import com.microsoft.azure.functions.annotation.CustomBinding;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-@CustomBinding(direction = "in", name = "", type = "daprState")
+@CustomBinding(direction = "in", name = "daprStateInputMessage", type = "daprState")
 public @interface DaprStateInput {
-    /**
-     * The variable name used in function.json.
-     */
-    String name();
-
     /**
      * Dapr runtime endpoint.
      */

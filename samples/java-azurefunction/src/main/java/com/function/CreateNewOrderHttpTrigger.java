@@ -42,7 +42,6 @@ public class CreateNewOrderHttpTrigger {
                 authLevel = AuthorizationLevel.ANONYMOUS)
                 HttpRequestMessage<Optional<String>> request,
             @DaprStateOutput(
-                name = "state",
                 stateStore = "%StateStoreName%",
                 key = "product")
             OutputBinding<String> product,
