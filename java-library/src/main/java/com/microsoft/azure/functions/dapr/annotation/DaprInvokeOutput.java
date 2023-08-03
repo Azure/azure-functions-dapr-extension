@@ -35,7 +35,7 @@ public @interface DaprInvokeOutput {
     String methodName() default "";
 
     /**
-     * Zhttp verb of the app to invoke.
+     * HTTP verb for invoking the app.
      */
     String httpVerb() default "POST";
 }
