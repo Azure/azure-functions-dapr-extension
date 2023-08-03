@@ -129,7 +129,7 @@ Now you can invoke this function by using the Dapr cli in a new command line ter
 
 Windows Command Prompt
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data "{ {\"value\": { \"orderId\": \"41\" } }"
+dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"value\": { \"orderId\": \"41\" } }"
 ```
 
 Windows PowerShell
@@ -139,7 +139,7 @@ dapr invoke --app-id functionapp --method CreateNewOrder --data '{"value": { "or
 
 Linux or MacOS
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{ {"value": { "orderId": "41" } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{"value": { "orderId": "41" } }'
 ```
 
 You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)

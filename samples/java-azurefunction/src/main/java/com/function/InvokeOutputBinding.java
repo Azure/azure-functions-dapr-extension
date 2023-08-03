@@ -41,7 +41,7 @@ public class InvokeOutputBinding {
     public String run(
             @HttpTrigger(
                 name = "req",
-                methods = {HttpMethod.GET},
+                methods = {HttpMethod.GET, HttpMethod.POST},
                 authLevel = AuthorizationLevel.ANONYMOUS,
                 route = "invoke/{appId}/{methodName}")
                 HttpRequestMessage<Optional<String>> request,
