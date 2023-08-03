@@ -23,7 +23,7 @@ namespace dotnet_azurefunction
         /// </summary>
         [FunctionName("InvokeOutputBinding")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{appId}/{methodName}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "invoke/{appId}/{methodName}")] HttpRequest req,
             [DaprInvoke(AppId = "{appId}", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodParameters> output,
             ILogger log)
         {
