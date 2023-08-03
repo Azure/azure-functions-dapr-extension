@@ -23,9 +23,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Folder Include="UnitTests\Bindings\" />
     <Folder Include="UnitTests\Triggers\" />
-  </ItemGroup> 
+  </ItemGroup>
 </Project>
