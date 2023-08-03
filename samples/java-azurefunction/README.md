@@ -19,7 +19,7 @@ This sample requires you to have the following installed on your machine:
 - Install maven
 - Install the [.NET SDK](https://aka.ms/dotnet-download)
 - Steps to run the Java Azure functions with Dapr extension
-  1. Got to `/java-library` folder and run below commands.
+  1. Go to `/java-library` folder and run below commands.
       ```
       mvn clean package
       ```
