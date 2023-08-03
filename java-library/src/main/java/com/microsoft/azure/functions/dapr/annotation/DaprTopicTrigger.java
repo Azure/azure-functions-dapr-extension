@@ -33,7 +33,7 @@ public @interface DaprTopicTrigger {
     String topic() default "";
 
     /**
-     * Route for the trigger. If unspecified the topic name will be used.                              
+     * Route for the trigger. If unspecified, the topic name will be used.                              
      */
     String route() default "";
 }
