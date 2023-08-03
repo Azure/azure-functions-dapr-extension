@@ -29,9 +29,7 @@ This sample requires you to have the following installed on your machine:
       ```
   2. Go to `Samples/java-azurefunction` directory and perform below steps.
    
-      Manually install the Microsoft.Azure.WebJobs.Extensions.Dapr until the extension is not added to Microsoft.Azure.Functions.ExtensionBundle
-   
-      Install the extension with below command.
+      Install the Microsoft.Azure.WebJobs.Extensions.Dapr package (required until the extension is not added to the extension bundle).
    
       ```
       func extensions install --package Microsoft.Azure.WebJobs.Extensions.Dapr --version <version>
