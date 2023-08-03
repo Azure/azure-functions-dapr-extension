@@ -11,6 +11,9 @@ This sample requires you to have the following installed on your machine:
 - [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
+```
+docker-compose -f docker-compose-single-kafka.yml up
+```
 
 # Step 1 - Understand the Settings 
 
@@ -300,7 +303,48 @@ Given differnt secret store, the metadata string needs to be provided. In order 
 [DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
 
-# Step 4 - Cleanup
+## 5. Dapr Invoke output binding:
+Dapr invoke output binding is could be used to invoke other azure functions or service where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke antother azure functions like RetrieveOrder.
+
+```CSharp
+[Function("InvokeOutputBinding")]
+[DaprInvokeOutput(AppId = "{appId}", MethodName = "{methodName}", HttpVerb = "post")]
+public static async Task<InvokeMethodParameters> Run(
+    [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{appId}/{methodName}")] HttpRequestData req, FunctionContext functionContext)
+{
+    var log = functionContext.GetLogger("InvokeOutputBinding");
+    log.LogInformation("C# HTTP trigger function processed a request.");
+
+    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+
+    var outputContent = new InvokeMethodParameters
+    {
+        Body = requestBody
+    };
+
+    return outputContent;
+}
+```
+
+Invoke the above function (InvokeOutputBinding) with http get call
+
+  ```
+  http://localhost:7071/api/invoke/functionapp/RetrieveOrder
+  ```
+
+Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure fucntion and the output will look like as shown below.
+
+```
+== APP == [TIMESTAMP] Executing 'InvokeOutputBinding' (Reason='This function was programmatically called via the host APIs.', Id=<ExecutionId>)
+== APP == [TIMESTAMP] C# HTTP trigger function processed a request.
+== APP == [TIMESTAMP] Executing 'RetrieveOrder' (Reason='(null)', Id=<ExecutionId>)
+== APP == [TIMESTAMP] C# function processed a RetrieveOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] {"orderId":"41"}
+== APP == [TIMESTAMP] Executed 'RetrieveOrder' (Succeeded, Id=<ExecutionId>)
+== APP == [TIMESTAMP] Executed 'InvokeOutputBinding' (Succeeded, Id=<ExecutionId>)
+```
+
+# Step 6 - Cleanup
 
 To stop your services from running, simply stop the "dapr run" process. Alternatively, you can spin down each of your services with the Dapr CLI "stop" command. For example, to spin down both services, run these commands in a new command line terminal: 
 

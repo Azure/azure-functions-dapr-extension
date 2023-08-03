@@ -1,7 +1,7 @@
-# .NET Azure Function Sample
+# Java Azure Function Sample
 
-This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
-We'll be running a Darp'd function app locally:
+This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-java) to familiarize with function programming model.
+We'll be running a Dapr-ized function app locally:
 1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
 3) Interact with [Dapr Bindings](https://github.com/dapr/components-contrib/tree/master/bindings) using `DaprBinding`
@@ -10,18 +10,38 @@ We'll be running a Darp'd function app locally:
 This sample requires you to have the following installed on your machine:
 - [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
-- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
-```
-docker-compose -f docker-compose-single-kafka.yml up
-```
+- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `samples\dapr-kafka` directory.
 
+  ```
+  docker-compose -f docker-compose-single-kafka.yml up
+  ```
+- Follow the [Configure your local environment](https://learn.microsoft.com/azure/azure-functions/create-first-function-vs-code-java#configure-your-environment) instructions for Java.
+- Install maven
+- Install the [.NET SDK](https://aka.ms/dotnet-download)
+- Steps to run the Java Azure functions with Dapr extension
+  1. Go to `/java-library` folder and run below commands.
+      ```
+      mvn clean package
+      ```
+      Install the created package, change the azure-functions-java-library-dapr version as per pom.xml
+      ```
+      mvn install:install-file -Dfile=target/azure-functions-java-library-dapr-1.0-SNAPSHOT.jar -DgroupId=com.microsoft.azure.functions -DartifactId=azure-functions-java-library-dapr -Dversion=1.0-SNAPSHOT -Dpackaging=jar 
+      ```
+  2. Go to `Samples/java-azurefunction` directory and perform below steps.
+   
+      Install the Microsoft.Azure.WebJobs.Extensions.Dapr package (required until the extension is not added to the extension bundle).
+   
+      ```
+      func extensions install --package Microsoft.Azure.WebJobs.Extensions.Dapr --version <version>
+      ```
+      `<version>` should be the latest version of the extension from [NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr)
 # Step 1 - Understand the Settings 
 
 Now that we've locally set up Dapr, clone the repo, then navigate to the dotnet-azurefunction sample: 
 
 ```bash
 git clone https://github.com/dapr/azure-functions-extension.git
-cd samples/dotnet-azurefunction
+cd samples/java-azurefunction
 ```
 In this folder, you will find `local.settings.json`, which lists a few app settings by the trigger/binding attributes.
 
@@ -31,7 +51,7 @@ In this folder, you will find `local.settings.json`, which lists a few app setti
 
 The `%` denotes an app setting value, for the following binding as an example:
 
-`[DaprState("%StateStoreName%", Key = "order")]`
+`[DaprStateOuput("%StateStoreName%", Key = "order")]`
 
  In the runtime, the binding will check the `local.settings.json` file and resolve `%StateStoreName%` into `statestore`. The function will then make a call into the state store named as `statestore`.
 
@@ -56,12 +76,12 @@ Run function host with Dapr:
 
 Windows
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- func host start
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- func -- mvn azure-functions:run
 ```
 
 Linux/Mac OS
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ../components/ -- func host start
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ../components/ -- -- mvn azure-functions:run
 ```
 
 The command should output the dapr logs that look like the following:
@@ -81,17 +101,23 @@ You're up and running! Both Dapr and your app logs will appear here.
 
 ## 1. Service Invocation and State Management: Create New Order and Retrieve Order
 
-```csharp
-[FunctionName("CreateNewOrder")]
-public static void Run(
-    [DaprServiceInvocationTrigger] JObject payload,
-    [DaprState("%StateStoreName%", Key = "order")] out JToken order,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a CreateNewOrder request from the Dapr Runtime.");
+```Java
+@FunctionName("CreateNewOrder")
+public String run(
+        @DaprServiceInvocationTrigger(
+            name = "payload", 
+            methodName = "CreateNewOrder") 
+        String payload,
+        @DaprStateOutput(
+            name = "state",
+            stateStore = "%StateStoreName%",
+            key = "order")
+        OutputBinding<String> product,
+        final ExecutionContext context) {
+    context.getLogger().info("'Java function processed a CreateNewOrder request from the Dapr Runtime.'");
+    product.setValue(payload);
 
-    // payload must be of the format { "data": { "value": "some value" } }
-    order = payload["data"];
+    return payload;
 }
 ```
 
@@ -101,17 +127,17 @@ Now you can invoke this function by using the Dapr cli in a new command line ter
 
 Windows Command Prompt
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data "{ \"data\": {\"value\": { \"orderId\": \"41\" } } }"
+dapr invoke --app-id functionapp --method CreateNewOrder --data "{\"value\": { \"orderId\": \"41\" } }"
 ```
 
 Windows PowerShell
 ```powershell
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{ \"data\": {\"value\": { \"orderId\": \"41\" } } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{"value": { "orderId": "41" } }'
 ```
 
 Linux or MacOS
 ```sh
-dapr invoke --app-id functionapp --method CreateNewOrder --data '{ "data": {"value": { "orderId": "41" } } }'
+dapr invoke --app-id functionapp --method CreateNewOrder --data '{"value": { "orderId": "41" } }'
 ```
 
 You can also do this using the Visual Studio Code [Rest Client Plugin](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
@@ -120,15 +146,13 @@ You can also do this using the Visual Studio Code [Rest Client Plugin](https://m
 POST  http://localhost:3501/v1.0/invoke/functionapp/method/CreateNewOrder
 
 {
-    "data": {
-        "value": {
+    "value": {
             "orderId": "41"
         }
-    }
 }
 ```
 
-**Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `[DaprServiceInvocationTrigger(MethodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
+**Note**: in this sample, `DaprServiceInvocationTrigger` attribute does not specify the method name, so it defaults to use the FunctionName. Alternatively, you can use `[DaprServiceInvocationTrigger(name = "payload", methodName = "newOrder")]` to specify the service invocation method name that your function should respond. In this case, then you need to use the following command:
 
 ```powershell
 dapr invoke --app-id functionapp --method newOrder --data "{\"data\": { \"orderId\": \"41\" } }"
@@ -138,51 +162,85 @@ In your terminal window, you should see logs indicating that the message was rec
 
 ```
 == APP == [TIMESTAMP] Executing 'CreateNewOrder' (Reason='', Id=<ExecutionId>)
-== APP == [TIMESTAMP] C# function processed a CreateNewOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] Java function processed a CreateNewOrder request from the Dapr Runtime.
 == APP == [TIMESTAMP] Executed 'CreateNewOrder' (Succeeded, Id=<ExecutionId>)
 ```
 ----------------
 In order to confirm the state is now persisted. You can now move to the next function:
 
-```csharp
-[FunctionName("RetrieveOrder")]
-public static void Run(
-    [DaprServiceInvocationTrigger] object args,
-    [DaprState("%StateStoreName%", Key = "order")] string data,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a RetrieveOrder request from the Dapr Runtime.");
+```Java
+@FunctionName("RetrieveOrder")
+public String run(
+        @DaprServiceInvocationTrigger(
+            name = "payload", 
+            methodName = "CreateNewOrder") 
+        String payload,
+        @DaprStateInput(
+            name = "state",
+            stateStore = "statestore",
+            key = "product")
+        String product,
+        final ExecutionContext context) {
+    context.getLogger().info("Java HTTP trigger processed a request.");
 
-    // print the fetched state value
-    log.LogInformation(data);
+    // Parse query parameter
+    final String query = request.getQueryParameters().get("name");
+    final String name = request.getBody().orElse(query);
+
+    context.getLogger().info(product);
+
+    return product;
 }
 ```
 
-Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. Here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data`' before exectuing the function block.
+Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. Here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to JsonElement object `data`' before exectuing the function block.
+
+Invoke input binding function with Dapr cli
+
+```
+dapr invoke --app-id functionapp --method RetrieveOrder
+```
 
 In your terminal window, you should see logs to confirm the expected result:
 
 ```
-== APP == [TIMESTAMP]  Executing 'RetrieveOrder' (Reason='', Id=<ExecutionId>)
-== APP == [TIMESTAMP]  C# function processed a RetrieveOrder request from the Dapr Runtime.
-== APP == [TIMESTAMP]  {"orderId":"41"}
-== APP == [TIMESTAMP]  Executed 'RetrieveOrder' (Succeeded, Id=<ExecutionId>)
+== APP == [TIMESTAMP] Executing 'Functions.RetrieveOrder' (Reason='(null)', Id=<ExecutionId>)
+== APP == [TIMESTAMP] {"orderId":"42"}
+== APP == [TIMESTAMP] Java function processed a RetrieveOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] Executed 'Functions.RetrieveOrder' (Succeeded, Id=<ExecutionId>, Duration=186ms)
 ```
 
 
 ## 2. Pub/Sub: TransferEventBetweenTopics and PrintTopicMessage
 
-```csharp
-[FunctionName("TransferEventBetweenTopics")]
-public static void Run(
-    [DaprTopicTrigger("%PubSubName%", Topic = "A")] CloudEvent subEvent,
-    [DaprPublish(PubSubName = "%PubSubName%", Topic = "B")] out DaprPubSubEvent pubEvent,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
+```java
+@FunctionName("TransferEventBetweenTopics")
+public String run(
+        @DaprTopicTrigger(
+            name = "topicMessage",
+            pubSubName = "%PubSubName%",
+            topic = "A")
+            String request,
+        @DaprPublishOutput(
+            name = "state",
+            pubSubName = "%PubSubName%",
+            topic = "B")
+        OutputBinding<String> payload,
+        final ExecutionContext context) throws JsonProcessingException {
+    context.getLogger().info("Java function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
 
+    // Get the CloudEvent data from the request body as a JSON string
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode jsonNode = objectMapper.readTree(request);
 
-    pubEvent = new DaprPubSubEvent("Transfer from Topic A: " + subEvent.Data);
+    String data = jsonNode.get("data").asText();
+
+    context.getLogger().info("Printing Topic A received a message: " + data);
+
+    String pubsubPayload = String.format("{\"payload\":\" Transfer from Topic A: %s \"}", data);      
+    payload.setValue(pubsubPayload);
+
+    return data;
 }
 ```
 
@@ -193,20 +251,33 @@ Here, `DaprTopicTrigger` is used to subscribe to topic `A`, so whenever a messag
 
 Then, `DaprPublish` *output binding* is used to publish a new event to topic `B` using the strongly-typed `DaprPubSubEvent` class, or it can be written using the attribute `[DaprPublish(Topic = "B")] out object pubEvent`:
 
-```csharp
+```java
     pubEvent = "Transfer from Topic A:" + subEvent.Data;
 ```
 
 The function below subscribes to topic `B`, and it simply prints the message content when an event arrives.
 
-```csharp
-[FunctionName("PrintTopicMessage")]
-public static void Run(
-    [DaprTopicTrigger("%PubSubName%", Topic = "B")] CloudEvent subEvent,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a PrintTopicMessage request from the Dapr Runtime.");
-    log.LogInformation($"Topic B received a message: {subEvent.Data}.");
+```java
+@FunctionName("PrintTopicMessage")
+public String run(
+        @DaprTopicTrigger(
+            name = "payload",
+            pubSubName = "%PubSubName%",
+            topic = "B")
+        String payload,
+        final ExecutionContext context) throws JsonProcessingException {
+    Logger logger = context.getLogger();
+    logger.info("Java function processed a PrintTopicMessage request from the Dapr Runtime.");
+
+    // Get the CloudEvent data from the request body as a JSON string
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode jsonNode = objectMapper.readTree(payload);
+
+    String data = jsonNode.get("data").asText();
+
+    logger.info("Topic B received a message: " + data);
+
+    return data;
 }
 ```
 
@@ -230,33 +301,44 @@ The Dapr logs should show the following:
 ## 3. Dapr Binding: 
 This section demonstrates the integration of this extension with Dapr Binding component. A Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
-```csharp
-[FunctionName("ConsumeMessageFromKafka")]
-public static void Run(
-    // Note: the value of BindingName must match the binding name in components/kafka-bindings.yaml
-    [DaprBindingTrigger(BindingName = "%KafkaBindingName%")] JsonElement triggerData,
-    ILogger log)
-{
-    log.LogInformation("Hello from Kafka!");
+```java
+@FunctionName("ConsumeMessageFromKafka")
+public String run(
+        @DaprBindingTrigger(
+            name = "triggerData", 
+            bindingName = "%KafkaBindingName%") 
+        String triggerData,
+        final ExecutionContext context) {
+    context.getLogger().info("'Java function processed a ConsumeMessageFromKafka request from the Dapr Runtime.'");
+    context.getLogger().info("Hello from Kafka!");
 
-    log.LogInformation($"Trigger data: {triggerData}");
+    context.getLogger().info(String.format("Trigger data: %s", triggerData));
+
+    return triggerData;
 }
 ```
 Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance.
 
-```csharp
-[FunctionName("SendMessageToKafka")]
-public static async void Run(
-    [DaprServiceInvocationTrigger] JsonElement payload,
-    [DaprBinding(BindingName = "%KafkaBindingName%")] IAsyncCollector<JsonElement> messages,
-    ILogger log)
-{
-    log.LogInformation("C# HTTP trigger function processed a request.");
+```java
+@FunctionName("SendMessageToKafka")
+public String run(
+        @DaprServiceInvocationTrigger(
+            name = "payload", 
+            methodName = "SendMessageToKafka") 
+        String payload,
+        @DaprBindingOutput(
+            name = "state",
+            bindingName = "%KafkaBindingName%", 
+            operation = "create")
+        OutputBinding<String> product,
+        final ExecutionContext context) {
+    context.getLogger().info("Java  function processed a SendMessageToKafka request.");
+    product.setValue(payload);
 
-    await messages.AddAsync(payload);
+    return payload;
 }
 ```
-`DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. `IAsyncCollector<object>` allows you to send multiple message by calling `AddAsync` with different payloads. 
+`DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding. 
 
 You can use service invocation to invoke this function:
 
@@ -290,21 +372,29 @@ This section demonstrates how `DaprSecret` **input binding** integrates with Dap
 
 Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/file-secret-store/) to set up other supported secret stores.
 
-```csharp
-[FunctionName("RetrieveSecretLocal")]
-public static void Run(
-    [DaprServiceInvocationTrigger] object args,
-    [DaprSecret("localsecretstore", "my-secret", Metadata = "metadata.namespace=default")] IDictionary<string, string> secret,
-    ILogger log)
-{
-    log.LogInformation("C# function processed a RetrieveSecret request from the Dapr Runtime.");
-      
-    foreach (var kvp in secret)
-    {
-        log.LogInformation("Stored secret: Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-    }
+```java
+    @FunctionName("RetrieveSecretLocal")
+    public void run(
+        @DaprServiceInvocationTrigger(
+            name = "args", 
+            methodName = "RetrieveSecretLocal") Object args,
+        @DaprSecretInput(
+            name = "secret", 
+            secretStoreName = "localsecretstore",
+            key = "my-secret", 
+            metadata = "metadata.namespace=default") 
+            Map<String, String> secret,
+        final ExecutionContext context) {
 
-}
+        context.getLogger().info("Java function processed a RetrieveSecret request from the Dapr Runtime.");
+
+        // Print the fetched secret value
+        // This is only for demo purpose
+        // Please do not log any real secret in your production code
+        for (Map.Entry<String, String> entry : secret.entrySet()) {
+            context.getLogger().info(String.format("Stored secret: Key = %s, Value = %s", entry.getKey(), entry.getValue()));
+        }
+    }
 ```
 
 `DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
@@ -315,48 +405,56 @@ dapr invoke --app-id functionapp --method RetrieveSecretLocal my-secret
 ```
 
 Given differnt secret store, the metadata string needs to be provided. In order to specify multiple metadata fields, join them by `&`, see the below [Hashicorp Vault](https://docs.dapr.io/operations/components/setup-secret-store/supported-secret-stores/hashicorp-vault/) example.
-```csharp
-[DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
+```java
+[DaprSecretInput(secretStoreName = "vault", key = "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
 
 ## 5. Dapr Invoke output binding:
-Dapr invoke output binding can be used to invoke other Azure functions or services where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke another Azure functions like RetrieveOrder.
+Dapr invoke output binding is could be used to invoke other azure functions or service where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke antother azure functions like RetrieveOrder.
 
-```CSharp
-[FunctionName("InvokeOutputBinding")]
-public static async Task<IActionResult> Run(
-    [HttpTrigger(AuthorizationLevel.Function, "get", Route = "invoke/{appId}/{methodName}")] HttpRequest req,
-    [DaprInvoke(AppId = "{appId}", MethodName = "{methodName}", HttpVerb = "post")] IAsyncCollector<InvokeMethodParameters> output,
-    ILogger log)
-{
-    log.LogInformation("C# HTTP trigger function processed a request.");
+```Java
+@FunctionName("InvokeOutputBinding")
+public String run(
+        @HttpTrigger(
+            name = "req",
+            methods = {HttpMethod.GET},
+            authLevel = AuthorizationLevel.ANONYMOUS,
+            route = "invoke/{appId}/{methodName}")
+            HttpRequestMessage<Optional<String>> request,
+        @DaprInvokeOutput(
+            name = "payload",
+            appId = "{appId}", 
+            methodName = "{methodName}", 
+            httpVerb = "post")
+        OutputBinding<String> payload,
+        final ExecutionContext context) {
+    context.getLogger().info("Java HTTP trigger processed a request.");
 
-    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+    // Parse query parameter
+    final String query = request.getQueryParameters().get("name");
+    final String name = request.getBody().orElse(query);
 
-    var outputContent = new InvokeMethodParameters
-    {
-        Body = requestBody
-    };
+    String jsoString = String.format("{\"body\":\"%s\"}", name);
 
-    await output.AddAsync(outputContent);
+    payload.setValue(jsoString);
 
-    return new OkResult();
+    return jsoString;
 }
 ```
 
-Invoke the above function (InvokeOutputBinding) with a HTTP GET request.
+Invoke the above function (InvokeOutputBinding) with http get call
 
   ```
   http://localhost:7071/api/invoke/functionapp/RetrieveOrder
   ```
 
-Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure function and the output will look like as shown below.
+Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure fucntion and the output will look like as shown below.
 
 ```
 == APP == [TIMESTAMP] Executing 'InvokeOutputBinding' (Reason='This function was programmatically called via the host APIs.', Id=<ExecutionId>)
-== APP == [TIMESTAMP] C# HTTP trigger function processed a request.
+== APP == [TIMESTAMP] Java HTTP trigger processed a request.
 == APP == [TIMESTAMP] Executing 'RetrieveOrder' (Reason='(null)', Id=<ExecutionId>)
-== APP == [TIMESTAMP] C# function processed a RetrieveOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] Java function processed a RetrieveOrder request from the Dapr Runtime.
 == APP == [TIMESTAMP] {"orderId":"41"}
 == APP == [TIMESTAMP] Executed 'RetrieveOrder' (Succeeded, Id=<ExecutionId>)
 == APP == [TIMESTAMP] Executed 'InvokeOutputBinding' (Succeeded, Id=<ExecutionId>)
