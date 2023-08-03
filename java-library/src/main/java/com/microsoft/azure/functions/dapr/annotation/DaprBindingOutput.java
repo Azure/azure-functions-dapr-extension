@@ -25,7 +25,7 @@ public @interface DaprBindingOutput {
     String daprAddress() default "";
 
     /**
-Name of the Dapr binding, should be same as the name specified in the Dapr component YAML.
+    * Name of the Dapr binding, should be same as the name specified in the Dapr component YAML.
      */
     String bindingName() default "";
 
