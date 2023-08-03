@@ -14,7 +14,10 @@ This sample requires you to have the following installed on your machine:
     - This sample uses Python 3.7.6. Some nuance or issue is expected if using other version
 - [Set up Python Environment in Visual Studio Code](https://code.visualstudio.com/docs/python/python-tutorial)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download), used for install Dapr Extension for non .NET language
-- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
+- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `samples\dapr-kafka` directory.
+```
+docker-compose -f docker-compose-single-kafka.yml up
+```
 
 # Step 1 - Understand the Settings 
 

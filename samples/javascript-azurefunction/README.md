@@ -12,6 +12,9 @@ This sample requires you to have the following installed on your machine:
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download)
 - [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
+```
+docker-compose -f docker-compose-single-kafka.yml up
+```
 
 # Step 1 - Understand the Settings 
 
