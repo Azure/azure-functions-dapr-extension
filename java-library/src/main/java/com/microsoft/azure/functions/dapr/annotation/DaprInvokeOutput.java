@@ -30,7 +30,7 @@ public @interface DaprInvokeOutput {
     String appId() default "";
 
     /**
-     * Method name of the app to invoke.
+     * Method to invoke on the app.
      */
     String methodName() default "";
 
