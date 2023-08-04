@@ -108,7 +108,7 @@ jobs:
         run: |
           curl -Lo sbom-tool https://github.com/microsoft/sbom-tool/releases/latest/download/sbom-tool-linux-x64
           chmod +x sbom-tool
-          sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}"
+          ./sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}"
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
