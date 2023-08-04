@@ -32,7 +32,50 @@ jobs:
       - uses: actions/checkout@v2
       - name: Parse release version
         run: python ./.github/scripts/get_release_version.py
-
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0
+      - name: Build solution - ${{ env.CONFIGURATION }}
+        run: dotnet build --configuration ${{ env.CONFIGURATION }} --configfile nuget.config
+      - name: Run Unit Tests - ${{ env.CONFIGURATION }}
+        run: |
+          dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
+      - name: Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: "**/coverage.cobertura.xml,./.github/codecov.yml"  # Specify the path to your Cobertura format coverage report file
+          fail_ci_if_error: true # optional (default = false)
+      # The docker image is not pushed for pull requests,
+      # but the image is built to ensure that the Dockerfile and the sample app are valid.
+      - name: Set a sample app registry when it is a pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          OWNER_NAME="${OWNER_NAME,,}" # convert to lowercase
+          echo "Setting sample app registry to ghcr.io/${OWNER_NAME}"
+          echo "APP_REGISTRY=ghcr.io/${OWNER_NAME}" >> $GITHUB_ENV
+      - name: Build samples docker images
+        run: |
+          echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+          docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
+      - name: Push samples docker images
+        if: github.event_name != 'pull_request'
+        run: |
+          echo performing docker login
+          docker login ${{ secrets.DOCKER_REGISTRY_URL }} -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
+          echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
+          echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
+          docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
+      - name: Generate NuGet Packages - ${{ env.CONFIGURATION }}
+        if: startswith(github.ref, 'refs/tags/v')
+        run: dotnet pack --configuration ${{ env.CONFIGURATION }} -p:PackageVersion=${REL_VERSION}
+        # Since we create local development nuget packages, we need to clean them up.
+      - name: Clean up development Nuget packages
+        if: startswith(github.ref, 'refs/tags/v')
+        run: rm -rf $NUPKG_OUTDIR/*${DEV_VERSION_SUFFIX}.*{nupkg,snupkg}
+        # Building java-library
       - name: Set up JDK 8
         uses: actions/setup-java@v1
         with:
@@ -41,12 +84,15 @@ jobs:
         run: mvn package
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Set Java library version
+        if: startsWith(github.ref, 'refs/tags/v')
         run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Build Java Annotations with Maven
+        if: startsWith(github.ref, 'refs/tags/v')
         run: mvn clean package --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Copy Java Annotations to staging directory
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           prefix="azure-functions-java-library-dapr-${{ env.REL_VERSION }}"
           source="${{ env.JAVA_LIB_WORKING_DIRECTORY }}"
@@ -58,20 +104,22 @@ jobs:
           cp "$source/target/$prefix-sources.jar" "$destination/$prefix-sources.jar"
         shell: bash
       - name: Generate SBOM manifest
+        if: startswith(github.ref, 'refs/tags/v')
         run: |
           sudo curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/download/v1.2.0/sbom-tool-linux-x64
           sudo chmod +x $RUNNER_TEMP/sbom-tool
           $RUNNER_TEMP/sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -bc ${{ env.JAVA_LIB_WORKING_DIRECTORY }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}" -ps Microsoft
-      - name: Upload SBOM Manifest
+      - name: Upload Java artifacts
         uses: actions/upload-artifact@master
+        if: startswith(github.ref, 'refs/tags/v')
         with:
-          name: release_drop
+          name: java_release_drop
           path: ${{ env.MAVEN_OUTDIR }}
       - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
         if: startswith(github.ref, 'refs/tags/v')
         with:
-          name: release_drop
+          name: dotnet_release_drop
           path: ${{ env.NUPKG_OUTDIR }}
       - name: Create a GitHub Release
         if: startswith(github.ref, 'refs/tags/v')
