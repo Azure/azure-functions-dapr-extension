@@ -87,7 +87,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
-      - name: Build Java Annotations
+      - name: Build Java Annotations with Maven
         if: startsWith(github.ref, 'refs/tags/v')
         run: mvn clean package --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
