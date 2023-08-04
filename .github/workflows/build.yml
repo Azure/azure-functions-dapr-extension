@@ -30,6 +30,8 @@ jobs:
       JAVA_LIB_WORKING_DIRECTORY: java-library
     steps:
       - uses: actions/checkout@v2
+      - name: Parse release version
+        run: python ./.github/scripts/get_release_version.py
 
       - name: Set up JDK 8
         uses: actions/setup-java@v1
