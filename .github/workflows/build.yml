@@ -50,6 +50,7 @@ jobs:
         run: |
           prefix="azure-functions-java-library-dapr-${{ env.REL_VERSION }}"
           source="${{ env.JAVA_LIB_WORKING_DIRECTORY }}"
+          sudo rm ${{ env.MAVEN_OUTDIR }}/*
           destination=${{ env.MAVEN_OUTDIR }}  
           mkdir -p $destination
           cp "$source/pom.xml" "$destination/$prefix.pom"
@@ -62,6 +63,11 @@ jobs:
           sudo curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/download/v1.2.0/sbom-tool-linux-x64
           sudo chmod +x $RUNNER_TEMP/sbom-tool
           $RUNNER_TEMP/sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -bc ${{ env.MAVEN_OUTDIR }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}" -ps Microsoft
+      - name: Upload SBOM Manifest
+        uses: actions/upload-artifact@master
+        with:
+          name: release_drop
+          path: ${{ env.MAVEN_OUTDIR }}
       - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
         if: startswith(github.ref, 'refs/tags/v')
