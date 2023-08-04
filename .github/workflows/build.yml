@@ -50,7 +50,6 @@ jobs:
         run: |
           prefix="azure-functions-java-library-dapr-${{ env.REL_VERSION }}"
           source="${{ env.JAVA_LIB_WORKING_DIRECTORY }}"
-          sudo rm ${{ env.MAVEN_OUTDIR }}/*
           destination=${{ env.MAVEN_OUTDIR }}  
           mkdir -p $destination
           cp "$source/pom.xml" "$destination/$prefix.pom"
