@@ -104,21 +104,22 @@ jobs:
           cp "$source/target/$prefix-sources.jar" "$destination/$prefix-sources.jar"
         shell: bash
       - name: Generate SBOM manifest
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startswith(github.ref, 'refs/tags/v')
         run: |
-          sudo apt-get update
-          sudo apt-get install wget
-          wget https://github.com/microsoft/sbom-tool/releases/download/v1.2.0/sbom-tool-linux-x64
-          chmod +x sbom-tool-linux-x64
-          ls -l sbom-tool-linux-x64
-          sudo mv sbom-tool-linux-x64 /usr/local/bin/sbom-tool
-          sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}"
-        working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
+          sudo curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/download/v1.2.0/sbom-tool-linux-x64
+          sudo chmod +x $RUNNER_TEMP/sbom-tool
+          $RUNNER_TEMP/sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -bc ${{ env.JAVA_LIB_WORKING_DIRECTORY }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}" -ps Microsoft
+      - name: Upload Java artifacts
+        uses: actions/upload-artifact@master
+        if: startswith(github.ref, 'refs/tags/v')
+        with:
+          name: java_release_drop
+          path: ${{ env.MAVEN_OUTDIR }}
       - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
         if: startswith(github.ref, 'refs/tags/v')
         with:
-          name: release_drop
+          name: dotnet_release_drop
           path: ${{ env.NUPKG_OUTDIR }}
       - name: Create a GitHub Release
         if: startswith(github.ref, 'refs/tags/v')
