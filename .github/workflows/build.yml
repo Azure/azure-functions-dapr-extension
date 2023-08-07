@@ -87,9 +87,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: mvn versions:set --batch-mode --define=newVersion=${{ env.REL_VERSION }} --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
-      - name: Build Java Annotations
+      - name: Build Java Annotations with Maven
         if: startsWith(github.ref, 'refs/tags/v')
-        run: mvn --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
+        run: mvn clean package --batch-mode --define=org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn --update-snapshots
         working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
       - name: Copy Java Annotations to staging directory
         if: startsWith(github.ref, 'refs/tags/v')
@@ -104,15 +104,22 @@ jobs:
           cp "$source/target/$prefix-sources.jar" "$destination/$prefix-sources.jar"
         shell: bash
       - name: Generate SBOM manifest
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startswith(github.ref, 'refs/tags/v')
         run: |
-          ./ManifestGeneratorTask --buildDropPath "build/java/${{ env.REL_VERSION }}" --packageName "Azure Functions Dapr Java Triggers and Bindings" --packageVersion "${{ env.REL_VERSION }}"
-        working-directory: ${{ env.JAVA_LIB_WORKING_DIRECTORY }}
+          sudo curl -Lo $RUNNER_TEMP/sbom-tool https://github.com/microsoft/sbom-tool/releases/download/v1.2.0/sbom-tool-linux-x64
+          sudo chmod +x $RUNNER_TEMP/sbom-tool
+          $RUNNER_TEMP/sbom-tool generate -b ${{ env.MAVEN_OUTDIR }} -bc ${{ env.JAVA_LIB_WORKING_DIRECTORY }} -pn "Azure Functions Dapr Java Triggers and Bindings" -pv "${{ env.REL_VERSION }}" -ps Microsoft
+      - name: Upload Java artifacts
+        uses: actions/upload-artifact@master
+        if: startswith(github.ref, 'refs/tags/v')
+        with:
+          name: java_release_drop
+          path: ${{ env.MAVEN_OUTDIR }}
       - name: Upload .Net artifacts
         uses: actions/upload-artifact@master
         if: startswith(github.ref, 'refs/tags/v')
         with:
-          name: release_drop
+          name: dotnet_release_drop
           path: ${{ env.NUPKG_OUTDIR }}
       - name: Create a GitHub Release
         if: startswith(github.ref, 'refs/tags/v')
