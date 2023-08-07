@@ -145,4 +145,4 @@ jobs:
           export AZCOPY_SPA_CLIENT_SECRET=${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
           ./azcopy login --service-principal --application-id ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           ./azcopy copy "${{ env.NUPKG_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/dotnet/${{ env.REL_VERSION }}/"
-          ./azcopy copy "${{ env.MAVEN_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/java/${{ env.REL_VERSION }}/"
+          ./azcopy copy "${{ env.MAVEN_OUTDIR }}/*" "https://azuresdkpartnerdrops.blob.core.windows.net/drops/azure-functions-dapr-extension/java/${{ env.REL_VERSION }}/" --recursive=true
