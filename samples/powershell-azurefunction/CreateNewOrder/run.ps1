@@ -17,7 +17,5 @@ Write-Host "PowerShell function processed a CreateNewOrder request from the Dapr
 # Convert the object to a JSON-formatted string with ConvertTo-Json
 $jsonString = $payload| ConvertTo-Json
 
-Write-Host "hello $jsonString"
-
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name order -Value $payload["data"]

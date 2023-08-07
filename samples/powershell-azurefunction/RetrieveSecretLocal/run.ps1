@@ -9,8 +9,8 @@ param (
     $payload, $secret
 )
 
-# C# function processed a CreateNewOrder request from the Dapr Runtime.
-Write-Host "PowerShell function processed a RetrieveSecret request from the Dapr Runtime."
+# PowerShell function processed a CreateNewOrder request from the Dapr Runtime.
+Write-Host "PowerShell function processed a RetrieveSecretLocal request from the Dapr Runtime."
 
 # Convert the object to a JSON-formatted string with ConvertTo-Json
 $jsonString = $secret | ConvertTo-Json
