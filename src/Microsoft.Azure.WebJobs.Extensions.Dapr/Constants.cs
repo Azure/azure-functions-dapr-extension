@@ -12,6 +12,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             public const string AppPort = "DAPR_APP_PORT";
             public const string DisableSidecarMetadataCheck = "DAPR_DISABLE_SIDECAR_METADATA_CHECK";
             public const string SidecarHttpPort = "DAPR_HTTP_PORT";
+            public const string RestrictedHostingEnvironments = "DAPR_RESTRICTED_HOSTING_ENVIRONMENTS";
         }
     }
 }

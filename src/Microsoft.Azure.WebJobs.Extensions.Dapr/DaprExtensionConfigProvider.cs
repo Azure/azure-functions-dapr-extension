@@ -47,11 +47,39 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprTriggerCategory());
         }
 
+        public static bool ShouldRegisterDaprExtension(INameResolver nameResolver, ILogger logger)
+        {
+            var restrictedHostingEnvironments = nameResolver.Resolve(Constants.EnvironmentKeys.RestrictedHostingEnvironments);
+            var restrictedHostingEnvironmentList = restrictedHostingEnvironments?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (restrictedHostingEnvironmentList == null || restrictedHostingEnvironmentList.Length == 0)
+            {
+                return true;
+            }
+
+            foreach (var restrictedHostingEnvironment in restrictedHostingEnvironmentList)
+            {
+                if (!string.IsNullOrEmpty(nameResolver.Resolve(restrictedHostingEnvironment?.Trim())))
+                {
+                    logger.LogInformation($"Dapr extension is not supported for selected hosting environment ${restrictedHostingEnvironment}.");
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public void Initialize(ExtensionConfigContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException("context");
+            }
+
+            if (!ShouldRegisterDaprExtension(this.nameResolver, this.logger))
+            {
+                return;
             }
 
             this.logger.LogInformation($"Registered Dapr extension");
