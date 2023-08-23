@@ -54,14 +54,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentNullException("context");
             }
 
-            if (!EnvironmentExtensions.ShouldRegisterDaprExtension(this.nameResolver))
-            {
-                this.logger.LogInformation($"Dapr extension is not supported for selected Azure Function hosting plan. " +
-                    $"Currently it is supported only in Azure Container Apps Environment plan");
-
-                return;
-            }
-
             this.logger.LogInformation($"Registered Dapr extension");
 
             var daprStateConverter = new DaprStateConverter(this.daprClient);
