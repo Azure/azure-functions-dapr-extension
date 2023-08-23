@@ -31,7 +31,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             var serviceProvider = builder.Services.BuildServiceProvider();
             var nameResolver = serviceProvider.GetRequiredService<INameResolver>();
 
-            if (!EnvironmentExtensions.ShouldRegisterDaprExtension(nameResolver))
+            if (!EnvironmentUtils.ShouldRegisterDaprExtension(nameResolver))
             {
                 return builder;
             }

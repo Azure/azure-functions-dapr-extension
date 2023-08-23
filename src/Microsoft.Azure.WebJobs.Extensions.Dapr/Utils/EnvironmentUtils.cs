@@ -7,9 +7,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
 {
     using System;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
 
-    internal static class EnvironmentExtensions
+    internal static class EnvironmentUtils
     {
         public static bool IsAppService(INameResolver nameResolver)
         {

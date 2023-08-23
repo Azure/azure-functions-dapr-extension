@@ -24,7 +24,7 @@
             this.nameResolverMock.Setup(nr => nr.Resolve(Constants.EnvironmentKeys.AzureWebsiteInstanceId))
                                   .Returns(instanceId);
 
-            bool result = EnvironmentExtensions.IsAppService(this.nameResolverMock.Object);
+            bool result = EnvironmentUtils.IsAppService(this.nameResolverMock.Object);
 
             if (!string.IsNullOrEmpty(instanceId))
             {
@@ -45,7 +45,7 @@
             this.nameResolverMock.Setup(nr => nr.Resolve(Constants.EnvironmentKeys.AzureWebsiteSku))
                                   .Returns(skuValue);
 
-            bool result = EnvironmentExtensions.IsWindowsElasticPremium(this.nameResolverMock.Object);
+            bool result = EnvironmentUtils.IsWindowsElasticPremium(this.nameResolverMock.Object);
 
             Assert.Equal(expectedResult, result);
         }
@@ -58,7 +58,7 @@
             this.nameResolverMock.Setup(nr => nr.Resolve(Constants.EnvironmentKeys.AzureWebsiteSku))
                                   .Returns(skuValue);
 
-            bool result = EnvironmentExtensions.ShouldRegisterDaprExtension(this.nameResolverMock.Object);
+            bool result = EnvironmentUtils.ShouldRegisterDaprExtension(this.nameResolverMock.Object);
 
             Assert.Equal(expectedResult, result);
         }
@@ -77,7 +77,7 @@
             this.nameResolverMock.Setup(nr => nr.Resolve(Constants.EnvironmentKeys.AzureWebsiteSku))
                                   .Returns(azureWebsiteSkuValue);
 
-            bool result = EnvironmentExtensions.ShouldRegisterDaprExtension(this.nameResolverMock.Object);
+            bool result = EnvironmentUtils.ShouldRegisterDaprExtension(this.nameResolverMock.Object);
 
             Assert.Equal(expectedResult, result);
         }
