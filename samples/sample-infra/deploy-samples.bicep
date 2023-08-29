@@ -230,10 +230,6 @@ resource azfunctionapp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'statestore'
         }
         {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
-        {
           name: 'KafkaBindingName'
           value: 'sample-topic'
         }
