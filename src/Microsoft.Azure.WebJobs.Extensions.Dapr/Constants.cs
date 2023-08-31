@@ -14,11 +14,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             public const string SidecarHttpPort = "DAPR_HTTP_PORT";
             public const string AzureWebsiteInstanceId = "WEBSITE_INSTANCE_ID";
             public const string AzureWebsiteSku = "WEBSITE_SKU";
+            public const string ContainerName = "CONTAINER_NAME";
+            public const string WebsitePodName = "WEBSITE_POD_NAME";
+            public const string LegionServiceHost = "LEGION_SERVICE_HOST";
+            public const string ManagedEnvironment = "MANAGED_ENVIRONMENT";
         }
 
         public class HostingPlanSkuConstants
         {
             public const string ElasticPremiumSku = "ElasticPremium";
+            public const string DynamicSku = "Dynamic";
+            public const string FlexConsumptionSku = "FlexConsumption";
         }
     }
 }
