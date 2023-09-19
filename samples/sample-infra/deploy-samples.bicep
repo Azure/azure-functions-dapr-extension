@@ -33,6 +33,7 @@ module daprComponents 'dapr-components.bicep' = {
     redisCacheName: redisCacheName
     azStorageAccountName: azureServices.outputs.azStorageAccountName
     azStorageConnectionString: azureServices.outputs.azStorageConnectionString
+    eventHubNamespace: eventHubNamespace
   }
 }
 

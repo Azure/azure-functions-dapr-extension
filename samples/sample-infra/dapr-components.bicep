@@ -4,6 +4,7 @@ param redisCacheName string
 param eventHubName string
 param azStorageAccountName string
 param containerName string
+param eventHubNamespace string
 
 resource environment 'Microsoft.App/managedEnvironments@2022-10-01' existing = {
   name: '${envResourceNamePrefix}-env'
@@ -14,7 +15,7 @@ resource redisCache 'Microsoft.Cache/Redis@2020-06-01' existing = {
 }
 
 resource eventHubAuth 'Microsoft.EventHub/namespaces/authorizationRules@2022-10-01-preview' existing = {
-  name: '${envResourceNamePrefix}-eventHubAuth'
+  name: '${eventHubNamespace}/${envResourceNamePrefix}-eventHubAuth'
 }
 
 /* ###################################################################### */
