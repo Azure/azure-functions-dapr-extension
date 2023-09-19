@@ -1,5 +1,5 @@
 # azure-functions-dapr-aca-deployment
-Steps to deploye the Azure Function with Dapr extension in ACA.
+Steps to deploy the Azure Function with Dapr extension in ACA.
 
 ## Create resource group
 ```
