@@ -65,7 +65,7 @@ resource daprComponentMessagebus 'Microsoft.App/managedEnvironments/daprComponen
 }
 
 /* ###################################################################### */
-// Setup Dapr componet Eventhub in ACA
+// Setup Dapr component Eventhub in ACA
 /* ###################################################################### */
 resource daprComponentEventHub 'Microsoft.App/managedEnvironments/daprComponents@2023-05-01' = {
   parent: environment
