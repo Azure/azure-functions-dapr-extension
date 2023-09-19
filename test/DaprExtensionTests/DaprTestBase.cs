@@ -73,13 +73,13 @@ namespace DaprExtensionTests
 
             this.functionsHost = new HostBuilder()
                 .ConfigureLogging(loggingBuilder => loggingBuilder.AddProvider(this.logProvider))
-                .ConfigureWebJobs(webJobsBuilder => webJobsBuilder.AddDapr())
                 .ConfigureServices(
                     collection =>
                     {
                         collection.AddSingleton<INameResolver>(this.nameResolver);
                         collection.AddSingleton<ITypeLocator>(this.typeLocator);
                     })
+                .ConfigureWebJobs(webJobsBuilder => webJobsBuilder.AddDapr())
                 .Build();
             this.daprRuntime = new DaprRuntimeEmulator(DaprPort);
         }

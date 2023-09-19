@@ -8,6 +8,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
     using System;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
@@ -27,12 +28,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
                 throw new ArgumentNullException(nameof(builder));
             }
 
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var nameResolver = serviceProvider.GetRequiredService<INameResolver>();
+
+            if (!EnvironmentUtils.ShouldRegisterDaprExtension(nameResolver))
+            {
+                return builder;
+            }
+
             builder.AddExtension<DaprExtensionConfigProvider>()
                 .Services
                 .AddSingleton<IDaprServiceClient, DaprServiceClient>()
                 .AddSingleton<IDaprServiceListener, DaprServiceListener>()
                 .AddSingleton<IDaprClient, DaprHttpClient>()
                 .AddHttpClient();
+
             return builder;
         }
     }
