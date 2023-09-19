@@ -36,6 +36,9 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   }
 }
 
+/* ###################################################################### */
+// Create managed ACA environment
+/* ###################################################################### */
 resource logAnalyticsWorkspace'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: '${envResourceNamePrefix}-la'
   location: location
@@ -60,9 +63,6 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-/* ###################################################################### */
-// Create managed ACA environment
-/* ###################################################################### */
 resource environment 'Microsoft.App/managedEnvironments@2022-10-01' = {
   name: '${envResourceNamePrefix}-env'
   location: location
@@ -95,6 +95,9 @@ resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
   }
 }
 
+/* ###################################################################### */
+// Create Azure EventHub
+/* ###################################################################### */
 resource eventHubNamespaceResource 'Microsoft.EventHub/namespaces@2021-11-01' = {
   name: eventHubNamespace
   location: location
@@ -122,9 +125,6 @@ resource eventHubAuth 'Microsoft.EventHub/namespaces/authorizationRules@2022-10-
   }
 }
 
-/* ###################################################################### */
-// Create Azure EventHub
-/* ###################################################################### */
 resource eventHub 'Microsoft.EventHub/namespaces/eventhubs@2021-11-01' = {
   parent: eventHubNamespaceResource
   name: eventHubName
