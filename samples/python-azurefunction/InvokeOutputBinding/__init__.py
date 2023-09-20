@@ -17,7 +17,7 @@ def main(req: func.HttpRequest,
 
     if data:
         logging.info(f"Url: {req.url}, Data: {data}")
-        payload.set(json.dumps({"data": data}).encode('utf-8'))
+        payload.set(json.dumps({"body": data}).encode('utf-8'))
         return func.HttpResponse(f"Url: {req.url}, Data: {data}")
     else:
         return func.HttpResponse(

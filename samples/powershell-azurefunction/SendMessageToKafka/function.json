@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "type": "daprServiceInvocationTrigger",
+      "direction": "in",
+      "name": "req"
+    },
+    {
+      "type": "daprBinding",
+      "direction": "out",
+      "bindingName": "%KafkaBindingName%",
+      "operation": "create",
+      "name": "messages"
+    }
+  ]
+}
