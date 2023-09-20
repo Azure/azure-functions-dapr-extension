@@ -1,6 +1,7 @@
 # Python Azure Function Sample
 
-This tutorial will demonstrate how to use Azure Functions Python programming model to integrate with multiple Dapr components.  Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-python) to familiarize with function programming model.
+This tutorial will demonstrate how to use Azure Functions Python programming model to integrate with multiple Dapr components.  Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-python) to familiarize with function programming model. [Please explore Functions Dapr extension with Python V2 programming model samples for simplified development](https://github.com/Azure/azure-functions-dapr-extension/tree/master/samples/python-v2-azurefunctions).
+
 We'll be running a Darp'd function app locally:
 1) Invoked by [Dapr Service Invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/service-invocation-overview/) and persist/retrieve state using [Dapr State Management](https://github.com/dapr/components-contrib/tree/master/state)
 2) Publish/consume message on a specific topic powered by [Dapr pub/sub](https://github.com/dapr/components-contrib/tree/master/pubsub) and `DaprPublish`/`DaprTopicTrigger`
