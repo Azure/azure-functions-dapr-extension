@@ -15,7 +15,7 @@ Write-Host "PowerShell function processed a CreateNewOrder request from the Dapr
 # Payload must be of the format { "data": { "value": "some value" } }
 
 # Convert the object to a JSON-formatted string with ConvertTo-Json
-$jsonString = $payload| ConvertTo-Json
+$jsonString = $payload | ConvertTo-Json
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name order -Value $payload["data"]
