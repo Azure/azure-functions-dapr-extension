@@ -1,0 +1,20 @@
+import azure.functions as func
+
+from create_new_order import createNewOrder
+from consume_message_from_kafka import consumeMessageFromKafka
+from invoke_output_binding import invokeOutputBinding
+from print_topic_message import printTopicMessage
+from retrieve_order import retrieveOrder
+from retrieve_secret import retrieveSecret
+from send_message_to_kafka import sendMessageToKafka
+from transfer_event_between_topics import transferEventBetweenTopics
+
+dapp = func.DaprFunctionApp()
+dapp.register_blueprint(createNewOrder)
+dapp.register_blueprint(consumeMessageFromKafka)
+dapp.register_blueprint(invokeOutputBinding)
+dapp.register_blueprint(printTopicMessage)
+dapp.register_blueprint(retrieveOrder)
+dapp.register_blueprint(retrieveSecret)
+dapp.register_blueprint(sendMessageToKafka)
+dapp.register_blueprint(transferEventBetweenTopics)

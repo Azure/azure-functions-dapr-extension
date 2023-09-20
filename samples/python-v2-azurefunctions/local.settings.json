@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsFeatureFlags":"EnableWorkerIndexing",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "PubSubName": "messagebus", // should be same as metatdata.name in components/messagebus.yaml
+    "StateStoreName": "statestore", // should be same as metatdata.name in components/statestore.yaml
+    "KafkaBindingName": "sample-topic" // should be same as metatdata.name in components/kafka_binding.yaml
+  }
+}
