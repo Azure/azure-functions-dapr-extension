@@ -8,13 +8,13 @@ We'll be running a Darp'd function app locally:
 
 ## Prerequisites
 This sample requires you to have the following installed on your machine:
-- [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/hello-world) : Follow [instructions](https://docs.dapr.io/getting-started/install-dapr/) to download and install the Dapr CLI and initialize Dapr.
+- [Setup Dapr](https://github.com/dapr/quickstarts/tree/master/tutorials/hello-world) : Follow instructions to [download and install the Dapr CLI](https://docs.dapr.io/getting-started/install-dapr-cli/) and [initialize Dapr](https://docs.dapr.io/getting-started/install-dapr-selfhost/).
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
-- [Install .NET Core SDK](https://dotnet.microsoft.com/download)
-- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/bindings). The required Kafka files is located in `sample\dapr-kafka` directory.
-```
-docker-compose -f docker-compose-single-kafka.yml up
-```
+- [Run Kafka Docker Container Locally](https://github.com/dapr/quickstarts/tree/master/tutorials/bindings). The required Kafka files is located in `samples\dapr-kafka` directory.
+
+  ```
+  docker-compose -f docker-compose-single-kafka.yml up -d
+  ```
 
 # Step 1 - Understand the Settings 
 
