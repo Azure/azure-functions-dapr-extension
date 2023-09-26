@@ -147,7 +147,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         static DaprPubSubEvent CreatePubSubEvent(JsonElement json)
         {
-            if (!json.TryGetProperty("payload", out JsonElement payload))
+            var propertyLookup = json.ToCaseInsensitiveDictionary();
+
+            if (!propertyLookup.TryGetValue("payload", out JsonElement payload))
             {
                 throw new ArgumentException($"A '{nameof(json).ToLowerInvariant()}' parameter is required for outbound pub/sub operations.");
             }
@@ -160,12 +162,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             DaprPubSubEvent event_ = new DaprPubSubEvent(payloadObject);
 
-            if (json.TryGetProperty("pubsubname", out JsonElement pubsubName))
+            if (propertyLookup.TryGetValue("pubsubname", out JsonElement pubsubName))
             {
                 event_.PubSubName = pubsubName.GetString();
             }
 
-            if (json.TryGetProperty("topic", out JsonElement topic))
+            if (propertyLookup.TryGetValue("topic", out JsonElement topic))
             {
                 event_.Topic = topic.GetString();
             }
@@ -227,7 +229,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         private static DaprBindingMessage GetDaprBindingMessageFromValueKindObject(JsonElement jsonElement)
         {
-            if (!jsonElement.TryGetProperty("data", out JsonElement data))
+            var propertyLookup = jsonElement.ToCaseInsensitiveDictionary();
+            if (!propertyLookup.TryGetValue("data", out JsonElement data))
             {
                 throw new ArgumentException("A 'data' parameter is required for Dapr Binding operations.", nameof(jsonElement));
             }
@@ -240,17 +243,17 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
             DaprBindingMessage message = new DaprBindingMessage(dataObj);
 
-            if (jsonElement.TryGetProperty("operation", out JsonElement operation))
+            if (propertyLookup.TryGetValue("operation", out JsonElement operation))
             {
                 message.Operation = JsonSerializer.Deserialize<string>(operation);
             }
 
-            if (jsonElement.TryGetProperty("metadata", out JsonElement metadata))
+            if (propertyLookup.TryGetValue("metadata", out JsonElement metadata))
             {
                 message.Metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(metadata);
             }
 
-            if (jsonElement.TryGetProperty("bindingName", out JsonElement binding))
+            if (propertyLookup.TryGetValue("bindingname", out JsonElement binding))
             {
                 message.BindingName = JsonSerializer.Deserialize<string>(binding);
             }
@@ -275,14 +278,15 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         internal static DaprStateRecord CreateSaveStateParameters(JsonElement parametersJson)
         {
-            if (!parametersJson.TryGetProperty("value", out JsonElement value))
+            var propertyLookup = parametersJson.ToCaseInsensitiveDictionary();
+            if (!propertyLookup.TryGetValue("value", out JsonElement value))
             {
                 throw new ArgumentException("A 'value' parameter is required for save-state operations.", nameof(parametersJson));
             }
 
             var parameters = new DaprStateRecord(value);
 
-            if (parametersJson.TryGetProperty("key", out JsonElement key))
+            if (propertyLookup.TryGetValue("key", out JsonElement key))
             {
                 parameters.Key = key.GetString();
             }
@@ -314,22 +318,24 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
         {
             var options = new InvokeMethodParameters();
 
-            if (parametersJson.TryGetProperty("appId", out JsonElement appId))
+            var propertyLookup = parametersJson.ToCaseInsensitiveDictionary();
+
+            if (propertyLookup.TryGetValue("appid", out JsonElement appId))
             {
                 options.AppId = appId.GetRawText();
             }
 
-            if (parametersJson.TryGetProperty("methodName", out JsonElement methodName))
+            if (propertyLookup.TryGetValue("methodname", out JsonElement methodName))
             {
                 options.MethodName = methodName.GetRawText();
             }
 
-            if (parametersJson.TryGetProperty("body", out JsonElement body))
+            if (propertyLookup.TryGetValue("body", out JsonElement body))
             {
                 options.Body = body;
             }
 
-            if (parametersJson.TryGetProperty("httpVerb", out JsonElement httpVerb))
+            if (propertyLookup.TryGetValue("httpverb", out JsonElement httpVerb))
             {
                 options.HttpVerb = httpVerb.GetRawText();
             }
