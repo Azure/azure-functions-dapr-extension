@@ -13,7 +13,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <!-- Default version for dev -->
     <Version>99.99.99</Version>
-    <SupportedVersion>99.99.99</SupportedVersion>
+    <SupportedVersion>0.16.*-*</SupportedVersion>
     <PackageTags>Microsoft Azure WebJobs Azure-Functions Isolated Dotnet-Isolated Dapr Worker</PackageTags>
   </PropertyGroup>
 
