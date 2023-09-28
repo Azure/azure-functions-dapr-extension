@@ -25,18 +25,18 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
 
             if (element.ValueKind == JsonValueKind.Null || element.ValueKind == JsonValueKind.Undefined)
             {
-                return propertyLookup;
+                return propertyBag;
             }
 
             foreach (var prop in element.EnumerateObject())
             {
                 if (element.TryGetProperty(prop.Name, out JsonElement value) && value.ValueKind != JsonValueKind.Null)
                 {
-                    propertyLookup[prop.Name] = value;
+                    propertyBag[prop.Name] = value;
                 }
             }
 
-            return propertyLookup;
+            return propertyBag;
         }
     }
 }
