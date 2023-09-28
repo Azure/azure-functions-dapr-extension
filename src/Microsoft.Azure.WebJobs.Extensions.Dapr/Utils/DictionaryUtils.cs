@@ -21,7 +21,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
         /// <returns>Dictionary.</returns>
         public static Dictionary<string, JsonElement> ToCaseInsensitiveDictionary(this JsonElement element)
         {
-            var propertyLookup = new Dictionary<string, JsonElement>(StringComparer.InvariantCultureIgnoreCase);
+            var propertyBag = new Dictionary<string, JsonElement>(StringComparer.InvariantCultureIgnoreCase);
 
             if (element.ValueKind == JsonValueKind.Null || element.ValueKind == JsonValueKind.Undefined)
             {
