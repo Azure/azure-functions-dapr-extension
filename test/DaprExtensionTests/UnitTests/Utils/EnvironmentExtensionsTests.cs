@@ -1,4 +1,4 @@
-﻿namespace DaprExtensionTests.UnitTests.Services
+﻿namespace DaprExtensionTests.UnitTests.Utils
 {
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
