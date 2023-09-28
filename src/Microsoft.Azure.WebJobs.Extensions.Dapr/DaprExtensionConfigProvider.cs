@@ -147,7 +147,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
 
         static DaprPubSubEvent CreatePubSubEvent(JsonElement json)
         {
-            var propertyLookup = json.ToCaseInsensitiveDictionary();
+            var propertyBag = json.ToCaseInsensitiveDictionary();
 
             if (!propertyLookup.TryGetValue("payload", out JsonElement payload))
             {
