@@ -66,6 +66,8 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 
 You can run through a quickstart of developing some JavaScript Azure Functions that leverage Dapr with the [following tutorial](./docs/quickstart.md)
 
+You can deploy Azure Functions with Dapr extension in ACA using bicep template with the [following steps](./samples/sample-infra/README.md)
+
 ## Installing the extension
 
 ### .NET Functions
@@ -81,27 +83,12 @@ For dotnet out-of-proc (isolated) projects, use [Microsoft.Azure.Functions.Worke
 While this extension is in preview it is not included in the default extension bundle for functions.  You can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
 
 1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
-1. Run `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v 0.10.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).  You must have the .NET Core SDK installed in order for this command to work.
+1. Run `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v 0.17.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).  You must have the .NET Core SDK installed in order for this command to work.
 
-This also means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where you could include in your app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
-
-### Developing the extension
-
-The samples in this repo (other than the quickstart) are set up to run using a local build of the extension.
-
-You can use a development build of the extension for any function by:
-
-- Referencing the Microsoft.Azure.WebJobs.Extensions.Dapr project in your .NET function
-- Publishing the extension to the `bin/` directory of your non-.NET function
-
-Example for non-.NET function:
-
-```sh
-dotnet publish /path/to/Microsoft.Azure.WebJobs.Extensions.Dapr -o bin/
-```
+This also means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where you could include in your app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 5.2.1`.
 
 ## Dapr ports and listeners
-When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  
+When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar. This port is configurable, you can provide any other available port in your app settings for `DAPR_APP_PORT` env variable instead of 3001.
 
 > IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation or `--app-port` unless you have a trigger.  Doing so may lock your application from the Dapr sidecar.  Port 3001 does not need to be exposed or defined if only using input and output bindings.
 
@@ -122,6 +109,20 @@ So when running a Dapr app locally using the default ports, you would leverage t
 
 ### If Dapr triggers are in the app
 `dapr run --app-id functionA --app-port 3001 --dapr-http-port 3501 -- func host start --no-build`
+
+### Running an app with local Dapr Extension build
+The samples in this repo (other than the quickstart) are set up to run using a local build of the extension.
+
+You can use a development build of the extension for any function by:
+
+- Referencing the Microsoft.Azure.WebJobs.Extensions.Dapr project in your .NET function
+- Publishing the extension to the `bin/` directory of your non-.NET function
+
+Example for non-.NET function:
+
+```sh
+dotnet publish /path/to/Microsoft.Azure.WebJobs.Extensions.Dapr -o bin/
+```
 
 ## Deploying to Kubernetes
 
