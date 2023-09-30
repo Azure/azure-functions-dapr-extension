@@ -2,7 +2,7 @@ import json
 import logging 
 import azure.functions as func 
 
-retrieveSecret = func.DaprBlueprint()
+retrieveSecret = func.Blueprint()
 
 # Dapr secret input binding with http dapr_service_invocation_trigger
 @retrieveSecret.function_name(name="RetrieveSecret")

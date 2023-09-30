@@ -1,7 +1,7 @@
 import logging 
 import azure.functions as func 
 
-consumeMessageFromKafka = func.DaprBlueprint()
+consumeMessageFromKafka = func.Blueprint()
 
 # Dapr binding trigger
 @consumeMessageFromKafka.function_name(name="ConsumeMessageFromKafka")

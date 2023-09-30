@@ -38,7 +38,7 @@ In this folder, you will find `local.settings.json`, which lists a few app setti
 The `%` denotes an app setting value, for the following binding as an example:
 
 ```python
-@dapp.dapr_state_output(arg_name="state", state_store="%StateStoreName%", key="order")
+@app.dapr_state_output(arg_name="state", state_store="%StateStoreName%", key="order")
 ```
 
  In the runtime, the binding will check the `local.settings.json` file and resolve `%StateStoreName%` into `statestore`. The function will then make a call into the state store named as `statestore`.
@@ -57,7 +57,7 @@ spec:
 ....
 ```
 
-# DaprBlueprint
+# Blueprint
 The Python v2 programming model introduces the concept of blueprints. A blueprint is a new class that's instantiated to register functions outside of the core function application. The functions registered in blueprint instances aren't indexed directly by the function runtime. To get these blueprint functions indexed, the function app needs to register the functions from blueprint instances.
 
 ## Using blueprints provides the following benefits:
@@ -139,11 +139,11 @@ import json
 import azure.functions as func
 import logging
 
-dapp = func.DaprFunctionApp()
+app = func.FunctionApp()
 
-@dapp.function_name(name="CreateNewOrder")
-@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="CreateNewOrder")
-@dapp.dapr_state_output(arg_name="state", state_store="statestore", key="order")
+@app.function_name(name="CreateNewOrder")
+@app.dapr_service_invocation_trigger(arg_name="payload", method_name="CreateNewOrder")
+@app.dapr_state_output(arg_name="state", state_store="statestore", key="order")
 def main(payload: str, state: func.Out[str] ) :
     # request body must be passed this way '{\"value\": { \"key\": \"some value\" } }'
     logging.info('Python function processed a CreateNewOrder request from the Dapr Runtime.')
@@ -197,9 +197,9 @@ In your terminal window, you should see logs indicating that the message was rec
 In order to confirm the state is now persisted, you can move to the next function:
 
 ```python
-@dapp.function_name(name="RetrieveOrder")
-@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="RetrieveOrder")
-@dapp.dapr_state_input(arg_name="data", state_store="statestore", key="order")
+@app.function_name(name="RetrieveOrder")
+@app.dapr_service_invocation_trigger(arg_name="payload", method_name="RetrieveOrder")
+@app.dapr_state_input(arg_name="data", state_store="statestore", key="order")
 def main(payload, data: str) :
     # Function should be invoked with this command: dapr invoke --app-id functionapp --method RetrieveOrder  --data '{}'
     logging.info('Python function processed a RetrieveOrder request from the Dapr Runtime.')
@@ -227,8 +227,8 @@ In your terminal window, you should see logs to confirm the expected result:
 
 ```python
 # Dapr topic trigger
-@dapp.function_name(name="PrintTopicMessage")
-@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="B", route="B")
+@app.function_name(name="PrintTopicMessage")
+@app.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="B", route="B")
 def main(subEvent) -> None:
     logging.info('Python function processed a PrintTopicMessage request from the Dapr Runtime.')
     subEvent_json = json.loads(subEvent)
@@ -236,9 +236,9 @@ def main(subEvent) -> None:
 
 # Dapr publish output
 # Dapr topic trigger with dapr_publish_output
-@dapp.function_name(name="TransferEventBetweenTopics")
-@dapp.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="A", route="A")
-@dapp.dapr_publish_output(arg_name="pubEvent", pub_sub_name="%PubSubName%", topic="B")
+@app.function_name(name="TransferEventBetweenTopics")
+@app.dapr_topic_trigger(arg_name="subEvent", pub_sub_name="%PubSubName%", topic="A", route="A")
+@app.dapr_publish_output(arg_name="pubEvent", pub_sub_name="%PubSubName%", topic="B")
 def main(subEvent, pubEvent: func.Out[bytes]) -> None:
     logging.info('Python function processed a TransferEventBetweenTopics request from the Dapr Runtime.')
     subEvent_json = json.loads(subEvent)
@@ -279,8 +279,8 @@ This sections describes how this extension integrates with Dapr Binding componen
 
 ```python
 # Dapr binding trigger
-@dapp.function_name(name="ConsumeMessageFromKafka")
-@dapp.dapr_binding_trigger(arg_name="triggerData", binding_name="%KafkaBindingName%")
+@app.function_name(name="ConsumeMessageFromKafka")
+@app.dapr_binding_trigger(arg_name="triggerData", binding_name="%KafkaBindingName%")
 def main(triggerData: str) -> None:
     logging.info('Python function processed a ConsumeMessageFromKafka request from the Dapr Runtime.')
     logging.info('Trigger data: ' + triggerData)
@@ -291,9 +291,9 @@ Now let's look at how our function uses `DaprBinding` to push messages into our 
 ```python
 # Dapr binding output
 # Dapr state output binding with http dapr_service_invocation_trigger
-@dapp.function_name(name="SendMessageToKafka")
-@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="SendMessageToKafka")
-@dapp.dapr_binding_output(arg_name="messages", binding_name="%KafkaBindingName%", operation="create")
+@app.function_name(name="SendMessageToKafka")
+@app.dapr_service_invocation_trigger(arg_name="payload", method_name="SendMessageToKafka")
+@app.dapr_binding_output(arg_name="messages", binding_name="%KafkaBindingName%", operation="create")
 def main(payload: str, messages: func.Out[bytes]) -> None:
     logging.info('Python processed a SendMessageToKafka request from the Dapr Runtime.')
     messages.set(json.dumps({"data": payload}).encode('utf-8'))
@@ -334,9 +334,9 @@ Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/componen
 
 ```python
 # Dapr secret input binding with http dapr_service_invocation_trigger
-@dapp.function_name(name="RetrieveSecret")
-@dapp.dapr_service_invocation_trigger(arg_name="payload", method_name="RetrieveSecret")
-@dapp.dapr_secret_input(arg_name="secret", secret_store_name="localsecretstore", key="my-secret", metadata="metadata.namespace=default")
+@app.function_name(name="RetrieveSecret")
+@app.dapr_service_invocation_trigger(arg_name="payload", method_name="RetrieveSecret")
+@app.dapr_secret_input(arg_name="secret", secret_store_name="localsecretstore", key="my-secret", metadata="metadata.namespace=default")
 def main(payload, secret: str) :
     # Function should be invoked with this command: dapr invoke --app-id functionapp --method RetrieveSecret  --data '{}'
     logging.info('Python function processed a RetrieveSecret request from the Dapr Runtime.')
@@ -358,7 +358,51 @@ Some secret stores need a metadata string to be provided. In order to specify mu
 ```json
 "metadata": "metadata.version_id=15&metadata.version_stage=AAA"
 ```
+## 5. Dapr Invoke output binding:
+Dapr invoke output binding is could be used to invoke other azure functions or service where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke antother azure functions like RetrieveOrder.
 
+```Python
+# Dapr invoke output binding with http trigger
+@app.function_name(name="InvokeOutputBinding")
+@app.route(route="invoke/{appId}/{methodName}", auth_level=func.AuthLevel.ANONYMOUS)
+@app.dapr_invoke_output(arg_name = "payload", app_id = "{appId}", method_name = "{methodName}", http_verb = "post")
+def main(req: func.HttpRequest, payload: func.Out[str] ) -> str:
+    # request body must be passed this way "{\"body\":{\"value\":{\"key\":\"some value\"}}}" to use the InvokeOutputBinding, all the data must be enclosed in body property.
+    logging.info('Python function processed a InvokeOutputBinding request from the Dapr Runtime.')
+    
+    body = req.get_body()
+    logging.info(body)
+    if body is not None:
+        payload.set(body)
+    else:
+        logging.info('req body is none')
+    return 'ok'
+```
+
+Invoke the CreateNewOrder function with Http trigger, which inturn will a DaprInvokeOutputBinding
+
+```PowerShell
+Invoke-RestMethod -Uri 'http://localhost:7071/api/invoke/functionapp/CreateNewOrder' -Method Post -Headers @{"Content-Type"="application/json"} -Body '{
+    "body": {
+        "value": {
+            "orderId": "412"
+        }
+    }
+    }'
+```
+
+Once InvokeOutputBinding is called, it will invoke the CreateNewOrde azure fucntion and it will create an entry in state store.
+
+```
+== APP == [TIMESTAMP] Executing 'Functions.InvokeOutputBinding' (Reason='This function was programmatically called via the host APIs.', Id=<ExecutionId>)
+== APP == [TIMESTAMP] Python function processed a InvokeOutputBinding request from the Dapr Runtime.
+== APP == [TIMESTAMP] b'{\n    "body": {\n        "value": {\n            "orderId": "412"\n        }\n    }\n    }'
+== APP == [TIMESTAMP] Executing 'Functions.CreateNewOrder' (Reason='(null)', Id=<ExecutionId>)
+== APP == [TIMESTAMP] Python function processed a CreateNewOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] {"value":{"orderId":"412"}}
+== APP == [TIMESTAMP] Executed 'Functions.CreateNewOrder' (Succeeded, Id=<ExecutionId>, Duration=2ms)
+== APP == [TIMESTAMP] Executed 'Functions.InvokeOutputBinding' (Succeeded, Id=<ExecutionId>, Duration=6ms)
+```
 
 # Step 4 - Cleanup
 

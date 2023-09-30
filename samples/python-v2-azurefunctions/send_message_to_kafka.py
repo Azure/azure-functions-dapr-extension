@@ -2,7 +2,7 @@ import json
 import logging 
 import azure.functions as func 
 
-sendMessageToKafka = func.DaprBlueprint()
+sendMessageToKafka = func.Blueprint()
 
 # Dapr binding output
 # Dapr state output binding with http dapr_service_invocation_trigger
