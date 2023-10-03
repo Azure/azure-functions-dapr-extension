@@ -10,13 +10,13 @@
 
 ⚠️ This extension is currently in preview and not recommended for production. ⚠️
 
-The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted and Kubernetes modes.
+The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted, Functions on ACA and Kubernetes modes.
 
 If you are unfamiliar with Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model.  
 
 You can also jump to the [Dapr + Functions quickstart](./docs/quickstart.md) below.
 
-This extension currently supports Azure Functions written in [C#](./samples/dotnet-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), and [Python](./samples/python-azurefunction).
+This extension currently supports Azure Functions written in [C#](./samples/dotnet-azurefunction), [JAVA](./samples/java-azurefunction) [JavaScript / TypeScript](./samples/javascript-azurefunction), and [Python](./samples/python-azurefunction).
 
 ```javascript
 module.exports = async function (context, req) {
