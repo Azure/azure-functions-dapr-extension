@@ -2,7 +2,7 @@ import json
 import logging 
 import azure.functions as func 
 
-printTopicMessage = func.DaprBlueprint()
+printTopicMessage = func.Blueprint()
 
 # Dapr topic trigger
 @printTopicMessage.function_name(name="PrintTopicMessage")

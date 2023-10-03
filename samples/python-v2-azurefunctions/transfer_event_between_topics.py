@@ -2,7 +2,7 @@ import json
 import logging 
 import azure.functions as func 
 
-transferEventBetweenTopics = func.DaprBlueprint()
+transferEventBetweenTopics = func.Blueprint()
 
 # Dapr publish output
 # Dapr topic trigger with dapr_publish_output

@@ -9,12 +9,12 @@ from retrieve_secret import retrieveSecret
 from send_message_to_kafka import sendMessageToKafka
 from transfer_event_between_topics import transferEventBetweenTopics
 
-dapp = func.DaprFunctionApp()
-dapp.register_blueprint(createNewOrder)
-dapp.register_blueprint(consumeMessageFromKafka)
-dapp.register_blueprint(invokeOutputBinding)
-dapp.register_blueprint(printTopicMessage)
-dapp.register_blueprint(retrieveOrder)
-dapp.register_blueprint(retrieveSecret)
-dapp.register_blueprint(sendMessageToKafka)
-dapp.register_blueprint(transferEventBetweenTopics)
+app = func.FunctionApp()
+app.register_blueprint(createNewOrder)
+app.register_blueprint(consumeMessageFromKafka)
+app.register_blueprint(invokeOutputBinding)
+app.register_blueprint(printTopicMessage)
+app.register_blueprint(retrieveOrder)
+app.register_blueprint(retrieveSecret)
+app.register_blueprint(sendMessageToKafka)
+app.register_blueprint(transferEventBetweenTopics)

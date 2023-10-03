@@ -1,7 +1,7 @@
 import logging 
 import azure.functions as func 
 
-createNewOrder = func.DaprBlueprint()
+createNewOrder = func.Blueprint()
 
 # Dapr state output binding with http dapr_service_invocation_trigger
 @createNewOrder.function_name(name="CreateNewOrder")

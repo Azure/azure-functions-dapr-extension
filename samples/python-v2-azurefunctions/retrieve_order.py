@@ -1,7 +1,7 @@
 import logging 
 import azure.functions as func 
 
-retrieveOrder = func.DaprBlueprint()
+retrieveOrder = func.Blueprint()
 
 # Dapr state input binding with http dapr_service_invocation_trigger
 @retrieveOrder.function_name(name="RetrieveOrder")

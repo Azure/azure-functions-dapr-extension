@@ -1,7 +1,7 @@
 import logging 
 import azure.functions as func 
 
-invokeOutputBinding = func.DaprBlueprint()
+invokeOutputBinding = func.Blueprint()
 
 # Dapr invoke output binding with http trigger
 @invokeOutputBinding.function_name(name="InvokeOutputBinding")
