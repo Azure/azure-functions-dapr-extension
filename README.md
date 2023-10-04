@@ -46,7 +46,7 @@ You can run through a quickstart of developing JavaScript Azure Functions that l
 
 ### .NET Functions
 
-Run the following command from the path where your csproj is located  to add the Nuget package to your Azure Function project
+Run the following command from the path where your csproj is located to add the Nuget package to your Azure Function project
 
 **Isolated Worker Process:**
 
@@ -76,7 +76,7 @@ Since this extension is in Preview, you need to add the preview extension by add
 
 ## Dapr ports and listeners
 
-When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  This port is configurable, you can provide any other available port in your app settings for `DAPR_APP_PORT` env variable instead of 3001.
+When you are triggering a function from Dapr, the extension will bring-up a http server automatically to listen to incoming requests from the Dapr sidecar.  The port that is needed by http server is configured at function definition via Azure Portal or CLI.  provide any available port in via app setting `DAPR_APP_PORT` env variable in
 
 > IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation or `--app-port` unless you have a trigger.  Doing so may lock your application from the Dapr sidecar.  Port 3001 does not need to be exposed or defined if only using input and output bindings.
 
@@ -90,7 +90,7 @@ The function app will still expose another port and endpoint for things like HTT
 
 Normally when debugging an Azure Function you use the `func` command line tool to start up the function app process and trigger your code.  When debugging or running an Azure Function that will leverage Dapr, you need to use `dapr` alongside `func` so both processes are running.
 
-So when running a Dapr app locally using the default ports, you would leverage the `dapr` CLI to start the `func` CLI.
+So when running a Dapr app locally using the default ports, you can leverage `DAPR` CLI to start the function app using the below commands:
 
 ### If no Dapr triggers are in the app
 `dapr run --app-id functionA --dapr-http-port 3501 -- func host start --no-build`
@@ -99,6 +99,8 @@ So when running a Dapr app locally using the default ports, you would leverage t
 `dapr run --app-id functionA --app-port 3001 --dapr-http-port 3501 -- func host start --no-build`
 
 ## Deploying to Kubernetes
+
+**Note** - Follow this [document](https://learn.microsoft.com/en-us/azure/azure-functions/functions-kubernetes-keda) to know more on how to run functions on Kubernetes.
 
 You can annotate your function Kubernetes deployments to include the Dapr sidecar.
 
@@ -170,7 +172,7 @@ spec:
 
 ## Known Issues
 
-- **By Design:** In out-of-proc model, support for POCO model isn't available for output bindings and triggers, all the payloads must send JSON data and these data should be used as JsonElement type in Azure Functions. Please look at the [Note section][dotnet-out-of-proc] to find out required values for each bindings and triggers.
+- **By Design:** In out-of-proc model, support for POCO model isn't available for output bindings and triggers, all the payloads must be sent as JSON data and type as JsonElement. You can refer to [Note section][dotnet-out-of-proc] to know more about the required properties for each bindings and triggers.
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
