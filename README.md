@@ -7,41 +7,15 @@
 - [dapr.io](https://dapr.io)
 - [@DaprDev](https://twitter.com/DaprDev)
 
-
 ⚠️ This extension is currently in preview and not recommended for production. ⚠️
 
 The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted, Functions on ACA and Kubernetes modes.
 
-If you are unfamiliar with Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model.  
-
-You can also jump to the [Dapr + Functions quickstart](./docs/quickstart.md) below.
-
-This extension currently supports Azure Functions written in [C#](./samples/dotnet-azurefunction), [JAVA](./samples/java-azurefunction) [JavaScript / TypeScript](./samples/javascript-azurefunction), and [Python](./samples/python-azurefunction).
-
-```javascript
-module.exports = async function (context, req) {
-    context.log('Function triggered.  Reading Dapr state...');
-
-    context.log('Current state of this function: ' + context.bindings.daprState);
-
-    context.log('Using Dapr service invocation to trigger Function B');
-
-    context.bindings.daprInvoke = {
-        appId: 'function-b',
-        methodName: 'process',
-        httpVerb: 'post',
-        body: context.bindings.daprState
-    }
-
-    context.res = {
-        status: 200
-    };
-};
-```
+ This extension supports all the languages that Azure Function supports -  [C#](./samples/dotnet-azurefunction), [JAVA](./samples/java-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), and [Python](./samples/python-azurefunction).
 
 ## Function Triggers
 
-Azure Function triggers start an execution.
+Azure Function triggers cause a function to run. A trigger defines how a function is invoked and a function must have exactly one trigger. Triggers have associated data, which is often provided as the payload of the function.
 
 | Trigger Type | Description | Samples |
 | -- | -- | -- |
@@ -51,7 +25,7 @@ Azure Function triggers start an execution.
 
 ## Function Bindings
 
-Azure Function bindings allow you to pull data in or push data out as during an execution.  **Input Bindings** pass in data at the beginning of an execution at the time of triggering.  **Output Bindings** push data out once an execution has completed.
+Azure Function bindings is a way of declaratively connecting another resource to the function; bindings may be connected as **Input Bindings**, **Output Bindings**, or both. Data from bindings is provided to the function as parameters.
 
 | Binding Type | Direction | Description | Samples |
 | -- | -- | -- | -- |
@@ -64,44 +38,45 @@ Azure Function bindings allow you to pull data in or push data out as during an 
 
 ## Quickstart
 
-You can run through a quickstart of developing some JavaScript Azure Functions that leverage Dapr with the [following tutorial](./docs/quickstart.md)
+If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model. 
+
+You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
 
 ## Installing the extension
 
 ### .NET Functions
 
+Run the following command from the path where your csproj is located  to add the Nuget package to your Azure Function project
+
+**Isolated Worker Process:**
+
+```
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Dapr
+```
+
+**In-process**
+
 ```
 dotnet add package Microsoft.Azure.WebJobs.Extensions.Dapr
 ```
 
-For dotnet out-of-proc (isolated) projects, use [Microsoft.Azure.Functions.Worker.Extensions.Dapr](https://www.nuget.org/packages/Microsoft.Azure.Functions.Worker.Extensions.Dapr)
-
 ### Non-.NET Functions
 
-While this extension is in preview it is not included in the default extension bundle for functions.  You can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
+Since this extension is in Preview, you need to add the preview extension by adding or replacing the following code in your host.json file: 
 
-1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
-1. Run `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v 0.10.0-preview01`.  Be sure to use the latest version as [published on NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).  You must have the .NET Core SDK installed in order for this command to work.
-
-This also means for other extensions your app may be leveraging (e.g. Azure Service Bus or Azure Storage) you will need to manually install them using the NuGet package for that extension.  For example, with Azure Storage the [documentation](https://docs.microsoft.com/azure/azure-functions/functions-bindings-storage-blob) links to a NuGet package for that extension where you could include in your app with this Dapr extension by running `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Storage -v 4.0.2`.
-
-### Developing the extension
-
-The samples in this repo (other than the quickstart) are set up to run using a local build of the extension.
-
-You can use a development build of the extension for any function by:
-
-- Referencing the Microsoft.Azure.WebJobs.Extensions.Dapr project in your .NET function
-- Publishing the extension to the `bin/` directory of your non-.NET function
-
-Example for non-.NET function:
-
-```sh
-dotnet publish /path/to/Microsoft.Azure.WebJobs.Extensions.Dapr -o bin/
+```
+{
+  "version": "2.0",
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle.Preview",
+    "version": "[4.*, 5.0.0)"
+  }
+}
 ```
 
 ## Dapr ports and listeners
-When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  
+
+When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  This port is configurable, you can provide any other available port in your app settings for `DAPR_APP_PORT` env variable instead of 3001.
 
 > IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation or `--app-port` unless you have a trigger.  Doing so may lock your application from the Dapr sidecar.  Port 3001 does not need to be exposed or defined if only using input and output bindings.
 
