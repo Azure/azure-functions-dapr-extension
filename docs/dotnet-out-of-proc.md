@@ -1,45 +1,12 @@
-# Azure Functions Dapr Extension - Out-of-Proc Support
+# Azure Functions Dapr Extension - Isolated worker support
 
-This repository contains sample code demonstrating the out-of-proc support in the Dapr extension for Azure Functions using the .NET Isolated process.
+Azure function Dapr extension supports .Net isolated mode. In isolated mode your functions runs in an isolated worker process in Azure. This allows you to run your .NET class library functions on a version of .NET that is different from the version used by the Functions host process. To learn more about .Net isolated process follow [this link](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide).
 
-## Overview
-
-The out-of-proc support allows you to host your Azure Functions runtime in a separate process from Dapr, enabling better isolation and scalability. With this approach, the Azure Functions runtime and Dapr run as separate processes but communicate with each other using gRPC.
+To learn the differences between isolated worker model and in-process model .NET Azure Functions follow [this link](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-in-process-differences)
 
 ## Getting Started
 
-To run the sample Azure Functions with out-of-proc support, follow [these steps][dotnet-out-of-proc-samples]
-
-## Note
-
-**Required fields in the payload for dapr bindings and triggers in out-of-proc execution model.**
-
-# Function Triggers
-[daprBindingTrigger][binding-trigger-docs]
-
-| Field | Required | Example |
-| -- | -- | -- |
-| data | Y | ```'{\"data\":{\"message\": \"hello!\" }}'``` |
-
-## Function output Bindings
-
-[daprState][state-output-docs]
-
-| Field | Required | Example |
-| -- | -- | -- |
-| value | Y | ```'{\"value\":{\"message\": \"hello!\" }}'``` |
-
-[daprPublish][publish-output-docs]
-
-| Field | Required | Example |
-| -- | -- | -- |
-| payload | Y | ```'{\"payload\":{\"message\": \"hello!\" }}'``` |
-
-[daprBinding][binding-output-docs]
-
-| Field | Required | Example |
-| -- | -- | -- |
-| data | Y | ```'{\"data\":{\"message\": \"hello!\" }}'``` |
+To run the sample Azure Functions Dapr Extension in Isolated process, follow [these steps][dotnet-out-of-proc-samples]
 
 [dotnet-out-of-proc-samples]: ../samples/dotnet-isolated-azurefunction/README.md
 
