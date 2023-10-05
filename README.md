@@ -42,6 +42,8 @@ If you are new to Azure Functions, it's recommended to [try out an Azure Functio
 
 You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
 
+You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA) using a Bicep template. Follow the steps outlined in the [accompanying guide](./aca-deployment).
+
 ## Installing the extension
 
 ### .NET Functions
