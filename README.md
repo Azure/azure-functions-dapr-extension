@@ -1,4 +1,4 @@
-# Azure Functions dapr extensions
+# DAPR Extension for Azure Functions on Azure Container Apps
 
 ![Build and Test](https://github.com/Azure/azure-functions-dapr-extension/workflows/Build/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
