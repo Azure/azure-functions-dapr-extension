@@ -20,11 +20,11 @@ A GitHub account.
 | DOCKER_REGISTRY_PATH | Path to store Docker images, required for uploading sample image, e.g. `samples/dotnet` |
 | DOCKER_REGISTRY_ID | Username for Docker registry, required for uploading sample image |
 | DOCKER_REGISTRY_PASS | Password for Docker registry, required for uploading sample image |
-| AZCOPY_SPA_APPLICATION_ID | Service principal application ID for AzCopy, required for uploading NuGet packages |
-| AZCOPY_SPA_CLIENT_SECRET | Service principal client secret for AzCopy, required for uploading NuGet packages |
+| AZCOPY_SPA_APPLICATION_ID | Service principal application ID for AzCopy, required for uploading NuGet and Maven packages |
+| AZCOPY_SPA_CLIENT_SECRET | Service principal client secret for AzCopy, required for uploading NuGet and Maven packages |
 | GITHUB_TOKEN | GitHub token, required for creating release |
 | CODECOV_TOKEN | Codecov token, required for uploading code coverage results |
-| AZCOPY_TENANT_ID | Tenant Id, required for autheticating azure blob cotainer |
+| AZCOPY_TENANT_ID | Tenant ID used by AzCopy to authenticate, required for uploading artifacts |
 
 Notes
 - `GITHUB_TOKEN` is automatically set by GitHub Actions, so you don't need to set it manually.
