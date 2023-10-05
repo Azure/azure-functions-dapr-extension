@@ -61,9 +61,9 @@ The function app will still expose another port and endpoint for things like HTT
 
 ## Deployments
 Please follow below documentation to deploy Azure Functions with Dapr Extension.
-1. [Local](./deployment/local/local-deployment.md)
-2. [ACA](./deployment/aca/aca-deployment.md)
-3. [Kubernetes](./deployment/kubernetes/kubernetes-deployment.md)
+1. [Local](./deploy/local/local-deployment.md)
+2. [ACA](./deploy/aca/aca-deployment.md)
+3. [Kubernetes](./deploy/kubernetes/kubernetes-deployment.md)
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
