@@ -24,7 +24,7 @@ A GitHub account.
 | AZCOPY_SPA_CLIENT_SECRET | Service principal client secret for AzCopy, required for uploading NuGet and Maven packages |
 | GITHUB_TOKEN | GitHub token, required for creating release |
 | CODECOV_TOKEN | Codecov token, required for uploading code coverage results |
-| AZCOPY_TENANT_ID | Tenant ID used by AzCopy to authenticate, required for uploading artifacts |
+| AZCOPY_TENANT_ID | Tenant ID used by AzCopy to authenticate, required for uploading NuGet and Maven artifacts |
 
 Notes
 - `GITHUB_TOKEN` is automatically set by GitHub Actions, so you don't need to set it manually.
