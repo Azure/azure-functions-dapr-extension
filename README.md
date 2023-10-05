@@ -53,13 +53,13 @@ Run the following command from the path where your csproj is located  to add the
 **Isolated Worker Process:**
 
 ```
-dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Dapr
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Dapr --prerelease
 ```
 
 **In-process**
 
 ```
-dotnet add package Microsoft.Azure.WebJobs.Extensions.Dapr
+dotnet add package Microsoft.Azure.WebJobs.Extensions.Dapr --prerelease
 ```
 
 ### Non-.NET Functions
