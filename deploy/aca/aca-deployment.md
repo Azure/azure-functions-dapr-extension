@@ -1,4 +1,4 @@
-# azure-functions-dapr-aca-deployment
+# Quickstart: Deploying to ACA
 Steps to deploy the Azure Function with Dapr extension in ACA.
 
 ## Clone the Azure function Dapr Extension Repo

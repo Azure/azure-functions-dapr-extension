@@ -13,6 +13,13 @@ The Azure Functions Dapr extension allows you to easily interact with the Dapr A
 
  This extension supports all the languages that Azure Function supports -  [C# Isolated](./samples/dotnet-isolated-azurefunction), [C# Inproc](./samples/dotnet-azurefunction), [Java](./samples/java-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), [Python V2](./samples/python-v2-azurefunction), [Python V1](./samples/python-azurefunction), [PowerShell](./samples/powershell-azurefunction).
 
+
+If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model. 
+
+You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
+
+You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA) using a Bicep template. Follow the steps outlined in the [accompanying guide](./deploy/aca/aca-deployment.md).
+
 ## Function Triggers
 
 Azure Function triggers cause a function to run. A trigger defines how a function is invoked and a function must have exactly one trigger. Triggers have associated data, which is often provided as the payload of the function.

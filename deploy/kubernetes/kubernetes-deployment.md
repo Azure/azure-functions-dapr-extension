@@ -1,4 +1,4 @@
-## Deploying to Kubernetes
+# Quickstart: Deploying to Kubernetes
 
 You can annotate your function Kubernetes deployments to include the Dapr sidecar.
 

@@ -1,10 +1,4 @@
-# Quickstart
-
-If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model. 
-
-You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
-
-You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA) using a Bicep template. Follow the steps outlined in the [accompanying guide](./aca-deployment).
+# Quickstart: Deploying to Local
 
 ## Installing the extension
 
