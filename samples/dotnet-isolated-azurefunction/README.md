@@ -204,7 +204,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-This section demonstrates the integration of this extension with Dapr Binding component. A Kafka binding as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
+This section demonstrates the integration of this extension with Dapr Binding component. A Kafka binding as an example. Please refer [this doc to spin up Kafka locally](../../samples/dapr-kafka/README.md). In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```csharp
 [Function("ConsumeMessageFromKafka")]
