@@ -5,7 +5,7 @@ The following will get you started with a Function app that leverages the Dapr e
 ## Prerequisites
 
 * [Dapr configured locally (and optionally in Kubernetes)](https://docs.dapr.io/getting-started/install-dapr/)
-* [Azure Functions Core Tools - v3](https://github.com/azure/azure-functions-core-tools#installing)
+* [Azure Functions Core Tools - v4](https://github.com/azure/azure-functions-core-tools#installing)
 * [Docker](https://docs.docker.com/get-docker/)
 * [.NET Core SDK](https://dotnet.microsoft.com/download) - enables building of the extension locally in the project
 * [Node 12](https://nodejs.org/) for local debugging of the JavaScript app
@@ -24,10 +24,17 @@ The following will get you started with a Function app that leverages the Dapr e
 
 ## Installing the Dapr extension
 
-While this extension is in preview it is not included in the default extension bundle for functions.  We can still include it, but will need to manually install it into the project, and opt-out to using the default extensions.  
+Since this extension is in Preview, you need to add the preview extension by adding or replacing the following code in your host.json file: 
 
-1. Open the `host.json` file from the root of the project and remove the `extensionBundle` property and values (if they exist).  Save the file.
-1. Run `func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v 1.0.0`. Be sure to use the latest version as published on [NuGet](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
+```
+{
+  "version": "2.0",
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle.Preview",
+    "version": "[4.*, 5.0.0)"
+  }
+}
+```
 
 You can validate the extension installed successfully by running the function.  Run `func start` and validate the app loads and the startup contains the logs
 

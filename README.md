@@ -13,6 +13,13 @@ The Azure Functions Dapr extension allows you to easily interact with the Dapr A
 
  This extension supports all the languages that Azure Function supports -  [C# Isolated](./samples/dotnet-isolated-azurefunction), [C# Inproc](./samples/dotnet-azurefunction), [Java](./samples/java-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), [Python V2](./samples/python-v2-azurefunction), [Python V1](./samples/python-azurefunction), [PowerShell](./samples/powershell-azurefunction).
 
+
+If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model. 
+
+You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
+
+You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA) using a Bicep template. Follow the steps outlined in the [accompanying guide](./deploy/aca/aca-deployment.md).
+
 ## Function Triggers
 
 Azure Function triggers cause a function to run. A trigger defines how a function is invoked and a function must have exactly one trigger. Triggers have associated data, which is often provided as the payload of the function.
@@ -36,44 +43,6 @@ Azure Function bindings is a way of declaratively connecting another resource to
 | [daprPublish][publish-output-docs] | Output | Publish a message to a Dapr topic | [C# Isolated][csharp-isolated-publish-output], [C# Inproc][csharp-publish-output], [JavaScript][javascript-publish-output], [Python V2][python-v2-publish-output], [Python V1][python-publish-output], [Java][java-publish-output], [PowerShell][powershell-publish-output] |
 | [daprBinding][binding-output-docs] | Output | Send a value to a Dapr output binding | [C# Isolated][csharp-isolated-binding-output], [C# Inproc][csharp-binding-output], [JavaScript][javascript-binding-output], [Python V2][python-v2-binding-output], [Python V1][python-binding-output], [Java][java-binding-output], [PowerShell][powershell-binding-output] |
 
-## Quickstart
-
-If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model. 
-
-You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
-
-## Installing the extension
-
-### .NET Functions
-
-Run the following command from the path where your csproj is located  to add the Nuget package to your Azure Function project
-
-**Isolated Worker Process:**
-
-```
-dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Dapr
-```
-
-**In-process**
-
-```
-dotnet add package Microsoft.Azure.WebJobs.Extensions.Dapr
-```
-
-### Non-.NET Functions
-
-Since this extension is in Preview, you need to add the preview extension by adding or replacing the following code in your host.json file: 
-
-```
-{
-  "version": "2.0",
-  "extensionBundle": {
-    "id": "Microsoft.Azure.Functions.ExtensionBundle.Preview",
-    "version": "[4.*, 5.0.0)"
-  }
-}
-```
-
 ## Dapr ports and listeners
 
 When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar.  This port is configurable, you can provide any other available port in your app settings for `DAPR_APP_PORT` env variable instead of 3001.
@@ -86,91 +55,15 @@ You can override the Dapr address used by input and output bindings by setting t
 
 The function app will still expose another port and endpoint for things like HTTP triggers (locally this defaults to 7071, in a container it defaults to 80).
 
-## Running and debugging an app
-
-Normally when debugging an Azure Function you use the `func` command line tool to start up the function app process and trigger your code.  When debugging or running an Azure Function that will leverage Dapr, you need to use `dapr` alongside `func` so both processes are running.
-
-So when running a Dapr app locally using the default ports, you would leverage the `dapr` CLI to start the `func` CLI.
-
-### If no Dapr triggers are in the app
-`dapr run --app-id functionA --dapr-http-port 3501 -- func host start --no-build`
-
-### If Dapr triggers are in the app
-`dapr run --app-id functionA --app-port 3001 --dapr-http-port 3501 -- func host start --no-build`
-
-## Deploying to Kubernetes
-
-You can annotate your function Kubernetes deployments to include the Dapr sidecar.
-
-> IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr, the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation or `--app-port` unless you have a trigger.  Doing so may lock your application from the Dapr sidecar. Port 3001 does not need to be exposed or defined if only using input and output bindings.
-
-To generate a Dockerfile for your app if you don't already have one, you can run the following command in your function project:
-`func init --docker-only`.
-
-The Azure Function core tools can automatically generate for you Kubernetes deployment files based on your local app.  It's worth noting these manifests expect [KEDA](https://keda.sh) will be present to manage scaling, so if not using KEDA you may need to remove the `ScaledObjects` generated, or craft your own deployment YAML file.  We do recommend including KEDA in any cluster that is running Azure Functions containers (with or without Dapr), but it is an optional component to assist with scaling.
-
-An example of a function app deployment for Kubernetes can be [found below](#sample-kubernetes-deployment).
-
-The following command will generate a `deploy.yaml` file for your project:
-`func kubernetes deploy --name {container-name} --registry {docker-registry} --dry-run > deploy.yaml`
-
-You can then edit the generated `deploy.yaml` to add the dapr annotations.  You can also craft a deployment manually.
-
-### Azure Storage account requirements
-
-While an Azure Storage account is required to run functions within Azure, it is NOT required for functions that run in Kubernetes or from a Docker container.  The exception to that is functions that leverage a Timer trigger or Event Hub trigger.  In those cases the storage account is used to coordinate leases for instances, so you will need to set an `AzureWebJobsStorage` connection string if using those triggers.  You can set the `AzureWebJobsStorage` value to `none` if not using any of the triggers that require it.
-
-### Sample Kubernetes deployment
-
-```yml
-apiVersion: v1
-kind: Service
-metadata:
-  name: my-function
-  namespace: default
-spec:
-  selector:
-    app: my-function
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-function
-  namespace: default
-  labels:
-    app: my-function
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: my-function
-  template:
-    metadata:
-      labels:
-        app: my-function
-      annotations:
-        dapr.io/enabled: "true"
-        dapr.io/id: "functionapp"
-        # Only define port of Dapr triggers are included
-        dapr.io/port: "3001"
-    spec:
-      containers:
-      - name: my-function
-        image: myregistry/my-function
-        ports:
-        # Port for HTTP triggered functions
-        - containerPort: 80
----
-```
-
 ## Known Issues
 
-- **By Design:** In out-of-proc model, support for POCO model isn't available for output bindings and triggers, all the payloads must send JSON data and these data should be used as JsonElement type in Azure Functions. Please look at the [Note section][dotnet-out-of-proc] to find out required values for each bindings and triggers.
+- **By Design:** In isolated mode, there's no support for using POCO (Plain Old CLR Object) models in output bindings and triggers. All payloads must be sent as JSON data, and these data should be treated as the JsonElement type in Azure Functions. You can refer to the [input bindings][input-binding-details], [output bindings][output-binding-details], and [triggers][trigger-details] sections to understand the data format and the necessary properties for each type of binding.
+
+## Deployments
+Please follow below documentation to deploy Azure Functions with Dapr Extension.
+1. [Local](./deploy/local/local-deployment.md)
+2. [ACA](./deploy/aca/aca-deployment.md)
+3. [Kubernetes](./deploy/kubernetes/kubernetes-deployment.md)
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
@@ -253,6 +146,8 @@ spec:
 [powershell-binding-output]: ./samples/powershell-azurefunction/SendMessageToKafka/run.ps1
 
 
-[dotnet-out-of-proc]: ./docs/dotnet-out-of-proc.md#Note
+[input-binding-details]: ./docs/input-bindings.md
+[output-binding-details]: ./docs/output-bindings.md
+[trigger-details]: ./docs/triggers.md
 
 
