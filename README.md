@@ -23,7 +23,7 @@ The Azure Functions Dapr extension allows you to easily interact with the Dapr A
 
 ## Quickstarts
 
-You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA), self-hosted mode or Kubernetes.Follow the below quickstarts guides to deploy Azure Functions with Dapr Extension.
+You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA), self-hosted mode or Kubernetes. Follow the below quickstarts guides to deploy Azure Functions with Dapr Extension.
 
 - [Local](./deploy/local/local-deployment.md)
 - [Azure Container Apps](./deploy/aca/aca-deployment.md)
