@@ -13,13 +13,13 @@ The Azure Functions Dapr extension allows you to easily interact with the Dapr A
 
  This extension supports all the languages that Azure Function supports :
 
- - [C# Isolated](./samples/dotnet-isolated-azurefunction)
- - [C# Inproc](./samples/dotnet-azurefunction)
--  [Java](./samples/java-azurefunction)
--  [JavaScript / TypeScript](./samples/javascript-azurefunction)
+- [C# Isolated](./samples/dotnet-isolated-azurefunction)
+- [C# Inproc](./samples/dotnet-azurefunction)
+- [Java](./samples/java-azurefunction)
+- [JavaScript / TypeScript](./samples/javascript-azurefunction)
 - [Python V2](./samples/python-v2-azurefunction)
 - [Python V1](./samples/python-azurefunction)
- -[PowerShell](./samples/powershell-azurefunction)
+- [PowerShell](./samples/powershell-azurefunction)
 
 ## Quickstarts
 
