@@ -10,12 +10,7 @@ We'll be running a Dapr-ized function app locally:
 This sample requires you to have the following installed on your machine:
 - Setup Dapr : Follow instructions to [download and install the Dapr CLI](https://docs.dapr.io/getting-started/install-dapr-cli/) and [initialize Dapr](https://docs.dapr.io/getting-started/install-dapr-selfhost/).
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
-- Run Kafka Docker Container locally with below command.
-
-  ```
-  cd samples\dapr-kafka
-  docker-compose -f docker-compose-single-kafka.yml up -d
-  ```
+- [Run Kafka Docker Container locally](../../samples/dapr-kafka/README.md)
 - Follow the [Configure your local environment](https://learn.microsoft.com/azure/azure-functions/create-first-function-vs-code-java#configure-your-environment) instructions for Java.
 - Install maven
 - Install the [.NET SDK](https://aka.ms/dotnet-download)

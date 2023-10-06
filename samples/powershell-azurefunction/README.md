@@ -12,12 +12,7 @@ This sample requires you to have the following installed on your machine:
 - [Install Azure Functions Core Tool](https://github.com/Azure/azure-functions-core-tools/blob/master/README.md#windows)
 - [Install Powershell on your machine](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3)
 - [Install .NET Core SDK](https://dotnet.microsoft.com/download), used for install Dapr Extension for non .NET language
-- Run Kafka Docker Container locally with below command.
-
-  ```
-  cd samples\dapr-kafka
-  docker-compose -f docker-compose-single-kafka.yml up -d
-  ```
+- [Run Kafka Docker Container locally](../../samples/dapr-kafka/README.md)
 
 # Step 1 - Understand the Settings 
 
