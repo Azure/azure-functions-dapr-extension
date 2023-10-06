@@ -1,4 +1,4 @@
-# DAPR Extension for Azure Functions on Azure Container Apps
+# DAPR Extension for Azure Functions - Preview
 
 ![Build and Test](https://github.com/Azure/azure-functions-dapr-extension/workflows/Build/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,18 +7,31 @@
 - [dapr.io](https://dapr.io)
 - [@DaprDev](https://twitter.com/DaprDev)
 
-⚠️ This extension is currently in preview and not recommended for production. ⚠️
+⚠️ This extension is currently in public preview and not recommended for production use. ⚠️
 
 The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted, Functions on ACA and Kubernetes modes.
 
- This extension supports all the languages that Azure Function supports -  [C# Isolated](./samples/dotnet-isolated-azurefunction), [C# Inproc](./samples/dotnet-azurefunction), [Java](./samples/java-azurefunction), [JavaScript / TypeScript](./samples/javascript-azurefunction), [Python V2](./samples/python-v2-azurefunction), [Python V1](./samples/python-azurefunction), [PowerShell](./samples/powershell-azurefunction).
+ This extension supports all the languages that Azure Function supports :
 
+ - [C# Isolated](./samples/dotnet-isolated-azurefunction)
+ - [C# Inproc](./samples/dotnet-azurefunction)
+-  [Java](./samples/java-azurefunction)
+-  [JavaScript / TypeScript](./samples/javascript-azurefunction)
+- [Python V2](./samples/python-v2-azurefunction)
+- [Python V1](./samples/python-azurefunction)
+ -[PowerShell](./samples/powershell-azurefunction)
 
-If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model. 
+## Quickstarts
+
+You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA), self-hosted mode or Kubernetes. Follow the below quickstarts guides to deploy Azure Functions with Dapr Extension.
+
+- [Local](./deploy/local/local-deployment.md)
+- [Azure Container Apps](./deploy/aca/aca-deployment.md)
+- [Kubernetes](./deploy/kubernetes/kubernetes-deployment.md)
+
+If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model.
 
 You can run through a quickstart of developing JavaScript Azure Functions that leverage Dapr following this [tutorial](./docs/quickstart.md)
-
-You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA) using a Bicep template. Follow the steps outlined in the [accompanying guide](./deploy/aca/aca-deployment.md).
 
 ## Function Triggers
 
@@ -59,11 +72,6 @@ The function app will still expose another port and endpoint for things like HTT
 
 - **By Design:** In isolated mode, there's no support for using POCO (Plain Old CLR Object) models in output bindings and triggers. All payloads must be sent as JSON data, and these data should be treated as the JsonElement type in Azure Functions. You can refer to the [input bindings][input-binding-details], [output bindings][output-binding-details], and [triggers][trigger-details] sections to understand the data format and the necessary properties for each type of binding.
 
-## Deployments
-Please follow below documentation to deploy Azure Functions with Dapr Extension.
-1. [Local](./deploy/local/local-deployment.md)
-2. [ACA](./deploy/aca/aca-deployment.md)
-3. [Kubernetes](./deploy/kubernetes/kubernetes-deployment.md)
 
 [binding-trigger-docs]: ./docs/triggers.md#input-binding-trigger
 [service-invocation-trigger-docs]: ./docs/triggers.md#service-invocation-trigger
