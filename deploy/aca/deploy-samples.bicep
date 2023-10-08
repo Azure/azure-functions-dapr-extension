@@ -41,6 +41,7 @@ module azureFunction 'azure-function.bicep' = {
   name: 'azure-function'
   scope: resourceGroup()
   params:{
+    location: location
     envResourceNamePrefix: envResourceNamePrefix
     azStorageConnectionString: azureServices.outputs.azStorageConnectionString
     appInsightsConnectionString: azureServices.outputs.appInsightsConnectionString
