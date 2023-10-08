@@ -1,7 +1,7 @@
 # Quickstart: DAPR with Functions on Azure Container Apps
 
 In this tutorial, a sample Dapr solution is deployed to Functions on Azure Container Apps via Bicep template.
-This Bicep script will deploy Function on Azure Container App along with DAPR extension, Azure Service Bus, DAPR Components - Blob as statestore, EventHub as pub-sub.
+This Bicep script will deploy Function on Azure Container App along with DAPR extension, Azure Service Bus, DAPR Components - Redis as state store, Azure Event Hub as pub-sub.
 
 You learn how to:
 
