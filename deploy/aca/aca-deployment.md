@@ -109,3 +109,10 @@ ContainerAppsConsoleLogs_CL
 | where Log_s contains "Order22"
 | project Log_s
 
+## Clean up resources
+
+Once you're done, run the following command to delete your resource group along with all the resources you created in this tutorial.
+
+```
+az group delete --resource-group $RESOURCE_GROUP
+```
