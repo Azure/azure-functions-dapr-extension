@@ -1,4 +1,5 @@
 param envResourceNamePrefix string
+param location string
 param azStorageConnectionString string
 param appInsightsConnectionString string
 param environmentId string
@@ -13,7 +14,7 @@ resource daprComponentStateManagement 'Microsoft.App/managedEnvironments/daprCom
 /* ###################################################################### */
 resource azfunctionapp 'Microsoft.Web/sites@2022-09-01' = {
   name: '${envResourceNamePrefix}-funcapp'
-  location: 'East Asia (Stage)'
+  location: location
   kind: 'functionapp,linux,container,azurecontainerapps'
   properties: {
     name: '${envResourceNamePrefix}-funcapp'
