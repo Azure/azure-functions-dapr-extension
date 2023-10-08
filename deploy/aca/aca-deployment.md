@@ -5,7 +5,7 @@ This Bicep script will deploy Function on Azure Container App along with DAPR ex
 
 You learn how to:
 
-- Create an Azure Blob Storage for use as a Dapr state store
+- Create an Azure Redis Cache for use as a Dapr state store
 - Deploy a Container Apps environment to host container apps
 - Deploy dapr-enabled Function on container apps: one that invokes the other service which will create an Order, saves it to storage via DAPR statestore.
 - Verify the interaction between the two apps.
