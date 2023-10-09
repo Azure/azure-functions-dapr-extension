@@ -326,7 +326,7 @@ The Dapr logs should show the following:
 ```
 
 ## 3. Dapr Binding: 
-This sections describes how this extension integrates with Dapr Binding component. Here Kafka binding is used as an example. Please refer to [Dapr Bindings Sample](https://github.com/dapr/quickstarts/tree/master/bindings) to spin up your the Kafka locally. In the example below, `daprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
+This sections describes how this extension integrates with Dapr Binding component. Here Kafka binding is used as an example. Please refer [this doc to spin up Kafka locally](../../samples/dapr-kafka/README.md). In the example below, `daprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```python
 def main(triggerData: str) -> None:
