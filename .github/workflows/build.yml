@@ -25,6 +25,7 @@ jobs:
       CONFIGURATION: Release
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
+      DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME: dotnet-isolated-quickstart
       NUPKG_OUTDIR: bin/Release/nugets
       MAVEN_OUTDIR: bin/Release/maven
       JAVA_LIB_WORKING_DIRECTORY: java-library
@@ -60,7 +61,11 @@ jobs:
         run: |
           echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
           docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
-      - name: Push samples docker images
+      - name: Build dotnet-isolated quickstart docker images
+        run: |
+          echo building docker image for ${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}
+          docker build -f quickstarts/dotnet-isolated/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
+      - name: Push docker images
         if: github.event_name != 'pull_request'
         run: |
           echo performing docker login
@@ -68,6 +73,10 @@ jobs:
           echo pushing docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
           echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
           docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
+
+          echo pushing docker image for ${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}
+          echo image with tag ${{ env.APP_REGISTRY }}/${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} will be pushed
+          docker push ${{ env.APP_REGISTRY }}/${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}:${{ env.REL_VERSION }}
       - name: Generate NuGet Packages - ${{ env.CONFIGURATION }}
         if: startswith(github.ref, 'refs/tags/v')
         run: dotnet pack --configuration ${{ env.CONFIGURATION }} -p:PackageVersion=${REL_VERSION}
