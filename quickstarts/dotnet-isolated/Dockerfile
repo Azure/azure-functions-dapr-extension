@@ -5,10 +5,11 @@ COPY /src/Microsoft.Azure.WebJobs.Extensions.Dapr /src/src/Microsoft.Azure.WebJo
 COPY /src/Microsoft.Azure.Functions.Extensions.Dapr.Core /src/src/Microsoft.Azure.Functions.Extensions.Dapr.Core
 COPY /.stylecop /src/.stylecop
 COPY /quickstarts/dotnet-isolated /src/quickstarts/dotnet-isolated
+COPY /local-packages /src/local-packages
 
 RUN cd /src/quickstarts/dotnet-isolated && \
     mkdir -p /home/site/wwwroot && \
-    dotnet publish *.csproj --output /home/site/wwwroot
+    dotnet publish *.csproj --configfile nuget.config --output /home/site/wwwroot
 
 FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated6.0
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
