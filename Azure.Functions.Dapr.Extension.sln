@@ -29,6 +29,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Worker.Extensions.Dapr.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Functions.Extensions.Dapr.Core", "src\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj", "{CE382838-8F90-432F-BE3C-1250FB2C5D36}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "quickstarts", "quickstarts", "{BEBD2890-9C86-4B92-9C54-95E6B7C9BE1E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-isolated", "quickstarts\dotnet-isolated\dotnet-isolated.csproj", "{DA021238-4ADA-4BB4-8BC7-0695D4616A83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,10 @@ Global
 		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE382838-8F90-432F-BE3C-1250FB2C5D36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA021238-4ADA-4BB4-8BC7-0695D4616A83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA021238-4ADA-4BB4-8BC7-0695D4616A83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA021238-4ADA-4BB4-8BC7-0695D4616A83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA021238-4ADA-4BB4-8BC7-0695D4616A83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +83,7 @@ Global
 		{53AE9999-C6E4-4245-8E19-0BD93AA73117} = {B272AB9D-4CB7-43E1-8538-6236DE327C28}
 		{F9DB1C9A-E248-47F2-BA3F-1CFAC525D894} = {33E065E0-9CB4-422A-9880-FF71D089BAB8}
 		{CE382838-8F90-432F-BE3C-1250FB2C5D36} = {36331ABF-6DFF-4FD1-BF7B-BBB630E0FC75}
+		{DA021238-4ADA-4BB4-8BC7-0695D4616A83} = {BEBD2890-9C86-4B92-9C54-95E6B7C9BE1E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACF358FE-D84B-4EF9-95B4-E4F537B6D76F}
