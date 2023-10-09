@@ -1,4 +1,4 @@
-# DAPR Extension for Azure Functions - Preview
+# DAPR Extension for Azure Functions - Public Preview
 
 ![Build and Test](https://github.com/Azure/azure-functions-dapr-extension/workflows/Build/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,9 +7,26 @@
 - [dapr.io](https://dapr.io)
 - [@DaprDev](https://twitter.com/DaprDev)
 
-⚠️ This extension is currently in public preview and not recommended for production use. ⚠️
+Azure Functions is a serverless computing framework that simplifies the development of event-driven applications, while Dapr is a microservices framework that provides a set of building blocks for building distributed systems.
 
-The Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings.  This extension is supported in any environment that supports running Dapr and Azure Functions - primarily self-hosted, Functions on ACA and Kubernetes modes.
+The Azure Functions programming model uses a declarative approach, where developers define the triggers and bindings for their functions in a configuration file or through the Azure portal. The Dapr programming model is more flexible, allowing developers to use any programming language, framework, or infrastructure of their choice. 
+
+Converging the strengths of both programming models, Azure Functions Dapr extension allows you to easily interact with the Dapr APIs from an Azure Function using triggers and bindings. This extension works with Azure Functions on Azure Container Apps, Local Dev & Azure Kubernetes. 
+This extension provides integration to Dapr state, secrets, pub-sub, and bindings directly in your function code.  Extension is modularized into 6 components. 
+
+## Extension components:
+- **Extension runtime**: The extension includes a runtime that initializes the Dapr and sets up the necessary environment variables and configuration. It also provides a set of APIs and bindings that the function can use to interact with Dapr.
+
+- **Configuration**: The extension requires configuration settings to be set up properly to interact with Dapr's APIs. These settings include the Dapr HTTP endpoint, Dapr app ID, and Dapr API token.
+
+- **Trigger bindings**: The extension provides trigger bindings that enable functions to be triggered by Dapr events such as service-to-service requests and pub/sub events. This allows functions to react to events and perform actions based on them.
+
+- **Input bindings**: The extension provides input bindings that allow functions to receive data from Dapr, such as state values or input from external systems. This allows functions to consume data from other systems and use it in their processing.
+
+- **Output bindings**: The extension provides output bindings that allow functions to send data to Dapr or external systems, such as publishing events or sending HTTP requests. This allows functions to produce output that can be consumed by other systems.
+
+- **Dapr API integration**: The Dapr extension for functions integrates with Dapr's HTTP API to perform operations such as saving state, publishing events, and invoking service-to-service requests. This integration is handled by the Dapr implicit.
+Extension provides both HTTP client & HTTP Server (Kestrel) to interact with Dapr's APIs. These are built on top of the Dapr SDK and provide a consistent interface for making HTTP requests.
 
  This extension supports all the languages that Azure Function supports :
 
