@@ -12,7 +12,7 @@ The following will get you started with a Function app that leverages the Dapr e
 
 ## Creating the function app
 
-> For reference or to skip ahead, you can clone and navigate to a working version of [this quickstart app here](../samples/quickstart).
+> For reference or to skip ahead, you can clone and navigate to a working version of [this quickstart app here](../quickstarts/javascript-quickstart/).
 
 1. Create a new directory and navigate to it in a terminal
 1. Run `func init --docker`
@@ -95,7 +95,7 @@ Now that we have our HTTP function, we want to add bindings to Dapr to read and 
     }
     ```
     This means whatever value we set for the payload of the `publish` output binding during execution will be set.  We could define the topic here in `function.json`, but we will define the topic name in the execution for this sample.
-1. Confirm your `function.json` matches the completed [sample here](../samples/quickstart/HttpTrigger/function.json).
+1. Confirm your `function.json` matches the completed [sample here](../quickstarts/javascript-quickstart/HttpTrigger/function.json).
 
 ## Authoring the first function
 
@@ -156,7 +156,7 @@ If you prefer, you can use VS Code debugging to use the [Azure Functions VS Code
 1. Open the project in VS Code.
 1. Open the command pallette and choose the command **Azure Functions: Initialize Project for Use with VS Code...**
     This will generate a `launch.json` file to easily run and debug your code.
-1. Specify the port you want Dapr to listen on in the `local.settings.json` file by adding a value for `DAPR_HTTP_PORT` of `3501` as shown in [the quickstart sample](../samples/quickstart/local.settings.json).  If you wanted to debug multiple apps at the same time you would need to assign unique ports for each.
+1. Specify the port you want Dapr to listen on in the `local.settings.json` file by adding a value for `DAPR_HTTP_PORT` of `3501` as shown in [the quickstart sample](../quickstarts/javascript-quickstart/local.settings.json).  If you wanted to debug multiple apps at the same time you would need to assign unique ports for each.
 1. Start the debugger
     You will see a window appear with your app running
 1. Open a seperate terminal and start the Dapr sidecar at the specified port.
@@ -195,7 +195,7 @@ We could easily create a second function app and include a function in it that w
       "name": "daprTrigger"
     }
     ```
-    You can see a completed `function.json` in the [quickstart sample here](../samples/quickstart/DaprSubscribeTrigger/function.json).
+    You can see a completed `function.json` in the [quickstart sample here](../quickstarts/javascript-quickstart/DaprSubscribeTrigger/function.json).
 1. Replace the `index.js` code for this function with the following:
 ```javascript
 module.exports = async function (context) {
@@ -228,7 +228,7 @@ Our project template already has a `Dockerfile` included.  If yours does not, yo
 
 ### Deploy the container to Kubernetes
 
-1. Copy the contents of [this deployment file](../samples/quickstart/deploy.yaml) to your machine in a new file named `deploy.yaml`.
+1. Copy the contents of [this deployment file](../quickstarts/javascript-quickstart/deploy.yaml) to your machine in a new file named `deploy.yaml`.
 1. Replace the name of the `image` on line 39 with your container registry and image name.
 1. Deploy the function app to your Kubernetes cluster: `kubectl apply -f deploy.yaml`.
     This will create a Kubernetes service named `azure-function` in your cluster exposing port 80 to trigger the function.  The dapr sidecar will also be configured to run alongside the service and communicate with the Azure Function via port 3001.
