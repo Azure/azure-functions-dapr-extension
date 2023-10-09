@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "OrderServiceDaprFun": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7062"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 31759,
+      "useSSL": false
+    }
+  }
+}
