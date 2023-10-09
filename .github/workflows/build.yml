@@ -25,7 +25,7 @@ jobs:
       CONFIGURATION: Release
       DEV_VERSION_SUFFIX: 99.99.99
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
-      DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME: dotnet-isolated-quickstart
+      DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME: dotnet-isolated-dapr-azure-function-orderservice
       NUPKG_OUTDIR: bin/Release/nugets
       MAVEN_OUTDIR: bin/Release/maven
       JAVA_LIB_WORKING_DIRECTORY: java-library
