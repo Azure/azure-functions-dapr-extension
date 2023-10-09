@@ -57,12 +57,11 @@ jobs:
           OWNER_NAME="${OWNER_NAME,,}" # convert to lowercase
           echo "Setting sample app registry to ghcr.io/${OWNER_NAME}"
           echo "APP_REGISTRY=ghcr.io/${OWNER_NAME}" >> $GITHUB_ENV
-      - name: Build samples docker images
+      - name: Build docker images
         run: |
           echo building docker image for ${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}
           docker build -f samples/dotnet-azurefunction/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_SAMPLE_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
-      - name: Build dotnet-isolated quickstart docker images
-        run: |
+
           echo building docker image for ${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}
           docker build -f quickstarts/dotnet-isolated/Dockerfile -t ${{ env.APP_REGISTRY }}/${{ env.DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME }}:${{ env.REL_VERSION }} .
       - name: Push docker images
