@@ -8,7 +8,7 @@ COPY /quickstarts/dotnet-isolated /src/quickstarts/dotnet-isolated
 
 RUN cd /src/quickstarts/dotnet-isolated && \
     mkdir -p /home/site/wwwroot && \
-    dotnet publish *.csproj --output /home/site/wwwroot && \
+    dotnet publish *.csproj --output /home/site/wwwroot
 
 FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated6.0
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
