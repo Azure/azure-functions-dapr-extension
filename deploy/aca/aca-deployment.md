@@ -1,7 +1,7 @@
 # Quickstart: DAPR with Functions on Azure Container Apps
 
-In this tutorial, a sample Dapr solution is deployed to Functions on Azure Container Apps via Bicep template.
-This Bicep script will deploy Function on Azure Container App along with DAPR extension, Azure Service Bus, DAPR Components - Redis as state store, Azure Event Hub as pub-sub.
+In this tutorial, a sample Dapr enabled Functions app on Azure Container App is deployed via Bicep template.
+This Bicep script will deploy Function on Azure Container App along with DAPR extension, DAPR Components - Redis as state store, Storage Account.
 
 You learn how to:
 
@@ -38,15 +38,16 @@ git clone https://github.com/Azure/azure-functions-dapr-extension.git
 ## Create resource group
 
 Container Apps support for Functions is currently in preview and is only available in the following regions. Specify the location from this list:
-Australia East
-Central US
-East US
-East US 2
-North Europe
-South Central US
-UK South
-West Europe
-West US 3
+
+- Australia East
+- Central US
+- East US
+- East US 2
+- North Europe
+- South Central US
+- UK South
+- West Europe
+- West US 3
 
 ```
 az group create --name {resourceGroupName} --location {region}
@@ -68,7 +69,7 @@ The Template deploys
 From az CLI run the following command:
 
 ```
-cd azure-functions-dapr-extension/aca-deployment
+cd ./azure-functions-dapr-extension/deploy/aca/
 az deployment group create --resource-group {resourceGroupName} --template-file deploy-samples.bicep
 ```
 
@@ -108,6 +109,7 @@ ContainerAppsConsoleLogs_CL
 | where RevisionName_s == $revision_name
 | where Log_s contains "Order22"
 | project Log_s
+```
 
 ## Clean up resources
 
