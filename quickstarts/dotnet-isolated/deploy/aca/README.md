@@ -111,6 +111,9 @@ ContainerAppsConsoleLogs_CL
 | project Log_s
 ```
 
+![image](https://github.com/ASHIQUEMD/azure-functions-dapr-extension/assets/16832724/4620e0fe-5f0d-4ee2-97cb-7105f422ab0f)
+
+
 You can also view the saved state with below curl command.
 
 ```
