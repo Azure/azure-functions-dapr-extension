@@ -1,7 +1,7 @@
 # Quickstart: DAPR with Functions on Azure Container Apps
 
-In this tutorial, a sample Dapr enabled Functions app on Azure Container App is deployed via Bicep template.
-This Bicep script will deploy Function on Azure Container App along with DAPR extension, DAPR Components - Redis as state store, Storage Account.
+In this tutorial, a sample Dapr enabled dotnet isolated Functions app on Azure Container App is deployed via Bicep template.
+This Bicep script will deploy Function on Azure Container App along with DAPR extension, DAPR Components - Redis as state store and Storage Account.
 
 You learn how to:
 
@@ -69,20 +69,20 @@ The Template deploys
 From az CLI run the following command:
 
 ```
-cd ./azure-functions-dapr-extension/deploy/aca/
-az deployment group create --resource-group {resourceGroupName} --template-file deploy-samples.bicep
+cd /azure-functions-dapr-extension/quickstarts/dotnet-isolated/deploy/aca
+az deployment group create --resource-group {resourceGroupName} --template-file deploy-quickstart.bicep
 ```
 
 ## Verify the Result
 
 Run the following CURL command to initiate a OrderService Function that will trigger CreateNewOrder process. A new Order is created and stored in the Redis store.
 
-Replace the {sample-functionapp-url} value with your actual function app URL ex: https://daprext-funcapp.wittyglacier-20884174.eastus.azurecontainerapps.io.
+Replace the {quickstart-functionapp-url} value with your actual function app URL ex: https://daprext-funcapp.wittyglacier-20884174.eastus.azurecontainerapps.io.
 
-Replace {sample-functionapp-name} with your function app name
+Replace {quickstart-functionapp-name} with your function app name
 
 ```
-curl --location 'https://{sample-functionapp-url.io}/api/invoke/{sample-functionapp-name}/CreateNewOrder' \
+curl --location 'https://{quickstart-functionapp-url.io}/api/invoke/{quickstart-functionapp-name}/CreateNewOrder' \
 --header 'Content-Type: application/json' \
 --data '{
     "data": {
@@ -109,6 +109,12 @@ ContainerAppsConsoleLogs_CL
 | where RevisionName_s == $revision_name
 | where Log_s contains "Order22"
 | project Log_s
+```
+
+You can also view the saved state with below curl command.
+
+```
+curl --location 'https://{quickstart-functionapp-url.io}/api/retrieveorder'
 ```
 
 ## Clean up resources
