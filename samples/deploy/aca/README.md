@@ -1,7 +1,7 @@
 # Quickstart: DAPR with Functions on Azure Container Apps
 
-In this tutorial, a sample Dapr enabled Functions app on Azure Container App is deployed via Bicep template.
-This Bicep script will deploy Function on Azure Container App along with DAPR extension, DAPR Components - Redis as state store, Storage Account.
+In this tutorial, a sample Dapr enabled dotnet in-proc Functions app on Azure Container App is deployed via Bicep template.
+This Bicep script will deploy Function on Azure Container App along with DAPR extension, DAPR Components - Redis as state store, Storage Account, Azure Event Hub.
 
 You learn how to:
 
@@ -69,7 +69,7 @@ The Template deploys
 From az CLI run the following command:
 
 ```
-cd ./azure-functions-dapr-extension/deploy/aca/
+cd ./azure-functions-dapr-extension/samples/deploy/aca/
 az deployment group create --resource-group {resourceGroupName} --template-file deploy-samples.bicep
 ```
 
