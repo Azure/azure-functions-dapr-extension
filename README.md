@@ -43,7 +43,7 @@ Extension provides both HTTP client & HTTP Server (Kestrel) to interact with Dap
 You can easily deploy Azure Functions with the Dapr extension in Azure Container Apps (ACA), self-hosted mode or Kubernetes. Follow the below quickstarts guides to deploy Azure Functions with Dapr Extension.
 
 - [Local](./deploy/local/local-deployment.md)
-- [Azure Container Apps](./deploy/aca/aca-deployment.md)
+- [Azure Container Apps](./quickstarts/dotnet-isolated/deploy/aca/README.md)
 - [Kubernetes](./deploy/kubernetes/kubernetes-deployment.md)
 
 If you are new to Azure Functions, it's recommended to [try out an Azure Function's quickstart first](https://docs.microsoft.com/azure/azure-functions/) to understand the basics of the programming model.
