@@ -22,3 +22,10 @@ Content-Type: application/json
         "Value": "Hello World"
     }
 ]
+
+### Test POST to function using Dapr invoke
+POST http://localhost:3501/SendMessageToKafka
+Content-Type: application/json
+dapr-app-id: functionapp
+
+{"data":{"message": "hello!" }}

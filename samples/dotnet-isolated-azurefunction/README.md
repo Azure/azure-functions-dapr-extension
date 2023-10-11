@@ -51,14 +51,14 @@ spec:
 
 Run function host with Dapr: 
 
-Windows
+Windows (requires Dapr 1.12+)
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- func host start
+dapr run -f .
 ```
 
-Linux/Mac OS
+Linux/Mac OS (requires Dapr 1.11+)
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ../components/ -- func host start
+dapr run -f .
 ```
 
 The command should output the dapr logs that look like the following:
@@ -97,7 +97,7 @@ public static JsonElement Run(
 
 Here the `DaprServiceInvocationTrigger` is used to receive and handle `CreateNewOrder` request and it first logs that this function is successfully triggered. Then it binds the content to the `JsonElement` object. The `DaprState` *output binding* will persist the order into the state store by serializing `JsonElement` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
 
-Now you can invoke this function by using the Dapr cli in a new command line terminal.  
+Now you can invoke this function by using either the `test.http` file with your favorite REST client, or use the Dapr cli in a new command line terminal.  
 
 
 Windows PowerShell
