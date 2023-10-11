@@ -1,0 +1,9 @@
+version: 1
+common:
+  resourcesPath: ../components
+apps:
+  - appDirPath: .
+    appID: functionapp
+    appPort: 3001
+    daprHTTPPort: 3501
+    command: ["func", "start"]
