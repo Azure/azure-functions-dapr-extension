@@ -17,7 +17,9 @@ This sample requires you to have the following installed on your machine:
 Now that we've locally set up Dapr, clone the repo, then navigate to the dotnet-isolated-azurefunction sample: 
 
 ```bash
-git clone https://github.com/dapr/azure-functions-extension.git
+git clone https://github.com/Azure/azure-functions-dapr-extension.git
+cd azure-functions-dapr-extension
+dotnet build --configfile nuget.config
 cd samples/dotnet-isolated-azurefunction
 ```
 In this folder, you will find `local.settings.json`, which lists a few app settings by the trigger/binding attributes.
