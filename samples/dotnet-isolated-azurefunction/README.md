@@ -349,6 +349,8 @@ To stop your services from running, simply stop the "dapr run" process. Alternat
 dapr stop --app-id functionapp
 ```
 
+# Troubleshooting guide
+If you run into issues, follow this [troubleshooting guild](../../troubleshooting-guide.md).
 
 # Deploy Dapr Function App into Kubernetes
 This section describes the steps to get the Dapr function app running in a Kubernetes cluster.
