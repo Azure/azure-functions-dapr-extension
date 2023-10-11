@@ -36,7 +36,7 @@ Welcome to the troubleshooting guide for Azure Functions Dapr Extension. This gu
 
     Windows: ```%appdata%\NuGet\NuGet.Config```
 
-    macOS: ```/Users/username/.nuget/NuGet.config```
+    macOS: Replace username with your username ```/Users/username/.nuget/NuGet.config```
 
     Edit the NuGet.config file and add the following content to specify the local package source, replace `/path/to/` with your actual path:
 
