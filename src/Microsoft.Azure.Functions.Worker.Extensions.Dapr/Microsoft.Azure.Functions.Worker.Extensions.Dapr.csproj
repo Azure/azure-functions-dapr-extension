@@ -34,16 +34,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj" />
-    <ProjectReference Include="..\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions.ExtensionInformationAttribute">
       <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Dapr</_Parameter1>
       <_Parameter2>$(SupportedVersion)</_Parameter2>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Azure.Functions.Extensions.Dapr.Core\Microsoft.Azure.Functions.Extensions.Dapr.Core.csproj" />
+    <ProjectReference Include="..\Microsoft.Azure.WebJobs.Extensions.Dapr\Microsoft.Azure.WebJobs.Extensions.Dapr.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
 </Project>

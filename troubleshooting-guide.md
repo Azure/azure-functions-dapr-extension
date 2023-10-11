@@ -38,14 +38,14 @@ Welcome to the troubleshooting guide for Azure Functions Dapr Extension. This gu
 
     macOS: Replace username with your username ```/Users/username/.nuget/NuGet.config```
 
-    Edit the NuGet.config file and add the following content to specify the local package source, replace `/path/to/` with your actual path:
+    Edit the NuGet.config file and add the following content to specify the local package source, replace `<home_directory>` with your actual path:
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
     <configuration>
         <packageSources>
             <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
-            <add key="nuget.local" value="/path/to/azure-functions-dapr-extension/local-packages" />
+            <add key="nuget.local" value="<home_directory>/azure-functions-dapr-extension/local-packages" />
         </packageSources>
     </configuration>
     ```
