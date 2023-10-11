@@ -54,7 +54,7 @@ You can run through a quickstart of developing JavaScript Azure Functions that l
 
 Azure Function triggers cause a function to run. A trigger defines how a function is invoked and a function must have exactly one trigger. Triggers have associated data, which is often provided as the payload of the function.
 
-| Trigger Type | Description | Samples |
+| Trigger Type | Description | Code Samples |
 | -- | -- | -- |
 | [daprBindingTrigger][binding-trigger-docs] | Trigger on a Dapr input binding | [C# Isolated][csharp-isolated-binding-trigger], [C# Inproc][csharp-binding-trigger], [JavaScript][javascript-binding-trigger], [Python V2][python-v2-binding-trigger], [Python V1][python-binding-trigger], [Java][java-binding-trigger], [PowerShell][powershell-binding-trigger] |
 | [daprServiceInvocationTrigger][service-invocation-trigger-docs] | Trigger on a Dapr service invocation | [C# Isolated][csharp-isolated-service-invocation-trigger], [C# Inproc][csharp-service-invocation-trigger], [JavaScript][javascript-service-invocation-trigger], [Python V2][python-v2-service-invocation-trigger], [Python V1][python-service-invocation-trigger], [Java][java-service-invocation-trigger], [PowerShell][powershell-service-invocation-trigger] |
