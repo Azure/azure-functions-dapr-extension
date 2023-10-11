@@ -38,7 +38,7 @@ Welcome to the troubleshooting guide for Azure Functions Dapr Extension. This gu
 
     macOS: ```/Users/username/.nuget/NuGet.config```
 
-    Edit the NuGet.config file and add the following content to specify the local package source:
+    Edit the NuGet.config file and add the following content to specify the local package source, replace `/path/to/` with your actual path:
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
