@@ -64,7 +64,7 @@ Azure Function triggers cause a function to run. A trigger defines how a functio
 
 Azure Function bindings is a way of declaratively connecting another resource to the function; bindings may be connected as **Input Bindings**, **Output Bindings**, or both. Data from bindings is provided to the function as parameters.
 
-| Binding Type | Direction | Description | Samples |
+| Binding Type | Direction | Description | Code Samples |
 | -- | -- | -- | -- |
 | [daprState][state-input-docs] | Input | Pull in Dapr state for an execution | [C# Isolated][csharp-isolated-state-input], [C# Inproc][csharp-state-input], [JavaScript][javascript-state-input], [Python V2][python-v2-state-input], [Python V1][python-state-input], [Java][java-state-input], [PowerShell][powershell-state-input] |
 | [daprSecret][secret-input-docs] | Input | Pull in Dapr secrets for an execution | [C# Isolated][csharp-isolated-secret-input], [C# Inproc][csharp-secret-input], [JavaScript][javascript-secret-input], [Python V2][python-v2-secret-input], [Python V1][python-secret-input], [Java][java-secret-input], [PowerShell][powershell-secret-input] ||
