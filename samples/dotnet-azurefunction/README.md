@@ -404,21 +404,23 @@ If you need a non-default namespace or in production environment, Helm has to be
 ```
     helm repo add bitnami https://charts.bitnami.com/bitnami
     helm repo update
-    kubectl create ns kafka
-    helm install dapr-kafka bitnami/kafka --wait --namespace kafka -f ./kafka-non-persistence.yaml
+    helm install dapr-kafka bitnami/kafka --wait -f ./kafka-non-persistence.yaml
 ```
 
- - Run `kubectl -n kafka get pods -w` to see Kafka pods are running. This might take a few minute, but you should see.
+ - Run `kubectl get pods -w` to see Kafka pods are running. This might take a few minute, but you should see.
    ```
     NAME                     READY   STATUS    RESTARTS   AGE
-    dapr-kafka-0             1/1     Running   0          2m7s
-    dapr-kafka-zookeeper-0   1/1     Running   0          2m57s
-    dapr-kafka-zookeeper-1   1/1     Running   0          2m13s
-    dapr-kafka-zookeeper-2   1/1     Running   0          109s
+    dapr-kafka-controller-0        1/1     Running   0          53m
+    dapr-kafka-controller-1        1/1     Running   0          53m
+    dapr-kafka-controller-2        1/1     Running   0          53m
    ```
-- Run `kubectl apply -f .\deploy\kafka.yaml` and observe that your kafka was successfully configured!
+- Run `kubectl apply -f .\deploy\kafka-bindings.yaml` and observe that your kafka bindings component was successfully configured!
    ```
    component.dapr.io/sample-topic created
+   ```
+- Run `kubectl apply -f .\deploy\kafka-pubsub.yaml` and observe that your kafka pub-sub component was successfully configured!
+   ```
+   component.dapr.io/pubsub created
    ```
 - Follow [secret management](https://docs.dapr.io/developing-applications/building-blocks/secrets/) instructions to securely manage your secrets in a production-grade application.
 

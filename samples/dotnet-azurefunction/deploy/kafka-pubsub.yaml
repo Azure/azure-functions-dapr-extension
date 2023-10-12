@@ -1,0 +1,25 @@
+ apiVersion: dapr.io/v1alpha1
+ kind: Component
+ metadata:
+   name: pubsub
+   namespace: default
+ spec:
+   type: pubsub.kafka
+   version: v1
+   metadata:
+   - name: brokers # Required. Kafka broker connection setting
+     value: "dapr-kafka.default.svc.cluster.local:9092" #localhost:9092 - for local testing
+   - name: clientID # Optional. Used as client tracing ID by Kafka brokers.
+     value: "my-dapr-app-id"
+   - name: authType # Required.
+     value: "password"
+   - name: disableTls # Optional. Disable TLS. This is not safe for production!! You should read the `Mutual TLS` section for how to use TLS.
+     value: "true"
+   - name: "saslUsername"
+     value: "user1"
+   - name: saslPassword 
+   # Required if authType is `password`. Make sure kafka is installed in the default namespace, otherwise secretKeyRef will not work.
+   # You can also provide directly password value instead of secretKeyRef. Read the kafka password with this command: `kubectl get secret dapr-kafka-user-passwords -o jsonpath='{.data.system-user-password}' | base64 --decode` Not recommended for production.
+     secretKeyRef:
+      name: dapr-kafka-user-passwords
+      key: system-user-password

@@ -31,3 +31,16 @@ spec:
           value: sample-topic
         - name: PubSubName
           value: pubsub
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: functionapp
+spec:
+  selector:
+    app: functionapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
