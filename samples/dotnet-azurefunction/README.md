@@ -514,6 +514,16 @@ dapr-sidecar-injector-675df889d5-22wxr   1/1     Running   0          10m
 functionapp-6d4cc6b7f7-2p9n9             2/2     Running   0          8s
 ```
 
+Run `kubectl get services functionapp` to see the public IP address, you can use this IP address access functions with http trigger.
+```
+NAME          TYPE           CLUSTER-IP   EXTERNAL-IP      PORT(S)        AGE
+functionapp   LoadBalancer                <external-ip>   80:32180/TCP   89m
+```
+You can use external-ip to invoke azure function as shown below
+```
+curl --location 'http://<external-ip>/api/StateInputBinding'
+```
+
 ## Test your Dapr Function App  
 Now let's try invoke our function. You can use the follwoing commad to the logs. Use `--tail` to specify the last `n` lines of logs.
 ```powershell
