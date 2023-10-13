@@ -2,7 +2,7 @@
 
 You can annotate your function Kubernetes deployments to include the Dapr sidecar.
 
-> IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr, the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/port` annotation or `--app-port` unless you have a trigger.  Doing so may lock your application from the Dapr sidecar. Port 3001 does not need to be exposed or defined if only using input and output bindings.
+> IMPORTANT: Port 3001 will only be exposed and listened if a Dapr trigger is defined in the function app.  When using Dapr, the sidecar will wait to receive a response from the defined port before completing instantiation.  This means it is important to NOT define the `dapr.io/app-port` annotation or `--app-port` unless you have a trigger.  Doing so may lock your application from the Dapr sidecar. Port 3001 does not need to be exposed or defined if only using input and output bindings.
 
 To generate a Dockerfile for your app if you don't already have one, you can run the following command in your function project:
 `func init --docker-only`.
@@ -55,9 +55,9 @@ spec:
         app: my-function
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "functionapp"
+        dapr.io/app-id: "functionapp"
         # Only define port of Dapr triggers are included
-        dapr.io/port: "3001"
+        dapr.io/app-port: "3001"
     spec:
       containers:
       - name: my-function

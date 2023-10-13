@@ -16,6 +16,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "functionapp"
+        # Only define port of Dapr triggers are included
         dapr.io/app-port: "3001"
     spec:
       containers:
@@ -31,3 +32,16 @@ spec:
           value: sample-topic
         - name: PubSubName
           value: pubsub
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: functionapp
+spec:
+  selector:
+    app: functionapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
