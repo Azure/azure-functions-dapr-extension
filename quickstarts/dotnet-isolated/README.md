@@ -167,6 +167,6 @@ You can use [test.http](test.http) get to read the data from state store.
 == APP == [TIMESTAMP] Executed 'Functions.RetrieveOrder' (Succeeded, Id=<ExecutionId>, Duration=186ms)
 ```
 ## Follow below links to deploy the function in ACA and Kubernetes
-### [Deploy Dapr Enabled Function App to Azure Container Apps (ACA)](./deploy/aca/deploy-quickstart.bicep)
+### [Deploy Dapr enabled Function App to Azure Container Apps (ACA)](./deploy/aca/deploy-quickstart.bicep)
 
-### [Deploy Dapr enabled function app to Kubernetes](../../deploy/kubernetes/kubernetes-deployment.md)
+### [Deploy Dapr enabled Function App to Kubernetes](../../deploy/kubernetes/kubernetes-deployment.md)
