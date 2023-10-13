@@ -479,8 +479,8 @@ spec:
         app: functionapp
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "functionapp"
-        dapr.io/port: "<app-port>"
+        dapr.io/app-id: "functionapp"
+        dapr.io/app-port: "<app-port>"
     spec:
       containers:
       - name: functionapp
