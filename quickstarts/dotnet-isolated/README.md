@@ -1,4 +1,4 @@
-# .NET Azure Function Sample in out-of-proc (OOP) mode
+# .NET Azure Function quicksart in Dotnet isolated mode
 
 This quickstart will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components in dotnet isolated mode. Please first go through the [Dapr quickstarts](https://github.com/dapr/quickstarts) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-csharp) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
@@ -166,7 +166,7 @@ You can use [test.http](test.http) get to read the data from state store.
 == APP == [TIMESTAMP] C# function processed a RetrieveOrder request from the Dapr Runtime.
 == APP == [TIMESTAMP] Executed 'Functions.RetrieveOrder' (Succeeded, Id=<ExecutionId>, Duration=186ms)
 ```
-
-### [Deploy Dapr enabled function app to ACA](./deploy/aca/deploy-quickstart.bicep)
+## Follow below links to deploy the function in ACA and Kubernetes
+### [Deploy Dapr Enabled Function App to Azure Container Apps (ACA)](./deploy/aca/deploy-quickstart.bicep)
 
 ### [Deploy Dapr enabled function app to Kubernetes](../../deploy/kubernetes/kubernetes-deployment.md)
