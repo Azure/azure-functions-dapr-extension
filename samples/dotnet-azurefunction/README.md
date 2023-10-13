@@ -480,6 +480,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "functionapp"
+        # Only define port of Dapr triggers are included
         dapr.io/app-port: "<app-port>"
     spec:
       containers:
