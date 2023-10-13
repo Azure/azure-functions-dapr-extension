@@ -8,7 +8,7 @@
    version: v1
    metadata:
    - name: brokers # Required. Kafka broker connection setting
-     value: "dapr-kafka.default.svc.cluster.local:9092" #localhost:9092 - for local testing
+     value: "dapr-kafka.default.svc.cluster.local:9092" #localhost:9092 - for local kafka
    - name: clientID # Optional. Used as client tracing ID by Kafka brokers.
      value: "my-dapr-app-id"
    - name: authType # Required.
