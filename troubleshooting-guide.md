@@ -91,11 +91,15 @@ Dapr sidecar is not present. Please see (https://aka.ms/azure-functions-dapr-sid
 The Dapr sidecar is configured to listen on port {portInt}, but the app server is running on port {appPort}. This may cause unexpected behavior. For more information, visit [this link](https://aka.ms/azfunc-dapr-app-config-error).
 ```
 
-**Possible Causes:** This error can occur when using Dapr Triggers. The Azure Function Dapr Extension starts an HTTP server on port 3001 when there is Dapr trigger in your Azure Function, you can configure this port using the DAPR_APP_PORT environment variable. If you provide an incorrect app_port value when running the Function app, it can lead to this problem.
+**Possible Causes:** This error occurs when using Dapr Triggers and not configuring the app port in Dapr settings for the ContainerApps properly. 
+
+**Note:** The Azure Function Dapr Extension starts an HTTP server on port 3001 when there is Dapr trigger in your Azure Function, you can configure this port using the DAPR_APP_PORT environment variable. If you provide an incorrect app_port value when running the Function app, it can lead to this problem.
 
 **Resolution:**
 
-***Configure the app-port correctly:*** Ensure that you provide the correct app_port value to Dapr in the Dapr configuration.
+***Configure the app-port correctly:*** When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar. This port is configurable, you can provide any other available port in your app settings for DAPR_APP_PORT env variable instead of 3001.
+
+Ensure that you provide the correct DAPR_APP_PORT value to Dapr in the Dapr configuration.
 
 - In Azure Container Apps (ACA), specify it in Bicep as shown below:
 
