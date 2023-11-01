@@ -97,7 +97,9 @@ The Dapr sidecar is configured to listen on port {portInt}, but the app server i
 
 **Resolution:**
 
-***Configure the app-port correctly:*** When you are triggering a function from Dapr, the extension will expose port 3001 automatically to listen to incoming requests from the Dapr sidecar. This port is configurable, you can provide any other available port in your app settings for DAPR_APP_PORT env variable instead of 3001.
+***Configure the app-port correctly:*** In your ContainerApp's Dapr settings,
+1. *If you are using a Dapr Trigger in your code*, make sure that the app port is set to 3001 or `DAPR_APP_PORT` if explicitly set as an environment variable for application.
+1. *If you are not using a Dapr Trigger in your code*, make sure that the app port is **not set**. It should be empty.
 
 Ensure that you provide the correct DAPR_APP_PORT value to Dapr in the Dapr configuration.
 
