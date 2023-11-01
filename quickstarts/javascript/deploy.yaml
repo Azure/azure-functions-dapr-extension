@@ -30,9 +30,9 @@ spec:
         app: azure-function
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "functionapp"
+        dapr.io/app-id: "functionapp"
         # Only define port if Dapr triggers are included
-        dapr.io/port: "3001"
+        dapr.io/app-port: "3001"
     spec:
       containers:
       - name: azure-function
