@@ -17,6 +17,13 @@
             "hostName": "127.0.0.1",
             "port": 5005,
             "preLaunchTask": "func: host start"
+        },
+        {
+            "name": "Attach to Node Functions",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "preLaunchTask": "func: host start"
         }
     ]
 }
