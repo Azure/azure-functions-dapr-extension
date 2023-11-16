@@ -353,7 +353,7 @@ Some secret stores need a metadata string to be provided. In order to specify mu
 ```json
 "metadata": "metadata.version_id=15&metadata.version_stage=AAA"
 ```
-## 5. Dapr Invoke output binding:
+## 5. Dapr Invoke output binding
 Dapr invoke output binding is could be used to invoke other azure functions or service where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke antother azure functions like RetrieveOrder.
 
 ```Python
@@ -399,7 +399,7 @@ Once InvokeOutputBinding is called, it will invoke the CreateNewOrde azure fucnt
 == APP == [TIMESTAMP] Executed 'Functions.InvokeOutputBinding' (Succeeded, Id=<ExecutionId>, Duration=6ms)
 ```
 
-# Step 4 - Cleanup
+# Step 6 - Cleanup
 
 To stop your services from running, simply stop the "dapr run" process. Alternatively, you can spin down each of your services with the Dapr CLI "stop" command. For example, to spin down both services, run these commands in a new command line terminal: 
 

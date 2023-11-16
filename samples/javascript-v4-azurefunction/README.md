@@ -18,7 +18,7 @@ Now that we've locally set up Dapr, clone the repo, then navigate to the javascr
 
 ```bash
 git clone https://github.com/dapr/azure-functions-extension.git
-cd samples/javascript-azurefunction
+cd samples/javascript-v4-azurefunction
 ```
 In this folder, you will find `local.settings.json`, which lists a few app settings used in the trigger/binding attributes.
 
@@ -397,7 +397,60 @@ Some secret stores need a metadata string to be provided. In order to specify mu
 "metadata": "metadata.version_id=15&metadata.version_stage=AAA"
 ```
 
-# Step 4 - Cleanup
+## 5. Dapr Invoke output binding
+Dapr invoke output binding can be used to invoke other Azure functions or services where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke another Azure functions like RetrieveOrder.
+
+```JavaScript
+const { app, output, trigger } = require('@azure/functions');
+
+const daprInvokeOutput = output.generic({
+    type: "daprInvoke",
+    direction: "out",
+    appId: "{appId}",
+    methodName: "{methodName}",
+    httpVerb: "post",
+    name: "invokePayload"
+});
+
+app.generic('InvokeOutputBinding', {
+    trigger: trigger.generic({
+        type: 'httpTrigger',
+        authLevel: 'anonymous',
+        methods: ['POST'],
+        route: "invoke/{appId}/{methodName}",
+        name: "req"
+    }),
+    return: daprInvokeOutput,
+    handler: async (request, context) => {
+        context.log("Node HTTP trigger function processed a request.");
+
+        const payload = await request.text();
+        context.log(JSON.stringify(payload));
+        
+        return { body: payload };
+    }
+});
+```
+
+Invoke the above function (InvokeOutputBinding) with a HTTP GET request.
+
+  ```
+  http://localhost:7071/api/invoke/functionapp/RetrieveOrder
+  ```
+
+Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure function and the output will look like as shown below.
+
+```
+== APP == [TIMESTAMP] Executing 'InvokeOutputBinding' (Reason='This function was programmatically called via the host APIs.', Id=<ExecutionId>)
+== APP == [TIMESTAMP] C# HTTP trigger function processed a request.
+== APP == [TIMESTAMP] Executing 'RetrieveOrder' (Reason='(null)', Id=<ExecutionId>)
+== APP == [TIMESTAMP] C# function processed a RetrieveOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] {"orderId":"41"}
+== APP == [TIMESTAMP] Executed 'RetrieveOrder' (Succeeded, Id=<ExecutionId>)
+== APP == [TIMESTAMP] Executed 'InvokeOutputBinding' (Succeeded, Id=<ExecutionId>)
+```
+
+# Step 6 - Cleanup
 
 To stop your services from running, simply stop the "dapr run" process. Alternatively, you can spin down each of your services with the Dapr CLI "stop" command. For example, to spin down both services, run these commands in a new command line terminal:
 
