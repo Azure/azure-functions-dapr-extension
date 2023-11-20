@@ -1,4 +1,4 @@
-# Node Azure Function Sample
+# Node V4 Azure Function Sample
 
 This tutorial will demonstrate how to use Azure Functions programming model to integrate with multiple Dapr components. Please first go through the [samples](https://github.com/dapr/samples) to get some contexts on various Dapr building blocks as well as go through Azure Functions [hello-world sample](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-function-vs-code?pivots=programming-language-javascript) to familiarize with function programming model.
 We'll be running a Darp'd function app locally:
@@ -18,7 +18,7 @@ Now that we've locally set up Dapr, clone the repo, then navigate to the javascr
 
 ```bash
 git clone https://github.com/dapr/azure-functions-extension.git
-cd samples/javascript-azurefunction
+cd samples/javascript-v4-azurefunction
 ```
 In this folder, you will find `local.settings.json`, which lists a few app settings used in the trigger/binding attributes.
 
@@ -103,10 +103,29 @@ You're up and running! Both Dapr and your app logs will appear here.
 ## 1. Service Invocation and State Management: Create New Order and Retrieve Order
 
 ```javascript
-module.exports = async function (context) {
-    context.log("Node function processed a CreateNewOrder request from the Dapr Runtime.");
-    context.bindings.order = context.bindings.payload["data"];
-};
+const { app, output, trigger } = require('@azure/functions');
+
+const daprStateOuput = output.generic({
+    type: "daprState",
+    stateStore: "%StateStoreName%",
+    direction: "out",
+    name: "order",
+    key: "order"
+});
+
+app.generic('CreateNewOrder', {
+    trigger: trigger.generic({
+        type: 'daprServiceInvocationTrigger',
+        name: "payload"
+    }),
+    return: daprStateOuput,
+    handler: async (request, context) => {
+        context.log("Node function processed a CreateNewOrder request from the Dapr Runtime.");
+        context.log(context.triggerMetadata.payload.data)
+
+       return context.triggerMetadata.payload.data;
+    }
+});
 ```
 
 Here `DaprServiceInvocationTrigger` is used to receive and handle `CreateNewOrder` request which first logs that this function is successfully triggered. Then it binds the content to the `order` object. The `DaprState` *output binding* will persist the order into the state store by serializing `order` object into a state arrary format and posting it to `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`.
@@ -157,12 +176,29 @@ In your terminal window, you should see logs indicating that the message was rec
 In order to confirm the state is now persisted, you can move to the next function:
 
 ```javascript
-module.exports = async function (context) {
-    context.log("Node function processed a RetrieveOrder request from the Dapr Runtime.");
+const { app, input, trigger } = require('@azure/functions');
 
-    // print the fetched state value
-    context.log(context.bindings.data);
-};
+const daprStateInput = input.generic({
+    type: "daprState",
+    stateStore: "%StateStoreName%",
+    direction: "in",
+    name: "order",
+    key: "order"
+});
+
+app.generic('RetrieveOrder', {
+    trigger: trigger.generic({
+        type: 'daprServiceInvocationTrigger',
+        name: "payload"
+    }),
+    extraInputs: [daprStateInput],
+    handler: async (request, context) => {
+        context.log("Node function processed a RetrieveOrder request from the Dapr Runtime.");
+        const daprStateInputValue = context.extraInputs.get(daprStateInput);
+        // print the fetched state value
+        context.log(daprStateInputValue);
+    }
+});
 ```
 
 Similarly, the function will be triggered by any `RetrieveOrder` service invocation request. However, here `DaprState` *input binding* is used to fetch the latest value of the key `order` and bind the value to string object `data`' before executing the function block.
@@ -180,11 +216,31 @@ In your terminal window, you should see logs to confirm the expected result:
 ## 2. Pub/Sub: TransferEventBetweenTopics and PrintTopicMessage
 
 ```javascript
-module.exports = async function (context) {
-    context.log("Node function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
+const { app, output, trigger } = require('@azure/functions');
 
-    context.bindings.pubEvent = { "payload": "Transfer from Topic A: " + JSON.stringify(context.bindings.subEvent.data) };
-}
+const daprPublishOutput = output.generic({
+    type: "daprPublish",
+    direction: "out",
+    pubsubname: "%PubSubName%",
+    topic: "B",
+    name: "payload"
+});
+
+app.generic('TransferEventBetweenTopics', {
+    trigger: trigger.generic({
+        type: 'daprTopicTrigger',
+        name: "subEvent",
+        pubsubname: "%PubSubName%",
+        topic: "A"
+    }),
+    return: daprPublishOutput,
+    handler: async (request, context) => {
+        context.log("Node function processed a TransferEventBetweenTopics request from the Dapr Runtime.");
+        context.log(context.triggerMetadata.subEvent.data);
+
+        return { payload: context.triggerMetadata.subEvent.data };
+    }
+});
 ```
 
 Here `DaprTopicTrigger` is used to subscribe to topic `A`, so whenever a message is published on topic `A`, the message will bind to `context.bindings.subEvent`. Please see the [`CloudEvent`](https://github.com/cloudevents/spec/blob/master/spec.md) for details.
@@ -221,22 +277,50 @@ The Dapr logs should show the following:
 == APP == [TIMESTAMP] Executed 'PrintTopicMessage' (Succeeded, Id={AnotherExectuionId})
 ```
 
-## 3. Dapr Binding: 
+## 3. Dapr Binding
 This section describes how this extension integrates with the Dapr Binding component. Here Kafka binding is used as an example. Please refer [this doc to spin up Kafka locally](../../samples/dapr-kafka/README.md). In the example below, `DaprBindingTrigger` is used to have the azure function triggerred when a new message arrives at Kafka.
 
 ```javascript
-module.exports = async function (context) {
-    context.log("Node function processed a ConsumeMessageFromKafka request from the Dapr Runtime.");
-    context.log(`Trigger data: ${JSON.stringify(context.bindings.triggerData)}`);
-};
+const { app, trigger } = require('@azure/functions');
+
+app.generic('ConsumeMessageFromKafka', {
+    trigger: trigger.generic({
+        type: 'daprBindingTrigger',
+        bindingName: "%KafkaBindingName%",
+        name: "triggerData"
+    }),
+    handler: async (request, context) => {
+        context.log("Node function processed a ConsumeMessageFromKafka request from the Dapr Runtime.");
+        context.log(context.triggerMetadata.triggerData)
+    }
+});
 ```
 Now let's look at how our function uses `DaprBinding` to push messages into our Kafka instance in `SendMessageToKafka` function:
 
 ```javascript
-module.exports = async function (context) {
-    context.log("Node function processed a SendMessageToKafka request from the Dapr Runtime.");
-    context.bindings.messages = { "data": context.bindings.args };
-};
+const { app, output, trigger } = require('@azure/functions');
+
+const daprBindingOuput = output.generic({
+    type: "daprBinding",
+    direction: "out",
+    bindingName: "%KafkaBindingName%",
+    operation: "create",
+    name: "messages"
+});
+
+app.generic('SendMessageToKafka', {
+    trigger: trigger.generic({
+        type: 'daprServiceInvocationTrigger',
+        name: "payload"
+    }),
+    return: daprBindingOuput,
+    handler: async (request, context) => {
+        context.log("Node function processed a SendMessageToKafka request from the Dapr Runtime.");
+        context.log(context.triggerMetadata.payload)
+
+        return { "data": context.triggerMetadata.payload };
+    }
+});
 ```
 `DaprBinding` *output binding* sends the payload to the `sample-topic` Kafka Dapr binding.
 
@@ -272,35 +356,33 @@ This section demonstrates how `DaprSecret` **input binding** integrates with Dap
 Please refer to [Dapr Secret Store doc](https://docs.dapr.io/operations/components/setup-secret-store/) to set up other supported secret stores.
 
 ```js
-module.exports = async function (context) {
-    context.log("Node function processed a RetrieveSecret request from the Dapr Runtime.");
+const { app, input, trigger } = require('@azure/functions');
 
-    // print the fetched secret value
-    for( var key in context.bindings.secret)
-    {
-        context.log(`Stored secret: Key = ${key}, Value =${context.bindings.secret[key]}`);
-    }
-};
-```
+const daprSecretInput = input.generic({
+    type: "daprSecret",
+    secretStoreName: "localsecretstore",
+    metadata: "metadata.namespace=default",
+    direction: "in",
+    name: "secret",
+    key: "my-secret"
+});
 
-```json
-{
-  "bindings": [
-    {
-      "type": "daprServiceInvocationTrigger",
-      "name": "payload",
-      "direction": "in"
-    },
-    {
-      "type": "daprSecret",
-      "direction": "in",
-      "name": "secret",
-      "key": "my-secret",
-      "secretStoreName": "localsecretstore",
-      "metadata": "metadata.namespace=default"
+app.generic('RetrieveSecret', {
+    trigger: trigger.generic({
+        type: 'daprServiceInvocationTrigger',
+        name: "payload"
+    }),
+    extraInputs: [daprSecretInput],
+    handler: async (request, context) => {
+        context.log("Node function processed a RetrieveSecret request from the Dapr Runtime.");
+        const daprSecretInputValue = context.extraInputs.get(daprSecretInput);
+
+        // print the fetched secret value
+        for (var key in daprSecretInputValue) {
+            context.log(`Stored secret: Key=${key}, Value=${daprSecretInputValue[key]}`);
+        }
     }
-  ]
-}
+});
 ```
 
 `DaprSecret` *input binding* retreives the secret named by `my-secret` and binds to `secret` as a dictionary object. Since Local Secret Store supports multiple keys in a secret, the secret dictionary could include multiple key value pairs and you can access the specfic one. For other secret store only supports one keys, the dictionary will only contain one key value pair where key matches the secret name, namely `my-secret` in this example, and the actual secret value is in the property value. This sample just simply prints out all secrets, but please do not log any real secret in your production code.
@@ -318,11 +400,36 @@ Some secret stores need a metadata string to be provided. In order to specify mu
 ## 5. Dapr Invoke output binding
 Dapr invoke output binding can be used to invoke other Azure functions or services where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke another Azure functions like RetrieveOrder.
 
-```javascript
-module.exports = async function (context, req) {
-    context.log("Node HTTP trigger function processed a request.");
-    context.bindings.invokePayload = { body: req.body };
-};
+```JavaScript
+const { app, output, trigger } = require('@azure/functions');
+
+const daprInvokeOutput = output.generic({
+    type: "daprInvoke",
+    direction: "out",
+    appId: "{appId}",
+    methodName: "{methodName}",
+    httpVerb: "post",
+    name: "invokePayload"
+});
+
+app.generic('InvokeOutputBinding', {
+    trigger: trigger.generic({
+        type: 'httpTrigger',
+        authLevel: 'anonymous',
+        methods: ['POST'],
+        route: "invoke/{appId}/{methodName}",
+        name: "req"
+    }),
+    return: daprInvokeOutput,
+    handler: async (request, context) => {
+        context.log("Node HTTP trigger function processed a request.");
+
+        const payload = await request.text();
+        context.log(JSON.stringify(payload));
+        
+        return { body: payload };
+    }
+});
 ```
 
 Invoke the above function (InvokeOutputBinding) with a HTTP GET request.

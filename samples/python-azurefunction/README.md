@@ -450,7 +450,57 @@ Some secret stores need a metadata string to be provided. In order to specify mu
 ```
 
 
-# Step 4 - Cleanup
+## 5. Dapr Invoke output binding
+Dapr invoke output binding can be used to invoke other Azure functions or services where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke another Azure functions like RetrieveOrder.
+
+```powershell
+import json
+import logging
+import azure.functions as func
+
+
+def main(req: func.HttpRequest,
+         payload: func.Out[bytes]) -> func.HttpResponse:
+    logging.info('Python InvokeOutputBinding processed a request.')
+    data = req.params.get('data')
+    if not data:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            data = req_body.get('data')
+
+    if data:
+        logging.info(f"Url: {req.url}, Data: {data}")
+        payload.set(json.dumps({"body": data}).encode('utf-8'))
+        return func.HttpResponse(f"Url: {req.url}, Data: {data}")
+    else:
+        return func.HttpResponse(
+            "Please pass a data on the query string or in the request body",
+            status_code=400
+        )
+```
+
+Invoke the above function (InvokeOutputBinding) with a HTTP GET request.
+
+  ```
+  http://localhost:7071/api/invoke/functionapp/RetrieveOrder
+  ```
+
+Once InvokeOutputBinding is called, it will invoke the RetrieveOrder azure function and the output will look like as shown below.
+
+```
+== APP == [TIMESTAMP] Executing 'Functions.InvokeOutputBinding' (Reason='This function was programmatically called via the host APIs.', Id=<ExecutionId>)
+== APP == [TIMESTAMP] Powershell InvokeOutputBinding processed a request.
+== APP == [TIMESTAMP] Executing 'Functions.RetrieveOrder' (Reason='(null)', Id=<ExecutionId>)
+== APP == [TIMESTAMP] PowerShell function processed a RetrieveOrder request from the Dapr Runtime.
+== APP == [TIMESTAMP] {"orderId":"41"}
+== APP == [TIMESTAMP] Executed 'Functions.RetrieveOrder' (Succeeded, Id=<ExecutionId>)
+== APP == [TIMESTAMP] Executed 'Functions.InvokeOutputBinding' (Succeeded, Id=<ExecutionId>)
+```
+
+# Step 6 - Cleanup
 
 To stop your services from running, simply stop the "dapr run" process. Alternatively, you can spin down each of your services with the Dapr CLI "stop" command. For example, to spin down both services, run these commands in a new command line terminal: 
 

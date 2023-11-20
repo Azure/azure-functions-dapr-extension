@@ -316,7 +316,7 @@ Given differnt secret store, the metadata string needs to be provided. In order 
 [DaprSecret("vault", "my-secret",  Metadata = "metadata.version_id=15&metadata.version_stage=AAA"`.
 ```
 
-## 5. Dapr Invoke output binding:
+## 5. Dapr Invoke output binding
 Dapr invoke output binding can be used to invoke other Azure functions or services where it will act as a proxy. For example, In the below Azure function, which gets triggered on HttpTrigger, can invoke another Azure functions like RetrieveOrder.
 
 ```CSharp
