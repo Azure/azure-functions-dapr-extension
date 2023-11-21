@@ -72,12 +72,12 @@ Run function host with Dapr:
 
 Windows
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- mvn azure-functions:run
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --resources-path ..\components\ -- mvn azure-functions:run
 ```
 
 Linux/Mac OS
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ../components/ -- mvn azure-functions:run
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --resources-path ../components/ -- mvn azure-functions:run
 ```
 
 The command should output the dapr logs that look like the following:

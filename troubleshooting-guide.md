@@ -79,7 +79,7 @@ Dapr sidecar is not present. Please see (https://aka.ms/azure-functions-dapr-sid
     ```
 - If you are running your Azure Function locally, make sure you are [running the function app with Dapr](https://github.com/ASHIQUEMD/azure-functions-dapr-extension/tree/master/samples/python-v2-azurefunction#step-2---run-function-app-with-dapr). Execute the following command:
     ```bash
-    dapr run --app-id functionapp --app-port 3001  --components-path ..\components\ -- func host start 
+    dapr run --app-id functionapp --app-port 3001  --resources-path ..\components\ -- func host start 
     ```
 
 **Preventive Measures:** To prevent this error, always ensure that Dapr is properly set up and enabled in your environment before using Dapr bindings and triggers with Azure Functions.
@@ -126,7 +126,7 @@ annotations:
 - For local development, make sure to provide --app-port when running the Function app with Dapr:
 
 ```
-dapr run --app-id functionapp --app-port 3001 --components-path ..\components\ -- func host start 
+dapr run --app-id functionapp --app-port 3001 --resources-path ..\components\ -- func host start 
 ```
 
 **Preventive Measures:** To prevent this error, always configure the app-port parameter correctly in your Dapr setup.
