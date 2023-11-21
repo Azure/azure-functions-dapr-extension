@@ -53,12 +53,12 @@ Run function host with Dapr:
 
 Windows
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ..\components\ -- func host start
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --resources-path ..\components\ -- func host start
 ```
 
 Linux/Mac OS
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --components-path ../components/ -- func host start
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 --resources-path ../components/ -- func host start
 ```
 
 The command should output the dapr logs that look like the following:
