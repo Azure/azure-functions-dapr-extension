@@ -1,6 +1,6 @@
 const { app, output, trigger } = require('@azure/functions');
 
-const daprStateOuput = output.generic({
+const daprStateOutput = output.generic({
     type: "daprState",
     stateStore: "%StateStoreName%",
     direction: "out",
@@ -16,7 +16,7 @@ app.generic('StateOutputBinding', {
         route: "state/{key}",
         name: "req"
     }),
-    return: daprStateOuput,
+    return: daprStateOutput,
     handler: async (request, context) => {
         context.log("Node HTTP trigger function processed a request.");
 
