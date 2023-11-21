@@ -67,7 +67,7 @@ Build the function app:
 dotnet build -o bin/ extensions.csproj
 ```
 
-Alternatively you can install the Dapr extension, run the following command. Get the `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
+Alternatively, you can install the Dapr extension by running the following command. Retrieve the latest `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
 
 ```
 func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>

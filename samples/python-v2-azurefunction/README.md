@@ -68,7 +68,7 @@ The Python v2 programming model introduces the concept of blueprints. A blueprin
 dotnet build -o bin/ extensions.csproj
 ```
 
-Alternatively you can install the Dapr extension, run the following command. Get the `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
+Alternatively, you can install the Dapr extension by running the following command. Retrieve the latest `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
 
 ```
 func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>
@@ -221,7 +221,14 @@ def main(payload, data: str) :
 ```
 
 Similarly, the function will be triggered by any `RetrieveOrder` service invocation request such as:
+
+Windows Command Prompt
+```sh
+dapr invoke --app-id functionapp --method RetrieveOrder --data "{}"
 ```
+
+Linux or MacOS
+```sh
 dapr invoke --app-id functionapp --method RetrieveOrder --data '{}'
 ```
 
