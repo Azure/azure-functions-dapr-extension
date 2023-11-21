@@ -70,16 +70,16 @@ Note that this extensions.csproj file is required in order to reference the exce
 func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>
 ```
 
-Run function host with Dapr. `--components-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
+Run function host with Dapr. `--resources-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
 
 Windows
 ```
-dapr run --app-id functionapp --app-port 3001  --components-path ..\components\ -- func host start 
+dapr run --app-id functionapp --app-port 3001  --resources-path ..\components\ -- func host start 
 ```
 
 Linux/MacOS
 ```
-dapr run --app-id functionapp --app-port 3001  --components-path ../components/ -- func host start 
+dapr run --app-id functionapp --app-port 3001  --resources-path ../components/ -- func host start 
 ```
 
 The command should output the dapr logs that look like the following:

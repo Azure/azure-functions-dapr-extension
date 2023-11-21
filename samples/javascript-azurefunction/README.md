@@ -72,17 +72,17 @@ Run function host with Dapr:
 
 Windows
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --components-path ..\components\ -- func host start --no-build
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --resources-path ..\components\ -- func host start --no-build
 ```
 
 Linux/MacOS
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --components-path ../components/ -- func host start --no-build
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --resources-path ../components/ -- func host start --no-build
 ```
 
 Linux/MacOS
 ```
-dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --components-path ../components/ -- func host start --no-build
+dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501  --resources-path ../components/ -- func host start --no-build
 ```
 
 The command should output the dapr logs that look like the following:
