@@ -62,7 +62,7 @@ Build the function app:
 dotnet build -o bin extensions.csproj
 ```
 
-Note that this extensions.csproj file is required in order to reference the exception as a project rather than as an nuget package. To do the equivalent step with a published version of the extension on nuget.org, run the following step:
+Alternatively you can install the Dapr extension, run the following command. Get the `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
 
 ```
 func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>

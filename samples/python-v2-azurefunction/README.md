@@ -68,7 +68,7 @@ The Python v2 programming model introduces the concept of blueprints. A blueprin
 dotnet build -o bin/ extensions.csproj
 ```
 
-Note that this extensions.csproj file is required in order to reference the exception as a project rather than as an nuget package. To do the equivalent step with a [published version](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr) of the extension on nuget.org, run the following step:
+Alternatively you can install the Dapr extension, run the following command. Get the `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
 
 ```
 func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>
@@ -81,16 +81,16 @@ py -m venv .venv
 .venv\scripts\activate
 ```
 
-#### In your requirements.text file, add the following line:
-
-```bash
-azure-functions==1.18.0b3
-```
-
 #### Install the Dapr python library
 
 ```bash
 pip install -r .\requirements.txt
+```
+
+#### Modify your `local.setting.json` file with the following configuration:
+
+```bash
+"PYTHON_ISOLATE_WORKER_DEPENDENCIES":1
 ```
 
 #### Run function host with Dapr. `--resources-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
