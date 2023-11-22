@@ -17,6 +17,9 @@ app.generic('StateInputBinding', {
         name: "req"
     }),
     extraInputs: [daprStateInput],
+    return: output.generic({
+        type: "http",
+    }),
     handler: async (request, context) => {
         context.log("Node HTTP trigger function processed a request.");
 
@@ -24,6 +27,6 @@ app.generic('StateInputBinding', {
         // print the fetched state value
         context.log(daprStateInputValue);
 
-        return daprStateInputValue;
+        return { body: daprStateInputValue };
     }
 });
