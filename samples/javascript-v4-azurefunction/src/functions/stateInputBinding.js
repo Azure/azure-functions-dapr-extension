@@ -1,4 +1,4 @@
-const { app, input, trigger } = require('@azure/functions');
+const { app, input, trigger, output } = require('@azure/functions');
 
 const daprStateInput = input.generic({
     type: "daprState",
