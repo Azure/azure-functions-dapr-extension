@@ -77,7 +77,7 @@ func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>
 #### Create and activate a virtual environment
 
 ```PowerShell
-py -m venv .venv
+python -m venv .venv
 .venv\scripts\activate
 ```
 
