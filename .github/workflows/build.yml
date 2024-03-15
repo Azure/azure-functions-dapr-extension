@@ -142,6 +142,8 @@ jobs:
           --repo "${GITHUB_REPOSITORY}" \
           --title "Azure Functions Dapr Extension v${REL_VERSION}" \
           --notes "Release Azure Functions Dapr Extension v${REL_VERSION}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload NuGet and Maven packages to Azure blob storage
         if: |
           startsWith(github.ref, 'refs/tags/v') &&
