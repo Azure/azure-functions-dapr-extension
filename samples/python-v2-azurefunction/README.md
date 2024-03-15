@@ -62,19 +62,38 @@ The Python v2 programming model introduces the concept of blueprints. A blueprin
 
 # Step 2 - Run Function App with Dapr
 
-Build the function app:
+#### Build the function app:
 
 ```
 dotnet build -o bin/ extensions.csproj
 ```
 
-Note that this extensions.csproj file is required in order to reference the exception as a project rather than as an nuget package. To do the equivalent step with a published version of the extension on nuget.org, run the following step:
+Alternatively, you can install the Dapr extension by running the following command. Retrieve the latest `version` from [here](https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Dapr).
 
 ```
 func extensions install -p Microsoft.Azure.WebJobs.Extensions.Dapr -v <version>
 ```
 
-Run function host with Dapr. `--resources-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
+#### Create and activate a virtual environment
+
+```PowerShell
+python -m venv .venv
+.venv\scripts\activate
+```
+
+#### Install the Dapr python library
+
+```bash
+pip install -r .\requirements.txt
+```
+
+#### Modify your `local.setting.json` file with the following configuration:
+
+```bash
+"PYTHON_ISOLATE_WORKER_DEPENDENCIES":1
+```
+
+#### Run function host with Dapr. `--resources-path` flag specifies the directory stored all Dapr Components for this sample. They should be language ignostic.
 
 Windows
 ```
@@ -202,7 +221,14 @@ def main(payload, data: str) :
 ```
 
 Similarly, the function will be triggered by any `RetrieveOrder` service invocation request such as:
+
+Windows Command Prompt
+```sh
+dapr invoke --app-id functionapp --method RetrieveOrder --data "{}"
 ```
+
+Linux or MacOS
+```sh
 dapr invoke --app-id functionapp --method RetrieveOrder --data '{}'
 ```
 
