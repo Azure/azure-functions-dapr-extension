@@ -63,7 +63,8 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr
             }
 
             return Task.FromResult<ITriggerBinding?>(
-                new DaprTopicTriggerBinding(this.logger, this.serviceListener, pubSubName, topic, route, parameter));
+                new DaprTriggerBindingWrapper(
+                    new DaprTopicTriggerBinding(this.logger, this.serviceListener, pubSubName, topic, route, parameter)));
         }
 
         class DaprTopicTriggerBinding : DaprTriggerBindingBase
