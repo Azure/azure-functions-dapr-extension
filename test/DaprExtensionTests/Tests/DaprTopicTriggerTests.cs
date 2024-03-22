@@ -133,6 +133,7 @@ namespace DaprExtensionTests
                 s => AssertDefaults(s, nameof(Functions.BytesTopic)),
                 s => AssertDefaults(s, nameof(Functions.CloudEventTopic)),
                 s => AssertDefaults(s, nameof(Functions.CustomTypeTopic)),
+                s => AssertDefaults(s, nameof(Functions.DaprTopicTriggerRetryTest)),
                 s => AssertDefaults(s, nameof(Functions.IntTopic)),
                 s => AssertDefaults(s, nameof(Functions.JsonElementTopic)),
                 s =>
@@ -276,11 +277,8 @@ namespace DaprExtensionTests
 
             [FixedDelayRetry(3, "00:00:01")]
             public static void DaprTopicTriggerRetryTest(
-             [DaprTopicTrigger("MyPubSub")] byte[] input,
-            ILogger log)
-            {
-                throw new Exception("unhandled error");
-            }
+                 [DaprTopicTrigger("MyPubSub")] byte[] input,
+                ILogger log) => throw new Exception("unhandled error");
         }
 
         class CustomType
