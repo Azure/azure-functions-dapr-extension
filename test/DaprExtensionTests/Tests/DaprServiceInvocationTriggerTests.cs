@@ -18,6 +18,8 @@ namespace DaprExtensionTests
     using Xunit.Abstractions;
     using System.Text.Json;
     using Newtonsoft.Json.Linq;
+    using DaprExtensionTests.Tests;
+    using System.Linq;
 
     public class DaprServiceInvocationTriggerTests : DaprTestBase
     {
@@ -150,6 +152,18 @@ namespace DaprExtensionTests
             Assert.Equal("\"5\"", result);
         }
 
+        [Fact]
+        public async Task DaprServiceInvocationTriggerRetrySupport()
+        {
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/DaprServiceInvocationTriggerRetryTest");
+
+            IEnumerable<string> functionLogs = this.GetLogs("Function.DaprServiceInvocationTriggerRetryTest");
+            Assert.NotEmpty(functionLogs);
+            Assert.Contains("Function execution failed after '5' retries.", functionLogs);
+        }
+
         static class Functions
         {
             public static int ReturnInt([DaprServiceInvocationTrigger] int input) => input;
@@ -208,6 +222,14 @@ namespace DaprExtensionTests
                 [DaprState("store1", Key = "{input.stateKey}")] string existingState)
             {
                 return existingState;
+            }
+
+            [FixedDelayRetry(5, "00:00:01")]
+            public static void DaprServiceInvocationTriggerRetryTest(
+            [DaprServiceInvocationTrigger] object args,
+            ILogger log)
+            {
+                throw new Exception("unhandled error");
             }
         }
 
