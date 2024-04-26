@@ -151,7 +151,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
             try
             {
-                var res = await this.daprClient.GetAsync($"{this.daprAddress}/v1.0/metadata", cancellationToken);
+                var res = await this.daprClient.GetAsync(this.logger, $"{this.daprAddress}/v1.0/metadata", cancellationToken);
                 resBody = await res.Content.ReadAsStringAsync();
                 if (res.StatusCode != System.Net.HttpStatusCode.OK)
                 {
