@@ -87,6 +87,20 @@
             Assert.Equal(serializedInput, result);
         }
 
+        [Fact]
+        public async Task DaprBindingTriggerRetryTest()
+        {
+            string input = TriggerDataInput;
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                $"http://localhost:3001/DaprBindingTriggerRetryTest",
+                input);
+
+            IEnumerable<string> functionLogs = this.GetLogs("Function.DaprBindingTriggerRetryTest");
+            Assert.NotEmpty(functionLogs);
+            Assert.Contains("Function execution failed after '6' retries.", functionLogs);
+        }
+
         private readonly static string TriggerDataInput = JsonSerializer.Serialize(new
         {
             Metadata = new Dictionary<string, string>()
@@ -142,6 +156,14 @@
                 }
                 double result = arg1.GetDouble() + arg2.GetDouble();
                 return result.ToString();
+            }
+
+            [FixedDelayRetry(6, "00:00:01")]
+            public static void DaprBindingTriggerRetryTest(
+            [DaprBindingTrigger] object input,
+            ILogger log)
+            {
+                throw new Exception("unhandled error");
             }
         }
 
