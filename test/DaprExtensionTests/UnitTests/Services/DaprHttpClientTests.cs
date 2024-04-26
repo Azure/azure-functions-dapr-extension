@@ -5,17 +5,19 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Extensions.Logging;
     using Moq;
     using Xunit;
 
     public class DaprHttpClientTests
     {
-        private readonly ILoggerFactory loggerFactory;
+        private readonly ILogger logger;
 
         public DaprHttpClientTests()
         {
-            this.loggerFactory = new Mock<LoggerFactory>().Object;
+            var loggerFactory = new Mock<LoggerFactory>().Object;
+            this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory());
         }
 
         [Fact]
@@ -23,12 +25,12 @@
         {
             // Arrange
             var clientFactory = new TestHttpClientFactory(new HttpResponseMessage(HttpStatusCode.OK));
-            var httpClient = new DaprHttpClient(this.loggerFactory, clientFactory);
+            var httpClient = new DaprHttpClient(clientFactory);
             var content = new StringContent("Hello World");
             var cancellationToken = CancellationToken.None;
 
             // Act
-            var response = await httpClient.PostAsync("http://localhost/api", content, cancellationToken);
+            var response = await httpClient.PostAsync(this.logger, "http://localhost/api", content, cancellationToken);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -39,11 +41,11 @@
         {
             // Arrange
             var clientFactory = new TestHttpClientFactory(new HttpResponseMessage(HttpStatusCode.OK));
-            var httpClient = new DaprHttpClient(this.loggerFactory, clientFactory);
+            var httpClient = new DaprHttpClient(clientFactory);
             var cancellationToken = CancellationToken.None;
 
             // Act
-            var response = await httpClient.GetAsync("http://localhost/api", cancellationToken);
+            var response = await httpClient.GetAsync(this.logger, "http://localhost/api", cancellationToken);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -54,12 +56,12 @@
         {
             // Arrange
             var clientFactory = new TestHttpClientFactory(new HttpResponseMessage(HttpStatusCode.OK));
-            var httpClient = new DaprHttpClient(this.loggerFactory, clientFactory);
+            var httpClient = new DaprHttpClient(clientFactory);
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://localhost/api");
             var cancellationToken = CancellationToken.None;
 
             // Act
-            var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+            var response = await httpClient.SendAsync(this.logger, httpRequestMessage, cancellationToken);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

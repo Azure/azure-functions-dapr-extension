@@ -12,7 +12,6 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Functions.Extensions.Dapr.Core.Utils;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Extensions.Logging;
@@ -22,24 +21,21 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
     /// </summary>
     public class DaprHttpClient : IDaprClient
     {
-        readonly ILogger logger;
         readonly HttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DaprHttpClient"/> class.
         /// </summary>
-        /// <param name="loggerFactory">Logger factory.</param>
         /// <param name="clientFactory">Client factory.</param>
-        public DaprHttpClient(ILoggerFactory loggerFactory, IHttpClientFactory clientFactory)
+        public DaprHttpClient(IHttpClientFactory clientFactory)
         {
-            this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory());
             this.httpClient = clientFactory.CreateClient("DaprServiceClient");
         }
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> PostAsync(string uri, StringContent stringContent, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> PostAsync(ILogger logger, string uri, StringContent stringContent, CancellationToken cancellationToken)
         {
-            return await this.DaprHttpCall(async () =>
+            return await this.DaprHttpCall(logger, async () =>
             {
                 var response = await this.httpClient.PostAsync(uri, stringContent, cancellationToken);
 
@@ -48,9 +44,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         }
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> GetAsync(string uri, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> GetAsync(ILogger logger, string uri, CancellationToken cancellationToken)
         {
-            return await this.DaprHttpCall(async () =>
+            return await this.DaprHttpCall(logger, async () =>
             {
                 var response = await this.httpClient.GetAsync(uri, cancellationToken);
 
@@ -59,9 +55,9 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         }
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> SendAsync(ILogger logger, HttpRequestMessage httpRequestMessage, CancellationToken cancellationToken)
         {
-            return await this.DaprHttpCall(async () =>
+            return await this.DaprHttpCall(logger, async () =>
             {
                 HttpResponseMessage response = await this.httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -69,7 +65,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             });
         }
 
-        private async Task ThrowIfDaprFailure(HttpResponseMessage response)
+        private async Task ThrowIfDaprFailure(ILogger logger, HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {
@@ -87,7 +83,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     }
                     catch (Exception e) when (e is JsonException || e is ArgumentException)
                     {
-                        this.logger.LogError($"The returned error message from Dapr Service is not a valid JSON Object. Status Code: {response.StatusCode}");
+                        logger.LogError($"The returned error message from Dapr Service is not a valid JSON Object. Status Code: {response.StatusCode}");
                         throw new DaprException(
                             response.StatusCode,
                             ErrorCodes.ErrUnknown,
@@ -106,7 +102,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     }
                 }
 
-                this.logger.LogError($"Dapr Service returned an error. Status Code: {response.StatusCode}, Error Code: {errorCode}, Error Message: {errorMessage}");
+                logger.LogError($"Dapr Service returned an error. Status Code: {response.StatusCode}, Error Code: {errorCode}, Error Message: {errorMessage}");
 
                 // avoid potential overrides: specific 404 error messages can be returned from Dapr
                 // ex: https://docs.dapr.io/reference/api/actors_api/#get-actor-state
@@ -127,12 +123,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
             return;
         }
 
-        private async Task<HttpResponseMessage> DaprHttpCall(Func<Task<HttpResponseMessage>> httpCall)
+        private async Task<HttpResponseMessage> DaprHttpCall(ILogger logger, Func<Task<HttpResponseMessage>> httpCall)
         {
             try
             {
                 var response = await httpCall();
-                await this.ThrowIfDaprFailure(response);
+                await this.ThrowIfDaprFailure(logger, response);
 
                 return response;
             }

@@ -47,7 +47,7 @@ namespace DaprExtensionTests.UnitTests.Services
         public async Task WarnIfSidecarMisconfigured_WhenDaprSidecarIsNotRunning()
         {
             // Arrange
-            this.daprClientMock.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).
+            this.daprClientMock.Setup(x => x.GetAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).
                 Returns(Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)));
 
             // Act
@@ -74,7 +74,7 @@ namespace DaprExtensionTests.UnitTests.Services
                 Content = new StringContent(responseBody),
             };
 
-            this.daprClientMock.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).
+            this.daprClientMock.Setup(x => x.GetAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).
                 Returns(Task.FromResult(mockResponse));
 
             // Act

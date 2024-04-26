@@ -20,6 +20,16 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Utils
         }
 
         /// <summary>
+        /// Creates a category name for Dapr binding to be used in logging.
+        /// </summary>
+        /// <param name="bindingType">The type of the trigger.</param>
+        /// <returns>A category name for Dapr binding.</returns>
+        public static string CreateDaprBindingCategory(string bindingType)
+        {
+            return $"Host.Bindings.Dapr.{bindingType}";
+        }
+
+        /// <summary>
         /// Creates a category name for Dapr triggers to be used in logging.
         /// </summary>
         /// <returns>A category name for Dapr triggers.</returns>

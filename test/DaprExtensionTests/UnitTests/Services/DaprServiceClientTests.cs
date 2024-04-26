@@ -17,6 +17,7 @@ namespace DaprExtensionTests.UnitTests.Services
     using Microsoft.Azure.WebJobs.Extensions.Dapr;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Exceptions;
     using Microsoft.Azure.WebJobs.Extensions.Dapr.Services;
+    using Microsoft.Azure.WebJobs.Extensions.Dapr.Utils;
     using Microsoft.Extensions.Logging;
     using Moq;
     using Xunit;
@@ -27,11 +28,13 @@ namespace DaprExtensionTests.UnitTests.Services
         private readonly Mock<INameResolver> nameResolverMock;
         private readonly Mock<IDaprClient> daprClientMock;
         private readonly DaprServiceClient daprServiceClient;
+        private readonly ILogger logger;
 
         public DaprServiceClientTests()
         {
             this.loggerFactoryMock = new Mock<ILoggerFactory>();
-            loggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            this.logger = new Mock<ILogger>().Object;
+            this.loggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(this.logger);
 
             this.nameResolverMock = new Mock<INameResolver>();
             this.daprClientMock = new Mock<IDaprClient>();
@@ -59,14 +62,14 @@ namespace DaprExtensionTests.UnitTests.Services
                 System.Text.Encoding.UTF8,
                 "application/json");
             this.daprClientMock
-                .Setup(x => x.PostAsync(It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.PostAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
 
             // Act
             await this.daprServiceClient.SaveStateAsync(daprAddress, stateStore, values, CancellationToken.None);
 
             // Assert
-            this.daprClientMock.Verify(client => client.PostAsync(It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()), Times.Once);
+            this.daprClientMock.Verify(client => client.PostAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -104,7 +107,7 @@ namespace DaprExtensionTests.UnitTests.Services
             response.Headers.ETag = new EntityTagHeaderValue(expectedETag);
 
             this.nameResolverMock.Setup(r => r.Resolve("DAPR_HTTP_PORT")).Returns("3500");
-            this.daprClientMock.Setup(client => client.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            this.daprClientMock.Setup(client => client.GetAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(response);
 
             var daprServiceClient = new DaprServiceClient(this.loggerFactoryMock.Object, this.daprClientMock.Object, this.nameResolverMock.Object);
@@ -134,7 +137,7 @@ namespace DaprExtensionTests.UnitTests.Services
                 JsonSerializer.Serialize(new { message = "An error occurred", errorCode = errorCode }));
 
             this.nameResolverMock.Setup(r => r.Resolve("DAPR_HTTP_PORT")).Returns("3500");
-            this.daprClientMock.Setup(client => client.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            this.daprClientMock.Setup(client => client.GetAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                                .ThrowsAsync(new DaprException(HttpStatusCode.InternalServerError, errorCode, "An error occurred"));
 
             var daprServiceClient = new DaprServiceClient(this.loggerFactoryMock.Object, this.daprClientMock.Object, this.nameResolverMock.Object);
@@ -164,7 +167,7 @@ namespace DaprExtensionTests.UnitTests.Services
             await daprServiceClient.InvokeMethodAsync(expectedDaprAddress, expectedAppId, expectedMethodName, expectedHttpVerb, expectedBody, cancellationToken);
 
             // Assert
-            this.daprClientMock.Verify(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()));
+            this.daprClientMock.Verify(client => client.SendAsync(It.IsAny<ILogger>(), It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()));
         }
 
         [Fact]
@@ -177,10 +180,10 @@ namespace DaprExtensionTests.UnitTests.Services
             var expectedMessage = new DaprBindingMessage(new { test = "value" }, metadata, "test-binding-name");
             CancellationToken cancellationToken = CancellationToken.None;
             this.daprClientMock
-                .Setup(x => x.PostAsync(It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.PostAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
 
-            this.daprClientMock.Setup(client => client.PostAsync(It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()))
+            this.daprClientMock.Setup(client => client.PostAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
 
             var daprServiceClient = new DaprServiceClient(this.loggerFactoryMock.Object, this.daprClientMock.Object, this.nameResolverMock.Object);
@@ -189,7 +192,7 @@ namespace DaprExtensionTests.UnitTests.Services
             await daprServiceClient.SendToDaprBindingAsync(expectedDaprAddress, expectedMessage, cancellationToken);
 
             // Assert
-            this.daprClientMock.Verify(client => client.PostAsync(It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()));
+            this.daprClientMock.Verify(client => client.PostAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<StringContent>(), It.IsAny<CancellationToken>()));
         }
 
         [Fact]
@@ -202,7 +205,7 @@ namespace DaprExtensionTests.UnitTests.Services
             var expectedPayload = new { test = "value" };
             CancellationToken cancellationToken = CancellationToken.None;
 
-            this.daprClientMock.Setup(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            this.daprClientMock.Setup(client => client.SendAsync(It.IsAny<ILogger>(), It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
 
             var daprServiceClient = new DaprServiceClient(this.loggerFactoryMock.Object, this.daprClientMock.Object, this.nameResolverMock.Object);
@@ -213,7 +216,7 @@ namespace DaprExtensionTests.UnitTests.Services
                                                        cancellationToken);
 
             // Assert
-            this.daprClientMock.Verify(client => client.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()));
+            this.daprClientMock.Verify(client => client.SendAsync(It.IsAny<ILogger>(), It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()));
         }
 
         [Fact]
@@ -229,7 +232,7 @@ namespace DaprExtensionTests.UnitTests.Services
 
             var httpResponse = new HttpResponseMessage(HttpStatusCode.OK);
             httpResponse.Content = new StringContent(expectedSecretPayload, Encoding.UTF8, "application/json");
-            this.daprClientMock.Setup(client => client.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            this.daprClientMock.Setup(client => client.GetAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(httpResponse);
 
             var daprServiceClient = new DaprServiceClient(this.loggerFactoryMock.Object, this.daprClientMock.Object, this.nameResolverMock.Object);
@@ -239,7 +242,7 @@ namespace DaprExtensionTests.UnitTests.Services
 
             // Assert
             Assert.Equal(expectedSecretPayload, actual.RootElement.GetRawText());
-            this.daprClientMock.Verify(client => client.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()));
+            this.daprClientMock.Verify(client => client.GetAsync(It.IsAny<ILogger>(), It.IsAny<string>(), It.IsAny<CancellationToken>()));
         }
 
         [Theory]
@@ -253,7 +256,7 @@ namespace DaprExtensionTests.UnitTests.Services
                 nameResolverMock.Setup(r => r.Resolve("DAPR_HTTP_PORT")).Returns(daprPort.Value.ToString());
             }
 
-            var actual = DaprServiceClient.GetDaprHttpAddress(new Mock<ILogger>().Object, nameResolverMock.Object);
+            var actual = DaprServiceClient.GetDaprHttpAddress(this.logger, nameResolverMock.Object);
             var expected = daprPort.HasValue ? $"http://localhost:{daprPort.Value}" : "http://localhost:3500";
 
             Assert.Equal(expected, actual);

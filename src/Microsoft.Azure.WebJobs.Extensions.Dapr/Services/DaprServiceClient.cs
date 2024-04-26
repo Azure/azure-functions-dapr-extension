@@ -29,6 +29,13 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         private const int DefaultDaprPort = 3500;
 
         readonly ILogger logger;
+        readonly ILogger stateInputLogger;
+        readonly ILogger stateOutputLogger;
+        readonly ILogger secretInputLogger;
+        readonly ILogger invokeOutputLogger;
+        readonly ILogger bindingOutputLogger;
+        readonly ILogger publishOutputLogger;
+
         readonly string daprAddress;
         readonly IDaprClient daprClient;
 
@@ -41,6 +48,12 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
         public DaprServiceClient(ILoggerFactory loggerFactory, IDaprClient daprClient, INameResolver nameResolver)
         {
             this.logger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory());
+            this.stateInputLogger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory("StateInput"));
+            this.stateOutputLogger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory("StateOutput"));
+            this.secretInputLogger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory("SecretInput"));
+            this.invokeOutputLogger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory("InvokeOutput"));
+            this.bindingOutputLogger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory("BindingOutput"));
+            this.publishOutputLogger = loggerFactory.CreateLogger(LoggingUtils.CreateDaprBindingCategory("PublishOutput"));
             this.daprClient = daprClient;
             this.daprAddress = DaprServiceClient.GetDaprHttpAddress(this.logger, nameResolver);
         }
@@ -84,7 +97,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     "application/json");
                 var uri = $"{daprAddress}/v1.0/state/{Uri.EscapeDataString(stateStore)}";
 
-                await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+                await this.daprClient.PostAsync(this.stateOutputLogger, uri, stringContent, cancellationToken);
             }
             catch (JsonException ex)
             {
@@ -114,7 +127,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
                 var uri = $"{daprAddress}/v1.0/state/{stateStore}/{key}";
 
-                var response = await this.daprClient.GetAsync(uri, cancellationToken);
+                var response = await this.daprClient.GetAsync(this.stateInputLogger, uri, cancellationToken);
 
                 Stream contentStream = await response.Content.ReadAsStreamAsync();
                 string? eTag = response.Headers.ETag?.Tag;
@@ -155,7 +168,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     req.Content.Headers.ContentType.CharSet = string.Empty;
                 }
 
-                await this.daprClient.SendAsync(req, cancellationToken);
+                await this.daprClient.SendAsync(this.invokeOutputLogger, req, cancellationToken);
             }
             catch (JsonException ex)
             {
@@ -188,7 +201,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     "application/json");
                 string uri = $"{daprAddress}/v1.0/bindings/{message.BindingName}";
 
-                await this.daprClient.PostAsync(uri, stringContent, cancellationToken);
+                await this.daprClient.PostAsync(this.bindingOutputLogger, uri, stringContent, cancellationToken);
             }
             catch (JsonException ex)
             {
@@ -223,7 +236,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
                     req.Content = new StringContent(payload?.GetRawText(), Encoding.UTF8, "application/json");
                 }
 
-                await this.daprClient.SendAsync(req, cancellationToken);
+                await this.daprClient.SendAsync(this.publishOutputLogger, req, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -266,7 +279,7 @@ namespace Microsoft.Azure.WebJobs.Extensions.Dapr.Services
 
                 string uri = $"{daprAddress}/v1.0/secrets/{secretStoreName}/{key}{metadataQuery}";
 
-                var response = await this.daprClient.GetAsync(uri, cancellationToken);
+                var response = await this.daprClient.GetAsync(this.secretInputLogger, uri, cancellationToken);
 
                 string secretPayload = await response.Content.ReadAsStringAsync();
 
