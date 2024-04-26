@@ -133,6 +133,7 @@ namespace DaprExtensionTests
                 s => AssertDefaults(s, nameof(Functions.BytesTopic)),
                 s => AssertDefaults(s, nameof(Functions.CloudEventTopic)),
                 s => AssertDefaults(s, nameof(Functions.CustomTypeTopic)),
+                s => AssertDefaults(s, nameof(Functions.DaprTopicTriggerRetryTest)),
                 s => AssertDefaults(s, nameof(Functions.IntTopic)),
                 s => AssertDefaults(s, nameof(Functions.JsonElementTopic)),
                 s =>
@@ -183,6 +184,24 @@ namespace DaprExtensionTests
 
             IEnumerable<string> functionLogs = this.GetFunctionLogs(topicName);
             Assert.Contains(expectedOutput, functionLogs);
+        }
+
+        [Fact]
+        public async Task DaprTopicTriggerRetryTest()
+        {
+            int input = 42;
+
+            // The method name is ExplicitTopicNameInAttribute
+            // The function name is FunctionName
+            // The topic name is MyRoute
+            using HttpResponseMessage response = await this.SendRequestAsync(
+                HttpMethod.Post,
+                "http://localhost:3001/DaprTopicTriggerRetryTest",
+                jsonContent: CreateCloudEventMessage(input));
+
+            IEnumerable<string> functionLogs = this.GetLogs("Function.DaprTopicTriggerRetryTest");
+            Assert.NotEmpty(functionLogs);
+            Assert.Contains("Function execution failed after '3' retries.", functionLogs);
         }
 
         public static IEnumerable<object[]> GetTheoryDataInputs() => new List<object[]>
@@ -255,6 +274,11 @@ namespace DaprExtensionTests
             public static void DotNetBindingResolution(
                 [DaprTopicTrigger("%PubSubName%", Topic = "%TopicName%")] int input,
                 ILogger log) => log.LogInformation(input.ToString());
+
+            [FixedDelayRetry(3, "00:00:01")]
+            public static void DaprTopicTriggerRetryTest(
+                 [DaprTopicTrigger("MyPubSub")] byte[] input,
+                ILogger log) => throw new Exception("unhandled error");
         }
 
         class CustomType
