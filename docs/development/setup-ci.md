@@ -33,6 +33,6 @@ Notes
 4. Go to `Settings` -> `Actions` -> `General` and make sure to allow running GitHub Actions.
 
 ### Generate CODECOV_TOKEN
-To generate`CODECOV_TOKEN`, go to [this website](https://app.codecov.io/github/azure/azure-functions-dapr-extension/settings) and generate the upload token. Same should be updated in GitHub secrets for `CODECOV_TOKEN`
+To generate`CODECOV_TOKEN`, go to [this website](https://app.codecov.io/github/azure/azure-functions-dapr-extension/settings) and generate the upload token. Same should be updated in GitHub secrets for `CODECOV_TOKEN`. Make sure you are part of Azure GitHub Org and are owner of `azure-functions-dapr-extension` GitHub repo.
 
 
