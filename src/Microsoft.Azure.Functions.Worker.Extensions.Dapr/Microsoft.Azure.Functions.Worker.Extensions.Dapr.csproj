@@ -12,8 +12,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <!-- Default version for dev -->
-    <Version>99.99.99</Version>
-    <SupportedVersion>99.99.99</SupportedVersion>
+    <Version>0.0.0</Version>
+    <WebJobSupportedVersion>0.0.0</WebJobSupportedVersion>
     <PackageTags>Microsoft Azure WebJobs Azure-Functions Isolated Dotnet-Isolated Dapr Worker</PackageTags>
   </PropertyGroup>
 
@@ -36,7 +36,7 @@
   <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions.ExtensionInformationAttribute">
       <_Parameter1>Microsoft.Azure.WebJobs.Extensions.Dapr</_Parameter1>
-      <_Parameter2>$(SupportedVersion)</_Parameter2>
+      <_Parameter2>$(WebJobSupportedVersion)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 

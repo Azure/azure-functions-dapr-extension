@@ -9,7 +9,7 @@
     <Description>Dapr extension for Azure functions using the in-process execution model.</Description>
     <Summary>Dapr extension for Azure functions using the in-process execution model.</Summary>
     <!-- Default version for dev -->
-    <Version>99.99.99</Version>
+    <Version>0.0.0</Version>
   </PropertyGroup>
 
   <!-- Use C# 9.0 features -->
@@ -41,8 +41,8 @@
 
   <!-- Delete the nuget cache for the package -->
   <Target Name="RemoveNugetPackageCache" BeforeTargets="Build">
-    <RemoveDir Directories="$(NugetPackageRoot)/$(PackageId)/99.99.99"></RemoveDir>
-    <Message Text="Deleted nuget cache for $(PackageId)/99.99.99" Importance="high" />
+    <RemoveDir Directories="$(NugetPackageRoot)/$(PackageId)/0.0.0"></RemoveDir>
+    <Message Text="Deleted nuget cache for $(PackageId)/0.0.0" Importance="high" />
   </Target>
 
   <!-- Copy the nupkg to local-packages folder -->

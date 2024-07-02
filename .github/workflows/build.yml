@@ -25,7 +25,7 @@ jobs:
     env:
       APP_REGISTRY: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_REGISTRY_PATH }}
       CONFIGURATION: Release
-      DEV_VERSION_SUFFIX: 99.99.99
+      DEV_VERSION_SUFFIX: 0.0.0
       DOTNET_SAMPLE_APP_IMAGE_NAME: dotnet-azurefunction
       DOTNET_ISOLATED_QUICKSTART_APP_IMAGE_NAME: dotnet-isolated-dapr-azure-function-orderservice
       NUPKG_OUTDIR: bin/Release/nugets
@@ -44,8 +44,8 @@ jobs:
       - name: Run Unit Tests - ${{ env.CONFIGURATION }}
         run: |
           dotnet test --configuration ${{ env.CONFIGURATION }} --collect:"XPlat Code Coverage"
-      - name: Codecov
-        uses: codecov/codecov-action@v3
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: "**/coverage.cobertura.xml,./.github/codecov.yml"  # Specify the path to your Cobertura format coverage report file
