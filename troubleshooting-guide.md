@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to the troubleshooting guide for Azure Functions Dapr Extension. This guide is designed to help you address common issues and problems that may arise during the usage of Dapr Extension. Please follow the steps below to resolve any issues you encounter.
+Welcome to the troubleshooting guide for Azure Functions Dapr Extension. This guide is designed to help you address common issues and problems that may arise during the usage of Dapr Extension. Please follow the steps below to resolve any issues you encounter. 
 
 ## Table of Contents
 
