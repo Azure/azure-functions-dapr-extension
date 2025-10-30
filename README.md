@@ -1,3 +1,23 @@
+
+# ⚠️ Repository Deprecation Notice
+
+> **Important:** This repository and [Dapr Extension for Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-dapr?tabs=in-process%2Cbicep1&pivots=programming-language-csharp) suppport has been **deprecated** and is no longer actively maintained by Microsoft Azure.
+
+This codebase remains available **for reference and archival purposes only**.
+No new features, updates, or security fixes will be released.
+
+## Recommended Actions
+
+* **Do not** use this repository for new deployments or production workloads.
+* For the latest supported tools and guidance, please refer to:
+  👉 [Microsoft Learn – Azure Documentation](https://learn.microsoft.com/azure)
+
+### Support
+Issues or pull requests will **not be monitored**.
+If you require support, please use standard **Azure support channels** or refer to official product documentation.
+
+---
+
 # DAPR Extension for Azure Functions - Public Preview
 
 ![Build and Test](https://github.com/Azure/azure-functions-dapr-extension/workflows/Build/badge.svg)
